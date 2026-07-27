@@ -66,7 +66,7 @@ ${optionsStr}`;
   } catch (error: any) {
     console.error('Gemini API Exception in generate-explanation:', error);
     return NextResponse.json({ 
-      error: `Lỗi gọi API Gemini 1.5 Flash: ${error?.message || String(error)}` 
+      error: `Lỗi gọi API Gemini 2.5 Flash: ${error?.message || String(error)}` 
     }, { status: 500 });
   }
 }

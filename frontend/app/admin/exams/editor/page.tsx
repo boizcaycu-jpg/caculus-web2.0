@@ -148,10 +148,10 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
     ? questionGroups.find(g => g.id === activeSelection.id)
     : null;
 
-  // TRI-TAB GEMINI 1.5 FLASH PDF PARSER UPLOAD
+  // TRI-TAB GEMINI 2.5 FLASH PDF PARSER UPLOAD
   const handleFileUpload = async (file: File, targetCategory: 'math' | 'reading' | 'science' = importTab) => {
     setParsingFile(true);
-    setImportStatus('✨ Đang gửi tập tin PDF tới Gemini 1.5 Flash API để phân tích...');
+    setImportStatus('✨ Đang gửi tập tin PDF tới Gemini 2.5 Flash API để phân tích...');
 
     try {
       const formData = new FormData();
@@ -173,7 +173,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
         setIsDirty(true);
 
         const statusMsg = data.aiPowered
-          ? `✨ Gemini 1.5 Flash đã bóc tách thành công ${data.questions.length} câu hỏi phần ${targetCategory.toUpperCase()}!`
+          ? `✨ Gemini 2.5 Flash đã bóc tách thành công ${data.questions.length} câu hỏi phần ${targetCategory.toUpperCase()}!`
           : `Đã bóc tách thành công ${data.questions.length} câu hỏi theo cấu trúc!`;
         setImportStatus(statusMsg);
         setTimeout(() => setShowImportModal(false), 2000);
@@ -182,7 +182,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
       }
     } catch (e) {
       console.error(e);
-      setImportStatus('Không thể kết nối máy chủ Gemini 1.5 Flash PDF Parser.');
+      setImportStatus('Không thể kết nối máy chủ Gemini 2.5 Flash PDF Parser.');
     } finally {
       setParsingFile(false);
     }
@@ -196,7 +196,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
     }
   };
 
-  // AI EXPLANATION GENERATOR (GEMINI 1.5 FLASH)
+  // AI EXPLANATION GENERATOR (GEMINI 2.5 FLASH)
   const handleGenerateAiExplanation = async () => {
     if (!activeQuestion) return;
     setGeneratingAiExplanation(true);

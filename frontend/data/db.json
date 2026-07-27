@@ -1949,32 +1949,6 @@
       "explanation": "Đoạn văn không đưa ra con số khẳng định năng suất tăng gấp 10 lần."
     },
     {
-      "id": "q-sci-1",
-      "moduleId": "mod-science-1",
-      "number": 1,
-      "text": "Trong phản ứng tổng hợp Ammonia (NH3) theo phương pháp Haber-Bosch: N2(k) + 3H2(k) ⇌ 2NH3(k), ΔH < 0. Để tăng hiệu suất thu hồi NH3 trong công nghiệp, biện pháp nào sau đây là hiệu quả nhất?",
-      "options": [
-        {
-          "id": "opt-s1-a",
-          "text": "Tăng nhiệt độ và giảm áp suất hệ thống"
-        },
-        {
-          "id": "opt-s1-b",
-          "text": "Giảm nhiệt độ và tăng áp suất hệ thống"
-        },
-        {
-          "id": "opt-s1-c",
-          "text": "Tăng nhiệt độ và sử dụng thêm chất xúc tác Fe"
-        },
-        {
-          "id": "opt-s1-d",
-          "text": "Giảm áp suất và ngưng tụ liên tục NH3"
-        }
-      ],
-      "correctOptionId": "opt-s1-b",
-      "explanation": "Phản ứng tỏa nhiệt (ΔH < 0) nên giảm nhiệt độ dịch chuyển cân bằng sang phải. Phản ứng làm giảm số mol khí nên tăng áp suất dịch chuyển sang phải."
-    },
-    {
       "id": "q-math-1",
       "moduleId": "mod-math-1",
       "number": 1,
@@ -2036,6 +2010,81 @@
     {
       "id": "q-math-3",
       "moduleId": "mod-math-1",
+      "number": 3,
+      "type": "fill_blank",
+      "text": "Biết điện trở $R(T) = \\frac{1000}{1 + 0.05T} \\le 200 \\,\\Omega$. Nhiệt độ tối thiểu $T$ (°C) là bao nhiêu?",
+      "options": [],
+      "fillBlankAnswers": [
+        "80",
+        "80.0",
+        "t=80"
+      ],
+      "explanation": "$1000 / (1 + 0.05T) \\le 200 \\Rightarrow 1 + 0.05T \\ge 5 \\Rightarrow T \\ge 80$."
+    },
+    {
+      "id": "q-science-1",
+      "moduleId": "mod-science-1",
+      "groupId": "group-science-1",
+      "number": 1,
+      "type": "single_choice",
+      "text": "Trong phương trình cân bằng $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, yếu tố nào làm biến thiên $\\Delta H$?",
+      "options": [
+        {
+          "id": "opt-a",
+          "text": "Giới hạn bằng 4, hàm số liên tục tại x = 2"
+        },
+        {
+          "id": "opt-b",
+          "text": "Giới hạn bằng 2, $f(2) = 4$"
+        },
+        {
+          "id": "opt-c",
+          "text": "Tăng áp suất làm dịch chuyển cân bằng sang phải"
+        },
+        {
+          "id": "opt-d",
+          "text": "Nhiệt độ T tăng làm hằng số $K_c$ giảm"
+        }
+      ],
+      "correctOptionId": "opt-a",
+      "explanation": "Biến đổi $\\frac{x^2 - 4}{x - 2} = x + 2$. Khi $x \\to 2$, giới hạn là $2 + 2 = 4$.",
+      "imageSize": "medium"
+    },
+    {
+      "id": "q-science-2",
+      "moduleId": "mod-science-1",
+      "groupId": "group-science-1",
+      "number": 2,
+      "type": "multiple_choice",
+      "text": "Cho tích phân $I = \\int_0^1 (2x + 1) dx$. Những phát biểu nào sau đây ĐÚNG?",
+      "options": [
+        {
+          "id": "opt-2a",
+          "text": "Nguyên hàm của $2x + 1$ là $F(x) = x^2 + x$"
+        },
+        {
+          "id": "opt-2b",
+          "text": "Giá trị tích phân $I = 2$"
+        },
+        {
+          "id": "opt-2c",
+          "text": "Giá trị tích phân $I = 1$"
+        },
+        {
+          "id": "opt-2d",
+          "text": "Nếu đổi biến $u = 2x+1$ thì $du = 2dx$"
+        }
+      ],
+      "correctOptionIds": [
+        "opt-2a",
+        "opt-2b",
+        "opt-2d"
+      ],
+      "explanation": "$F(1) - F(0) = (1 + 1) - 0 = 2$. Do đó A, B, D đúng."
+    },
+    {
+      "id": "q-science-3",
+      "moduleId": "mod-science-1",
       "number": 3,
       "type": "fill_blank",
       "text": "Biết điện trở $R(T) = \\frac{1000}{1 + 0.05T} \\le 200 \\,\\Omega$. Nhiệt độ tối thiểu $T$ (°C) là bao nhiêu?",
@@ -2547,5 +2596,18 @@
       "details": "Thí sinh rời màn hình bài thi (Chuyển tab trình duyệt)"
     }
   ],
-  "questionGroups": []
+  "questionGroups": [
+    {
+      "id": "group-science-1",
+      "moduleId": "mod-science-1",
+      "title": "Bối cảnh Khoa học 1",
+      "passage": "[Bối cảnh Đọc hiểu / Thí nghiệm Khoa học]\nTrong phản ứng tổng hợp Ammonia: $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, $\\Delta H < 0$.\nGiá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến thiên theo nhiệt độ T.",
+      "imageUrl": "",
+      "imageSize": "medium",
+      "questionIds": [
+        "q-science-1",
+        "q-science-2"
+      ]
+    }
+  ]
 }

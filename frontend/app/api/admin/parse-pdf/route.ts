@@ -105,7 +105,7 @@ ${rawText.slice(0, 12000)}`;
           return NextResponse.json({
             success: true,
             aiPowered: true,
-            message: `✨ Gemini 1.5 Flash đã bóc tách thành công ${formattedQuestions.length} câu hỏi và ${formattedGroups.length} nhóm bối cảnh!`,
+            message: `✨ Gemini 2.5 Flash đã bóc tách thành công ${formattedQuestions.length} câu hỏi và ${formattedGroups.length} nhóm bối cảnh!`,
             questionGroups: formattedGroups,
             questions: formattedQuestions,
           });
