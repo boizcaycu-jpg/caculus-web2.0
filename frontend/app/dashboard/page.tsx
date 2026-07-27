@@ -113,20 +113,38 @@ export default function DashboardPage() {
               }`}
             >
               <div className="overflow-hidden space-y-3 pt-1">
-                {exams.map((exam) => (
-                  <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900">{exam.title}</h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{exam.modules?.length || 3} kíp thi tự động</p>
+                {exams.map((exam) => {
+                  const isVip = exam.title.includes('VIP') || exam.status === 'disabled';
+                  return (
+                    <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-bold text-slate-900">{exam.title}</h4>
+                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            Miễn phí
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">{exam.modules?.length || 3} kíp thi tự động</p>
+                      </div>
+
+                      {isVip ? (
+                        <button
+                          disabled
+                          className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3 py-1.5 rounded-lg cursor-not-allowed flex items-center gap-1"
+                        >
+                          🔒 Cần tài khoản VIP
+                        </button>
+                      ) : (
+                        <Link
+                          href={`/exams/${exam.id}`}
+                          className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
+                        >
+                          <PlayCircle className="w-3.5 h-3.5" /> Thi ngay
+                        </Link>
+                      )}
                     </div>
-                    <Link
-                      href={`/exams/${exam.id}`}
-                      className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
-                    >
-                      <PlayCircle className="w-3.5 h-3.5" /> Thi ngay
-                    </Link>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

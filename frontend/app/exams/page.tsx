@@ -57,28 +57,26 @@ export default function ExamsPortalPage() {
         {/* Exams Grid View */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {filteredExams.map((exam) => {
-            const isDisabled = exam.status === 'disabled';
+            const isVip = exam.title.includes('VIP') || exam.status === 'disabled';
 
             return (
               <div
                 key={exam.id}
                 className={`bg-white rounded-2xl border p-6 shadow-xs space-y-5 transition flex flex-col justify-between ${
-                  isDisabled ? 'border-slate-200 opacity-90' : 'border-slate-200 hover:shadow-md hover:border-rose-200'
+                  isVip ? 'border-slate-200 opacity-90' : 'border-slate-200 hover:shadow-md hover:border-rose-200'
                 }`}
               >
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${
-                      isDisabled 
+                      isVip 
                         ? 'bg-slate-100 text-slate-500 border border-slate-200'
-                        : exam.isFree 
-                          ? 'bg-rose-100 text-crimson border border-rose-200' 
-                          : 'bg-amber-50 text-amber-800 border border-amber-200'
+                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     }`}>
-                      {isDisabled ? 'Chưa mở' : exam.isFree ? 'Miễn phí' : `${exam.price?.toLocaleString()} VNĐ`}
+                      {isVip ? 'Gói VIP' : 'Miễn phí'}
                     </span>
                     <span className="text-xs font-mono font-semibold text-slate-400">
-                      {isDisabled ? 'Kế hoạch VIP' : 'Sẵn sàng'}
+                      {isVip ? 'Khóa bài thi' : 'Sẵn sàng'}
                     </span>
                   </div>
 
@@ -87,12 +85,12 @@ export default function ExamsPortalPage() {
                 </div>
 
                 <div className="pt-4 border-t border-slate-100">
-                  {isDisabled ? (
+                  {isVip ? (
                     <button
                       disabled
                       className="w-full bg-slate-100 text-slate-400 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed border border-slate-200"
                     >
-                      <Lock className="w-4 h-4 text-slate-400" /> Chưa mở
+                      🔒 Cần tài khoản VIP
                     </button>
                   ) : (
                     <Link

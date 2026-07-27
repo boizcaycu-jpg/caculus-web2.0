@@ -752,6 +752,75 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
                 )}
               </div>
 
+              {/* Question Image & Diagram Attachment Tool */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-crimson" />
+                    Đính kèm hình ảnh câu hỏi / Sơ đồ khoa học
+                  </label>
+                  {activeQuestion.imageUrl && (
+                    <button
+                      onClick={() => handleUpdateActiveQuestion('imageUrl', '')}
+                      className="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Xóa ảnh
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  <input
+                    type="text"
+                    placeholder="Dán URL hình ảnh (ví dụ: https://... hoặc /uploads/diagram.png)"
+                    value={activeQuestion.imageUrl || ''}
+                    onChange={(e) => handleUpdateActiveQuestion('imageUrl', e.target.value)}
+                    className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-crimson"
+                  />
+                  <label className="bg-white border border-slate-300 hover:bg-slate-100 font-bold text-xs px-3 py-2 rounded-xl text-slate-700 cursor-pointer flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+                    <Upload className="w-3.5 h-3.5 text-crimson" /> Tải từ máy tính
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleImageFileSelect(e.target.files[0], 'question')}
+                    />
+                  </label>
+                </div>
+
+                {activeQuestion.imageUrl && (
+                  <div className="space-y-2 pt-2 border-t border-slate-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase">Kích thước hiển thị:</span>
+                      <div className="flex gap-1.5">
+                        {(['small', 'medium', 'large', 'full'] as const).map((sz) => (
+                          <button
+                            key={sz}
+                            onClick={() => handleUpdateActiveQuestion('imageSize', sz)}
+                            className={`px-2.5 py-0.5 text-[11px] font-bold rounded-lg uppercase transition ${
+                              (activeQuestion.imageSize || 'medium') === sz
+                                ? 'bg-crimson text-white'
+                                : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            {sz === 'small' ? 'Nhỏ' : sz === 'medium' ? 'Vừa' : sz === 'large' ? 'Lớn' : 'Full'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 flex justify-center items-center overflow-hidden">
+                      <img
+                        src={activeQuestion.imageUrl}
+                        alt="Question Preview"
+                        className={`object-contain max-h-64 rounded-lg ${
+                          activeQuestion.imageSize === 'small' ? 'w-1/3' : activeQuestion.imageSize === 'large' ? 'w-3/4' : activeQuestion.imageSize === 'full' ? 'w-full' : 'w-1/2'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Options Editor */}
               <div className="space-y-4">
                 <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700">

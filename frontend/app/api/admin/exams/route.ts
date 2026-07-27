@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getExams, createExam, updateExam, saveQuestionsForModule, saveQuestionGroupsForModule } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
@@ -32,6 +33,9 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
     });
 
+    revalidatePath('/exams');
+    revalidatePath('/dashboard');
+
     return NextResponse.json({ success: true, exam: newExam });
   } catch (error) {
     console.error('Error creating exam:', error);
@@ -61,9 +65,18 @@ export async function PUT(req: NextRequest) {
       saveQuestionGroupsForModule(moduleId, questionGroups);
     }
 
+    // Flush cache so student dashboard and test rooms update immediately
+    revalidatePath('/exams');
+    revalidatePath('/dashboard');
+    if (id) {
+      revalidatePath(`/exams/${id}`);
+      revalidatePath(`/exams/${id}/room`);
+    }
+
     return NextResponse.json({ success: true, exam: updatedExam });
   } catch (error) {
     console.error('Error updating exam/questions:', error);
     return NextResponse.json({ error: 'Lỗi cập nhật đề thi' }, { status: 500 });
   }
 }
+
