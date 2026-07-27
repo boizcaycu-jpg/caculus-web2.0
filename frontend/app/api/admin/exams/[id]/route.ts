@@ -3,6 +3,9 @@ import { revalidatePath } from 'next/cache';
 import { getExamById, updateExam, saveQuestionsForModule, saveQuestionGroupsForModule } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function checkAdmin(req: NextRequest) {
   const token = req.cookies.get('caculus_token')?.value;
   if (!token) return null;
@@ -46,9 +49,10 @@ export async function PUT(
       saveQuestionGroupsForModule(moduleId, questionGroups);
     }
 
-    // Flush cache so student view reflects changes immediately
+    // Aggressive Cache Busting
     revalidatePath('/exams');
     revalidatePath('/dashboard');
+    revalidatePath('/admin/exams/editor');
     revalidatePath(`/exams/${id}`);
     revalidatePath(`/exams/${id}/room`);
 

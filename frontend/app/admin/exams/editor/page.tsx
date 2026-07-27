@@ -68,77 +68,92 @@ export default function ExamAuthoringEditorPage() {
     totalQuestions: activeCategory === 'reading' ? 20 : 40,
   };
 
-  // Seed initial questions & groups
+  // Load questions & groups for active module from Database API (with sample fallback)
   useEffect(() => {
-    if (!currentModule) return;
+    if (!currentModule?.id) return;
 
-    const sampleGroups: QuestionGroup[] = activeCategory !== 'math' ? [
-      {
-        id: `group-${activeCategory}-1`,
-        moduleId: currentModule.id,
-        title: `Bối cảnh ${activeCategory === 'reading' ? 'Đọc hiểu 1' : 'Khoa học 1'}`,
-        passage: `[Bối cảnh Đọc hiểu / Thí nghiệm Khoa học]
+    fetch(`/api/student/exams?moduleId=${currentModule.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.questions && data.questions.length > 0) {
+          setQuestions(data.questions);
+          setQuestionGroups(data.questionGroups || []);
+          setActiveSelection({ type: 'question', id: data.questions[0].id });
+        } else {
+          // Sample fallback if module is pristine
+          const sampleGroups: QuestionGroup[] = activeCategory !== 'math' ? [
+            {
+              id: `group-${activeCategory}-1`,
+              moduleId: currentModule.id,
+              title: `Bối cảnh ${activeCategory === 'reading' ? 'Đọc hiểu 1' : 'Khoa học 1'}`,
+              passage: `[Bối cảnh Đọc hiểu / Thí nghiệm Khoa học]
 Trong phản ứng tổng hợp Ammonia: $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, $\\Delta H < 0$.
 Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến thiên theo nhiệt độ T.`,
-        imageUrl: '',
-        imageSize: 'medium',
-        questionIds: [`q-${activeCategory}-1`, `q-${activeCategory}-2`],
-      }
-    ] : [];
+              imageUrl: '',
+              imageSize: 'medium',
+              questionIds: [`q-${activeCategory}-1`, `q-${activeCategory}-2`],
+            }
+          ] : [];
 
-    const sampleQuestions: Question[] = [
-      {
-        id: `q-${activeCategory}-1`,
-        moduleId: currentModule.id,
-        groupId: activeCategory !== 'math' ? `group-${activeCategory}-1` : undefined,
-        number: 1,
-        type: 'single_choice',
-        text: activeCategory === 'math' 
-          ? 'Cho hàm số $f(x) = \\frac{x^2 - 4}{x - 2}$. Tính giới hạn $\\lim_{x \\to 2} f(x)$ và xác định giá trị để hàm số liên tục trên $\\mathbb{R}$.'
-          : 'Trong phương trình cân bằng $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, yếu tố nào làm biến thiên $\\Delta H$?',
-        options: [
-          { id: 'opt-a', text: 'Giới hạn bằng 4, hàm số liên tục tại x = 2' },
-          { id: 'opt-b', text: 'Giới hạn bằng 2, $f(2) = 4$' },
-          { id: 'opt-c', text: 'Tăng áp suất làm dịch chuyển cân bằng sang phải' },
-          { id: 'opt-d', text: 'Nhiệt độ T tăng làm hằng số $K_c$ giảm' }
-        ],
-        correctOptionId: 'opt-a',
-        explanation: 'Biến đổi $\\frac{x^2 - 4}{x - 2} = x + 2$. Khi $x \\to 2$, giới hạn là $2 + 2 = 4$.',
-        imageSize: 'medium',
-      },
-      {
-        id: `q-${activeCategory}-2`,
-        moduleId: currentModule.id,
-        groupId: activeCategory !== 'math' ? `group-${activeCategory}-1` : undefined,
-        number: 2,
-        type: 'multiple_choice',
-        text: 'Cho tích phân $I = \\int_0^1 (2x + 1) dx$. Những phát biểu nào sau đây ĐÚNG?',
-        options: [
-          { id: 'opt-2a', text: 'Nguyên hàm của $2x + 1$ là $F(x) = x^2 + x$' },
-          { id: 'opt-2b', text: 'Giá trị tích phân $I = 2$' },
-          { id: 'opt-2c', text: 'Giá trị tích phân $I = 1$' },
-          { id: 'opt-2d', text: 'Nếu đổi biến $u = 2x+1$ thì $du = 2dx$' }
-        ],
-        correctOptionIds: ['opt-2a', 'opt-2b', 'opt-2d'],
-        explanation: '$F(1) - F(0) = (1 + 1) - 0 = 2$. Do đó A, B, D đúng.',
-      },
-      {
-        id: `q-${activeCategory}-3`,
-        moduleId: currentModule.id,
-        number: 3,
-        type: 'fill_blank',
-        text: 'Biết điện trở $R(T) = \\frac{1000}{1 + 0.05T} \\le 200 \\,\\Omega$. Nhiệt độ tối thiểu $T$ (°C) là bao nhiêu?',
-        options: [],
-        fillBlankAnswers: ['80', '80.0', 't=80'],
-        explanation: '$1000 / (1 + 0.05T) \\le 200 \\Rightarrow 1 + 0.05T \\ge 5 \\Rightarrow T \\ge 80$.',
-      }
-    ];
+          const sampleQuestions: Question[] = [
+            {
+              id: `q-${activeCategory}-1`,
+              moduleId: currentModule.id,
+              groupId: activeCategory !== 'math' ? `group-${activeCategory}-1` : undefined,
+              number: 1,
+              type: 'single_choice',
+              text: activeCategory === 'math' 
+                ? 'Cho hàm số $f(x) = \\frac{x^2 - 4}{x - 2}$. Tính giới hạn $\\lim_{x \\to 2} f(x)$ và xác định giá trị để hàm số liên tục trên $\\mathbb{R}$.'
+                : 'Trong phương trình cân bằng $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, yếu tố nào làm biến thiên $\\Delta H$?',
+              options: [
+                { id: 'opt-a', text: 'Giới hạn bằng 4, hàm số liên tục tại x = 2' },
+                { id: 'opt-b', text: 'Giới hạn bằng 2, $f(2) = 4$' },
+                { id: 'opt-c', text: 'Tăng áp suất làm dịch chuyển cân bằng sang phải' },
+                { id: 'opt-d', text: 'Nhiệt độ T tăng làm hằng số $K_c$ giảm' }
+              ],
+              correctOptionId: 'opt-a',
+              explanation: 'Biến đổi $\\frac{x^2 - 4}{x - 2} = x + 2$. Khi $x \\to 2$, giới hạn là $2 + 2 = 4$.',
+              imageSize: 'medium',
+            },
+            {
+              id: `q-${activeCategory}-2`,
+              moduleId: currentModule.id,
+              groupId: activeCategory !== 'math' ? `group-${activeCategory}-1` : undefined,
+              number: 2,
+              type: 'multiple_choice',
+              text: 'Cho tích phân $I = \\int_0^1 (2x + 1) dx$. Những phát biểu nào sau đây ĐÚNG?',
+              options: [
+                { id: 'opt-2a', text: 'Nguyên hàm của $2x + 1$ là $F(x) = x^2 + x$' },
+                { id: 'opt-2b', text: 'Giá trị tích phân $I = 2$' },
+                { id: 'opt-2c', text: 'Giá trị tích phân $I = 1$' },
+                { id: 'opt-2d', text: 'Nếu đổi biến $u = 2x+1$ thì $du = 2dx$' }
+              ],
+              correctOptionIds: ['opt-2a', 'opt-2b', 'opt-2d'],
+              explanation: '$F(1) - F(0) = (1 + 1) - 0 = 2$. Do đó A, B, D đúng.',
+            },
+            {
+              id: `q-${activeCategory}-3`,
+              moduleId: currentModule.id,
+              number: 3,
+              type: 'fill_blank',
+              text: 'Biết điện trở $R(T) = \\frac{1000}{1 + 0.05T} \\le 200 \\,\\Omega$. Nhiệt độ tối thiểu $T$ (°C) là bao nhiêu?',
+              options: [],
+              fillBlankAnswers: ['80', '80.0', 't=80'],
+              explanation: '$1000 / (1 + 0.05T) \\le 200 \\Rightarrow 1 + 0.05T \\ge 5 \\Rightarrow T \\ge 80$.',
+            }
+          ];
 
-    setQuestions(sampleQuestions);
-    setQuestionGroups(sampleGroups);
-    setActiveSelection({ type: 'question', id: sampleQuestions[0].id });
-    setIsDirty(false);
-  }, [activeCategory, selectedExamId]);
+          setQuestions(sampleQuestions);
+          setQuestionGroups(sampleGroups);
+          setActiveSelection({ type: 'question', id: sampleQuestions[0].id });
+        }
+        setIsDirty(false);
+      })
+      .catch(e => {
+        console.error('Error fetching active module questions:', e);
+        setIsDirty(false);
+      });
+  }, [activeCategory, selectedExamId, currentModule?.id]);
 
   const activeQuestion = activeSelection?.type === 'question' 
     ? questions.find(q => q.id === activeSelection.id) || questions[0]
@@ -503,7 +518,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
             className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-xs whitespace-nowrap"
           >
             <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-            AI Tri-Tab PDF Parser (Gemini 1.5 Flash)
+            AI Tri-Tab PDF Parser (Gemini 2.5 Flash)
           </button>
         </div>
       </div>

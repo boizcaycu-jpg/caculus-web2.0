@@ -3,6 +3,9 @@ import { revalidatePath } from 'next/cache';
 import { getExams, createExam, updateExam, saveQuestionsForModule, saveQuestionGroupsForModule } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function checkAdmin(req: NextRequest) {
   const token = req.cookies.get('caculus_token')?.value;
   if (!token) return null;
@@ -35,6 +38,7 @@ export async function POST(req: NextRequest) {
 
     revalidatePath('/exams');
     revalidatePath('/dashboard');
+    revalidatePath('/admin/exams/editor');
 
     return NextResponse.json({ success: true, exam: newExam });
   } catch (error) {
@@ -65,9 +69,10 @@ export async function PUT(req: NextRequest) {
       saveQuestionGroupsForModule(moduleId, questionGroups);
     }
 
-    // Flush cache so student dashboard and test rooms update immediately
+    // Aggressive Cache Busting across all student & admin views
     revalidatePath('/exams');
     revalidatePath('/dashboard');
+    revalidatePath('/admin/exams/editor');
     if (id) {
       revalidatePath(`/exams/${id}`);
       revalidatePath(`/exams/${id}/room`);
@@ -79,4 +84,3 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Lỗi cập nhật đề thi' }, { status: 500 });
   }
 }
-

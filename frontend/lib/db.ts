@@ -7,7 +7,7 @@ interface DatabaseSchema {
   users: User[];
   exams: Exam[];
   questions: Question[];
-  questionGroups?: QuestionGroup[];
+  questionGroups: QuestionGroup[];
   submissions: Submission[];
   antiCheatLogs: AntiCheatLog[];
 }
@@ -35,9 +35,18 @@ function ensureDbFile(): DatabaseSchema {
     }
 
     const fileContent = fs.readFileSync(DB_FILE_PATH, 'utf-8');
-    return JSON.parse(fileContent) as DatabaseSchema;
+    const parsed = JSON.parse(fileContent) as DatabaseSchema;
+
+    return {
+      users: parsed.users || INITIAL_USERS,
+      exams: parsed.exams || INITIAL_EXAMS,
+      questions: parsed.questions || INITIAL_QUESTIONS,
+      questionGroups: parsed.questionGroups || [],
+      submissions: parsed.submissions || INITIAL_SUBMISSIONS,
+      antiCheatLogs: parsed.antiCheatLogs || INITIAL_ANTICHEAT_LOGS,
+    };
   } catch (error) {
-    console.error('Error reading DB file, using initial memory state:', error);
+    console.error('Error reading DB file, returning fallback state:', error);
     return {
       users: INITIAL_USERS,
       exams: INITIAL_EXAMS,
@@ -134,7 +143,8 @@ export function updateExam(id: string, updates: Partial<Exam>): Exam | null {
 // Question operations
 export function getQuestionsByModule(moduleId: string): Question[] {
   const db = ensureDbFile();
-  return db.questions.filter(q => q.moduleId === moduleId).sort((a, b) => a.number - b.number);
+  const filtered = db.questions.filter(q => q.moduleId === moduleId).sort((a, b) => a.number - b.number);
+  return filtered;
 }
 
 export function createQuestion(question: Question): Question {
