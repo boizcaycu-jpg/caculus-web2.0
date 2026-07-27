@@ -126,7 +126,7 @@ Tuy nhiên, giới báo chí Mỹ thời đó đã thêu dệt và làm quá lê
       module={selectedModule}
       questions={questions}
       studentName={user?.name || 'Nguyễn Cường'}
-      studentId={user?.studentId || 'AECK496692'}
+      studentId={user?.studentId || 'CACULUS_496692'}
     />
   );
 }

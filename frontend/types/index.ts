@@ -5,7 +5,7 @@ export interface User {
   email: string;
   passwordHash: string;
   name: string;
-  studentId: string; // e.g. AECK496692
+  studentId: string; // e.g. CACULUS_496692
   role: Role;
   createdAt: string;
 }
@@ -15,14 +15,30 @@ export interface QuestionOption {
   text: string;
 }
 
+export interface QuestionGroup {
+  id: string;
+  moduleId: string;
+  title?: string;
+  passage?: string; // Reading text or scientific experiment description
+  imageUrl?: string; // Embedded diagram or Base64 / upload path
+  imageSize?: 'small' | 'medium' | 'large' | 'full';
+  questionIds: string[]; // Child question IDs belonging to this group
+}
+
 export interface Question {
   id: string;
   moduleId: string;
+  groupId?: string; // Reference to parent QuestionGroup context
   number: number;
+  type?: 'single_choice' | 'multiple_choice' | 'fill_blank';
   text: string;
-  passage?: string; // Optional reading passage or scientific data context
+  passage?: string; // Optional standalone reading passage or scientific data context
+  imageUrl?: string; // Base64 data URL, upload path, or external URL
+  imageSize?: 'small' | 'medium' | 'large' | 'full';
   options: QuestionOption[];
-  correctOptionId: string;
+  correctOptionId?: string; // For single choice
+  correctOptionIds?: string[]; // For multiple choice (exact match required)
+  fillBlankAnswers?: string[]; // Acceptable correct values for fill in the blank
   explanation?: string;
 }
 
@@ -35,6 +51,7 @@ export interface ExamModule {
   openTime: string; // e.g., "00:00 02/05/2026"
   closeTime: string; // e.g., "02:59 07/05/2027"
   totalQuestions: number;
+  questionGroups?: QuestionGroup[];
 }
 
 export interface Exam {
@@ -43,13 +60,16 @@ export interface Exam {
   description: string;
   isFree: boolean;
   price?: number;
+  status?: 'active' | 'disabled' | 'coming_soon';
   modules: ExamModule[];
   createdAt: string;
 }
 
 export interface UserAnswer {
   questionId: string;
-  selectedOptionId: string;
+  selectedOptionId?: string;
+  selectedOptionIds?: string[];
+  fillBlankValue?: string;
   timeSpentSeconds: number;
 }
 

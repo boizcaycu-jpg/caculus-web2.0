@@ -7,42 +7,313 @@
       "name": "Quản trị viên hệ thống",
       "studentId": "ADMIN-001",
       "role": "admin",
-      "createdAt": "2026-07-24T09:55:58.164Z"
+      "createdAt": "2026-07-26T08:00:16.995Z"
     },
     {
       "id": "user-student-1",
       "email": "student@caculus.edu.vn",
       "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
       "name": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "studentId": "CACULUS_496692",
       "role": "student",
-      "createdAt": "2026-07-24T09:55:58.164Z"
+      "createdAt": "2026-07-26T08:00:16.995Z"
     },
     {
       "id": "user-student-2",
       "email": "tranvanb@caculus.edu.vn",
       "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
       "name": "Trần Văn B",
-      "studentId": "AECK496693",
+      "studentId": "CACULUS_496693",
       "role": "student",
-      "createdAt": "2026-07-24T09:55:58.164Z"
+      "createdAt": "2026-07-26T08:00:16.995Z"
     },
     {
       "id": "user-student-3",
       "email": "lethic@caculus.edu.vn",
       "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
       "name": "Lê Thị C",
-      "studentId": "AECK496694",
+      "studentId": "CACULUS_496694",
       "role": "student",
-      "createdAt": "2026-07-24T09:55:58.164Z"
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-1",
+      "email": "student_mock1@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Nguyễn Minh Triết",
+      "studentId": "CACULUS_108291",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-2",
+      "email": "student_mock2@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Trần Hoàng Nam",
+      "studentId": "CACULUS_293812",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-3",
+      "email": "student_mock3@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Lê Phương Thảo",
+      "studentId": "CACULUS_819230",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-4",
+      "email": "student_mock4@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đặng Quốc Bảo",
+      "studentId": "CACULUS_304918",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-5",
+      "email": "student_mock5@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Vũ Hoàng Yến",
+      "studentId": "CACULUS_918234",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-6",
+      "email": "student_mock6@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Phạm Đức Anh",
+      "studentId": "CACULUS_129384",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-7",
+      "email": "student_mock7@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Bùi Thị Mai",
+      "studentId": "CACULUS_827364",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-8",
+      "email": "student_mock8@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đỗ Quang Huy",
+      "studentId": "CACULUS_394827",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-9",
+      "email": "student_mock9@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Hoàng Ngọc Ánh",
+      "studentId": "CACULUS_583920",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-10",
+      "email": "student_mock10@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Nguyễn Thành Long",
+      "studentId": "CACULUS_948201",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-11",
+      "email": "student_mock11@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Lương Gia Huy",
+      "studentId": "CACULUS_284719",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-12",
+      "email": "student_mock12@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Trịnh Như Quỳnh",
+      "studentId": "CACULUS_472910",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-13",
+      "email": "student_mock13@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Phan Nhật Minh",
+      "studentId": "CACULUS_739201",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-14",
+      "email": "student_mock14@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đào Khánh Linh",
+      "studentId": "CACULUS_193847",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-15",
+      "email": "student_mock15@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đinh Tấn Phát",
+      "studentId": "CACULUS_582019",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-16",
+      "email": "student_mock16@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Phùng Hải Yến",
+      "studentId": "CACULUS_392018",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-17",
+      "email": "student_mock17@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Tạ Minh Khôi",
+      "studentId": "CACULUS_849201",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-18",
+      "email": "student_mock18@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Dương Thu Trang",
+      "studentId": "CACULUS_103928",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-19",
+      "email": "student_mock19@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Ngô Bảo Lâm",
+      "studentId": "CACULUS_592018",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-20",
+      "email": "student_mock20@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Cao Hoài Nam",
+      "studentId": "CACULUS_293049",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-21",
+      "email": "student_mock21@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Nguyễn Khánh Vy",
+      "studentId": "CACULUS_839201",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-22",
+      "email": "student_mock22@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đặng Tuấn Kiệt",
+      "studentId": "CACULUS_492018",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-23",
+      "email": "student_mock23@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Trần Đức Thắng",
+      "studentId": "CACULUS_192038",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-24",
+      "email": "student_mock24@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Vũ Mỹ Duyên",
+      "studentId": "CACULUS_583920",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-25",
+      "email": "student_mock25@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Lê Gia Bảo",
+      "studentId": "CACULUS_930192",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-26",
+      "email": "student_mock26@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Phạm Quỳnh Anh",
+      "studentId": "CACULUS_482019",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-27",
+      "email": "student_mock27@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Bùi Duy Khánh",
+      "studentId": "CACULUS_193049",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-28",
+      "email": "student_mock28@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đỗ Phương Nam",
+      "studentId": "CACULUS_593029",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-29",
+      "email": "student_mock29@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Hoàng Bảo Ngọc",
+      "studentId": "CACULUS_839102",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-30",
+      "email": "student_mock30@caculus.edu.vn",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Nguyễn Hải Đăng",
+      "studentId": "CACULUS_293840",
+      "role": "student",
+      "createdAt": "2026-07-26T08:00:16.995Z"
     }
   ],
   "exams": [
     {
       "id": "exam-2k9-1",
-      "title": "Đề Trải nghiệm Premium 2K9 - Đề số 1",
+      "title": "Đề TSA Caculus DEMO 01",
       "description": "Bộ đề thi chuẩn cấu trúc Đánh giá Tư duy (TSA) Bách Khoa 2026",
       "isFree": true,
+      "status": "active",
       "modules": [
         {
           "id": "mod-math-1",
@@ -75,14 +346,15 @@
           "totalQuestions": 20
         }
       ],
-      "createdAt": "2026-07-24T09:55:58.164Z"
+      "createdAt": "2026-07-26T08:00:16.995Z"
     },
     {
       "id": "exam-2k9-2",
-      "title": "Đề Trải nghiệm Premium 2K9 - Đề số 2",
+      "title": "Đề TSA Caculus DEMO 02",
       "description": "Thử thách nâng cao các dạng bài logic và phân tích dữ liệu thực tế",
       "isFree": false,
       "price": 150000,
+      "status": "active",
       "modules": [
         {
           "id": "mod-math-2",
@@ -115,7 +387,1483 @@
           "totalQuestions": 20
         }
       ],
-      "createdAt": "2026-07-24T09:55:58.164Z"
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "exam-vip-001",
+      "title": "Đề thực chiến TSA VIP 001",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 001)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-001",
+          "examId": "exam-vip-001",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-001",
+          "examId": "exam-vip-001",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-001",
+          "examId": "exam-vip-001",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "exam-vip-002",
+      "title": "Đề thực chiến TSA VIP 002",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 002)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-002",
+          "examId": "exam-vip-002",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-002",
+          "examId": "exam-vip-002",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-002",
+          "examId": "exam-vip-002",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "exam-vip-003",
+      "title": "Đề thực chiến TSA VIP 003",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 003)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-003",
+          "examId": "exam-vip-003",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-003",
+          "examId": "exam-vip-003",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-003",
+          "examId": "exam-vip-003",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "exam-vip-004",
+      "title": "Đề thực chiến TSA VIP 004",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 004)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-004",
+          "examId": "exam-vip-004",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-004",
+          "examId": "exam-vip-004",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-004",
+          "examId": "exam-vip-004",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-005",
+      "title": "Đề thực chiến TSA VIP 005",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 005)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-005",
+          "examId": "exam-vip-005",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-005",
+          "examId": "exam-vip-005",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-005",
+          "examId": "exam-vip-005",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-006",
+      "title": "Đề thực chiến TSA VIP 006",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 006)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-006",
+          "examId": "exam-vip-006",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-006",
+          "examId": "exam-vip-006",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-006",
+          "examId": "exam-vip-006",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-007",
+      "title": "Đề thực chiến TSA VIP 007",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 007)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-007",
+          "examId": "exam-vip-007",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-007",
+          "examId": "exam-vip-007",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-007",
+          "examId": "exam-vip-007",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-008",
+      "title": "Đề thực chiến TSA VIP 008",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 008)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-008",
+          "examId": "exam-vip-008",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-008",
+          "examId": "exam-vip-008",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-008",
+          "examId": "exam-vip-008",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-009",
+      "title": "Đề thực chiến TSA VIP 009",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 009)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-009",
+          "examId": "exam-vip-009",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-009",
+          "examId": "exam-vip-009",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-009",
+          "examId": "exam-vip-009",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-010",
+      "title": "Đề thực chiến TSA VIP 010",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 010)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-010",
+          "examId": "exam-vip-010",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-010",
+          "examId": "exam-vip-010",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-010",
+          "examId": "exam-vip-010",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-011",
+      "title": "Đề thực chiến TSA VIP 011",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 011)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-011",
+          "examId": "exam-vip-011",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-011",
+          "examId": "exam-vip-011",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-011",
+          "examId": "exam-vip-011",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-012",
+      "title": "Đề thực chiến TSA VIP 012",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 012)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-012",
+          "examId": "exam-vip-012",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-012",
+          "examId": "exam-vip-012",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-012",
+          "examId": "exam-vip-012",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-013",
+      "title": "Đề thực chiến TSA VIP 013",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 013)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-013",
+          "examId": "exam-vip-013",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-013",
+          "examId": "exam-vip-013",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-013",
+          "examId": "exam-vip-013",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-014",
+      "title": "Đề thực chiến TSA VIP 014",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 014)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-014",
+          "examId": "exam-vip-014",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-014",
+          "examId": "exam-vip-014",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-014",
+          "examId": "exam-vip-014",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-015",
+      "title": "Đề thực chiến TSA VIP 015",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 015)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-015",
+          "examId": "exam-vip-015",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-015",
+          "examId": "exam-vip-015",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-015",
+          "examId": "exam-vip-015",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-016",
+      "title": "Đề thực chiến TSA VIP 016",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 016)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-016",
+          "examId": "exam-vip-016",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-016",
+          "examId": "exam-vip-016",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-016",
+          "examId": "exam-vip-016",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-017",
+      "title": "Đề thực chiến TSA VIP 017",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 017)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-017",
+          "examId": "exam-vip-017",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-017",
+          "examId": "exam-vip-017",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-017",
+          "examId": "exam-vip-017",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-018",
+      "title": "Đề thực chiến TSA VIP 018",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 018)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-018",
+          "examId": "exam-vip-018",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-018",
+          "examId": "exam-vip-018",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-018",
+          "examId": "exam-vip-018",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-019",
+      "title": "Đề thực chiến TSA VIP 019",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 019)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-019",
+          "examId": "exam-vip-019",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-019",
+          "examId": "exam-vip-019",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-019",
+          "examId": "exam-vip-019",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-020",
+      "title": "Đề thực chiến TSA VIP 020",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 020)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-020",
+          "examId": "exam-vip-020",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-020",
+          "examId": "exam-vip-020",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-020",
+          "examId": "exam-vip-020",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-021",
+      "title": "Đề thực chiến TSA VIP 021",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 021)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-021",
+          "examId": "exam-vip-021",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-021",
+          "examId": "exam-vip-021",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-021",
+          "examId": "exam-vip-021",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-022",
+      "title": "Đề thực chiến TSA VIP 022",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 022)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-022",
+          "examId": "exam-vip-022",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-022",
+          "examId": "exam-vip-022",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-022",
+          "examId": "exam-vip-022",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-023",
+      "title": "Đề thực chiến TSA VIP 023",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 023)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-023",
+          "examId": "exam-vip-023",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-023",
+          "examId": "exam-vip-023",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-023",
+          "examId": "exam-vip-023",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-024",
+      "title": "Đề thực chiến TSA VIP 024",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 024)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-024",
+          "examId": "exam-vip-024",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-024",
+          "examId": "exam-vip-024",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-024",
+          "examId": "exam-vip-024",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-025",
+      "title": "Đề thực chiến TSA VIP 025",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 025)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-025",
+          "examId": "exam-vip-025",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-025",
+          "examId": "exam-vip-025",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-025",
+          "examId": "exam-vip-025",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-026",
+      "title": "Đề thực chiến TSA VIP 026",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 026)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-026",
+          "examId": "exam-vip-026",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-026",
+          "examId": "exam-vip-026",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-026",
+          "examId": "exam-vip-026",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-027",
+      "title": "Đề thực chiến TSA VIP 027",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 027)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-027",
+          "examId": "exam-vip-027",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-027",
+          "examId": "exam-vip-027",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-027",
+          "examId": "exam-vip-027",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-028",
+      "title": "Đề thực chiến TSA VIP 028",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 028)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-028",
+          "examId": "exam-vip-028",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-028",
+          "examId": "exam-vip-028",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-028",
+          "examId": "exam-vip-028",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-029",
+      "title": "Đề thực chiến TSA VIP 029",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 029)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-029",
+          "examId": "exam-vip-029",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-029",
+          "examId": "exam-vip-029",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-029",
+          "examId": "exam-vip-029",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-030",
+      "title": "Đề thực chiến TSA VIP 030",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 030)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-030",
+          "examId": "exam-vip-030",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-030",
+          "examId": "exam-vip-030",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-030",
+          "examId": "exam-vip-030",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-031",
+      "title": "Đề thực chiến TSA VIP 031",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 031)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-031",
+          "examId": "exam-vip-031",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-031",
+          "examId": "exam-vip-031",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-031",
+          "examId": "exam-vip-031",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-032",
+      "title": "Đề thực chiến TSA VIP 032",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 032)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-032",
+          "examId": "exam-vip-032",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-032",
+          "examId": "exam-vip-032",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-032",
+          "examId": "exam-vip-032",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-033",
+      "title": "Đề thực chiến TSA VIP 033",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 033)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-033",
+          "examId": "exam-vip-033",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-033",
+          "examId": "exam-vip-033",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-033",
+          "examId": "exam-vip-033",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-034",
+      "title": "Đề thực chiến TSA VIP 034",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 034)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-034",
+          "examId": "exam-vip-034",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-034",
+          "examId": "exam-vip-034",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-034",
+          "examId": "exam-vip-034",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-035",
+      "title": "Đề thực chiến TSA VIP 035",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 035)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-035",
+          "examId": "exam-vip-035",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-035",
+          "examId": "exam-vip-035",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-035",
+          "examId": "exam-vip-035",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
+    },
+    {
+      "id": "exam-vip-036",
+      "title": "Đề thực chiến TSA VIP 036",
+      "description": "Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP 036)",
+      "isFree": false,
+      "price": 150000,
+      "status": "disabled",
+      "modules": [
+        {
+          "id": "mod-math-vip-036",
+          "examId": "exam-vip-036",
+          "title": "1. Tư duy Toán học",
+          "category": "math",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 40
+        },
+        {
+          "id": "mod-reading-vip-036",
+          "examId": "exam-vip-036",
+          "title": "2. Tư duy Đọc hiểu",
+          "category": "reading",
+          "durationMinutes": 30,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        },
+        {
+          "id": "mod-science-vip-036",
+          "examId": "exam-vip-036",
+          "title": "3. Tư duy Khoa học & Giải quyết vấn đề",
+          "category": "science",
+          "durationMinutes": 60,
+          "openTime": "Chưa mở",
+          "closeTime": "Chưa mở",
+          "totalQuestions": 20
+        }
+      ],
+      "createdAt": "2026-07-26T08:00:16.996Z"
     }
   ],
   "questions": [
@@ -201,84 +1949,6 @@
       "explanation": "Đoạn văn không đưa ra con số khẳng định năng suất tăng gấp 10 lần."
     },
     {
-      "id": "q-math-1",
-      "moduleId": "mod-math-1",
-      "number": 1,
-      "text": "Một công ty sản xuất đồ điện tử tính toán chi phí cố định hằng ngày là 12,000,000 VNĐ và chi phí sản xuất mỗi sản phẩm là 450,000 VNĐ. Nếu giá bán mỗi sản phẩm là 650,000 VNĐ, công ty cần bán ít nhất bao nhiêu sản phẩm mỗi ngày để bắt đầu có lãi?",
-      "options": [
-        {
-          "id": "opt-m1-a",
-          "text": "50 sản phẩm"
-        },
-        {
-          "id": "opt-m1-b",
-          "text": "60 sản phẩm"
-        },
-        {
-          "id": "opt-m1-c",
-          "text": "61 sản phẩm"
-        },
-        {
-          "id": "opt-m1-d",
-          "text": "75 sản phẩm"
-        }
-      ],
-      "correctOptionId": "opt-m1-c",
-      "explanation": "Lợi nhuận mỗi sản phẩm = 650,000 - 450,000 = 200,000 VNĐ. Điểm hòa vốn = 12,000,000 / 200,000 = 60 sản phẩm. Để bắt đầu có lãi cần ít nhất 61 sản phẩm."
-    },
-    {
-      "id": "q-math-2",
-      "moduleId": "mod-math-2",
-      "number": 2,
-      "text": "Cho hàm số f(x) liên tục trên R có bảng biến thiên dạng hình chuông cân đối qua x = 2. Biết tích phân từ 0 đến 4 của f(x) dx = 16. Giá trị của tích phân từ 2 đến 4 của f(x) dx là bao nhiêu?",
-      "options": [
-        {
-          "id": "opt-m2-a",
-          "text": "4"
-        },
-        {
-          "id": "opt-m2-b",
-          "text": "8"
-        },
-        {
-          "id": "opt-m2-c",
-          "text": "12"
-        },
-        {
-          "id": "opt-m2-d",
-          "text": "16"
-        }
-      ],
-      "correctOptionId": "opt-m2-b",
-      "explanation": "Do tính đối xứng qua x = 2, tích phân từ 2 đến 4 bằng một nửa tích phân từ 0 đến 4 = 16 / 2 = 8."
-    },
-    {
-      "id": "q-math-3",
-      "moduleId": "mod-math-1",
-      "number": 3,
-      "text": "Trong một giải đấu bóng đá gồm 8 đội thi đấu vòng tròn 1 lượt. Mỗi trận thắng được 3 điểm, hòa được 1 điểm, thua 0 điểm. Tổng số điểm của tất cả 8 đội sau khi kết thúc giải đấu có thể đạt giá trị nào sau đây?",
-      "options": [
-        {
-          "id": "opt-m3-a",
-          "text": "75 điểm"
-        },
-        {
-          "id": "opt-m3-b",
-          "text": "80 điểm"
-        },
-        {
-          "id": "opt-m3-c",
-          "text": "84 điểm"
-        },
-        {
-          "id": "opt-m3-d",
-          "text": "90 điểm"
-        }
-      ],
-      "correctOptionId": "opt-m3-a",
-      "explanation": "Tổng số trận = C(8,2) = 28 trận. Mỗi trận thắng-thua cho tổng 3 điểm, trận hòa cho tổng 2 điểm. Tổng điểm nằm trong khoảng [56, 84]. Với 84 - (số trận hòa) = 75 điểm khi có 9 trận hòa."
-    },
-    {
       "id": "q-sci-1",
       "moduleId": "mod-science-1",
       "number": 1,
@@ -305,30 +1975,77 @@
       "explanation": "Phản ứng tỏa nhiệt (ΔH < 0) nên giảm nhiệt độ dịch chuyển cân bằng sang phải. Phản ứng làm giảm số mol khí nên tăng áp suất dịch chuyển sang phải."
     },
     {
-      "id": "q-sci-2",
-      "moduleId": "mod-science-1",
-      "number": 2,
-      "text": "Một thiết bị cảm biến nhiệt độ báo động khi điện trở R giảm xuống dưới 200 Ω. Biết R biến thiên theo nhiệt độ T (°C) theo công thức R(T) = 1000 / (1 + 0.05T). Nhiệt độ tối thiểu để thiết bị kích hoạt báo động là:",
+      "id": "q-math-1",
+      "moduleId": "mod-math-1",
+      "number": 1,
+      "type": "single_choice",
+      "text": "Cho hàm số $f(x) = \\frac{x^2 - 4}{x - 2}$. Tính giới hạn $\\lim_{x \\to 2} f(x)$ và xác định giá trị để hàm số liên tục trên $\\mathbb{R}$.",
       "options": [
         {
-          "id": "opt-s2-a",
-          "text": "60 °C"
+          "id": "opt-a",
+          "text": "Giới hạn bằng 4, hàm số liên tục tại x = 2"
         },
         {
-          "id": "opt-s2-b",
-          "text": "75 °C"
+          "id": "opt-b",
+          "text": "Giới hạn bằng 2, $f(2) = 4$"
         },
         {
-          "id": "opt-s2-c",
-          "text": "80 °C"
+          "id": "opt-c",
+          "text": "Tăng áp suất làm dịch chuyển cân bằng sang phải"
         },
         {
-          "id": "opt-s2-d",
-          "text": "100 °C"
+          "id": "opt-d",
+          "text": "Nhiệt độ T tăng làm hằng số $K_c$ giảm"
         }
       ],
-      "correctOptionId": "opt-s2-c",
-      "explanation": "1000 / (1 + 0.05T) <= 200 => 1 + 0.05T >= 5 => 0.05T >= 4 => T >= 80 °C."
+      "correctOptionId": "opt-a",
+      "explanation": "Biến đổi $\\frac{x^2 - 4}{x - 2} = x + 2$. Khi $x \\to 2$, giới hạn là $2 + 2 = 4$.",
+      "imageSize": "medium"
+    },
+    {
+      "id": "q-math-2",
+      "moduleId": "mod-math-1",
+      "number": 2,
+      "type": "multiple_choice",
+      "text": "Cho tích phân $I = \\int_0^1 (2x + 1) dx$. Những phát biểu nào sau đây ĐÚNG?",
+      "options": [
+        {
+          "id": "opt-2a",
+          "text": "Nguyên hàm của $2x + 1$ là $F(x) = x^2 + x$"
+        },
+        {
+          "id": "opt-2b",
+          "text": "Giá trị tích phân $I = 2$"
+        },
+        {
+          "id": "opt-2c",
+          "text": "Giá trị tích phân $I = 1$"
+        },
+        {
+          "id": "opt-2d",
+          "text": "Nếu đổi biến $u = 2x+1$ thì $du = 2dx$"
+        }
+      ],
+      "correctOptionIds": [
+        "opt-2a",
+        "opt-2b",
+        "opt-2d"
+      ],
+      "explanation": "$F(1) - F(0) = (1 + 1) - 0 = 2$. Do đó A, B, D đúng."
+    },
+    {
+      "id": "q-math-3",
+      "moduleId": "mod-math-1",
+      "number": 3,
+      "type": "fill_blank",
+      "text": "Biết điện trở $R(T) = \\frac{1000}{1 + 0.05T} \\le 200 \\,\\Omega$. Nhiệt độ tối thiểu $T$ (°C) là bao nhiêu?",
+      "options": [],
+      "fillBlankAnswers": [
+        "80",
+        "80.0",
+        "t=80"
+      ],
+      "explanation": "$1000 / (1 + 0.05T) \\le 200 \\Rightarrow 1 + 0.05T \\ge 5 \\Rightarrow T \\ge 80$."
     }
   ],
   "submissions": [
@@ -338,7 +2055,7 @@
       "moduleId": "mod-math-1",
       "userId": "user-student-1",
       "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "studentId": "CACULUS_496692",
       "score": 85,
       "totalQuestions": 40,
       "correctCount": 34,
@@ -352,7 +2069,7 @@
       "moduleId": "mod-reading-1",
       "userId": "user-student-1",
       "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "studentId": "CACULUS_496692",
       "score": 90,
       "totalQuestions": 20,
       "correctCount": 18,
@@ -361,112 +2078,474 @@
       "antiCheatViolationCount": 1
     },
     {
-      "id": "sub-1784887382960",
+      "id": "sub-mock-1",
       "examId": "exam-2k9-1",
-      "moduleId": "mod-science-1",
-      "userId": "user-student-1",
-      "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
-      "score": 0,
-      "totalQuestions": 2,
-      "correctCount": 0,
-      "answers": [
-        {
-          "questionId": "q-read-18",
-          "selectedOptionId": "opt-a",
-          "timeSpentSeconds": 30,
-          "isCorrect": false
-        }
-      ],
-      "submittedAt": "2026-07-24T10:03:02.960Z",
-      "antiCheatViolationCount": 1
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-1",
+      "userName": "Nguyễn Minh Triết",
+      "studentId": "CACULUS_108291",
+      "score": 98,
+      "totalQuestions": 40,
+      "correctCount": 39,
+      "answers": [],
+      "submittedAt": "2026-07-26T04:00:16.996Z",
+      "antiCheatViolationCount": 0
     },
     {
-      "id": "sub-1784910121561",
+      "id": "sub-mock-2",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-2",
+      "userName": "Trần Hoàng Nam",
+      "studentId": "CACULUS_293812",
+      "score": 96,
+      "totalQuestions": 40,
+      "correctCount": 38,
+      "answers": [],
+      "submittedAt": "2026-07-26T00:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-3",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-3",
+      "userName": "Lê Phương Thảo",
+      "studentId": "CACULUS_819230",
+      "score": 95,
+      "totalQuestions": 40,
+      "correctCount": 38,
+      "answers": [],
+      "submittedAt": "2026-07-25T20:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-4",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-4",
+      "userName": "Đặng Quốc Bảo",
+      "studentId": "CACULUS_304918",
+      "score": 93,
+      "totalQuestions": 40,
+      "correctCount": 37,
+      "answers": [],
+      "submittedAt": "2026-07-25T16:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-5",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-5",
+      "userName": "Vũ Hoàng Yến",
+      "studentId": "CACULUS_918234",
+      "score": 92,
+      "totalQuestions": 40,
+      "correctCount": 37,
+      "answers": [],
+      "submittedAt": "2026-07-25T12:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-6",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-6",
+      "userName": "Phạm Đức Anh",
+      "studentId": "CACULUS_129384",
+      "score": 90,
+      "totalQuestions": 40,
+      "correctCount": 36,
+      "answers": [],
+      "submittedAt": "2026-07-25T08:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-7",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-7",
+      "userName": "Bùi Thị Mai",
+      "studentId": "CACULUS_827364",
+      "score": 89,
+      "totalQuestions": 40,
+      "correctCount": 36,
+      "answers": [],
+      "submittedAt": "2026-07-25T04:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-8",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-8",
+      "userName": "Đỗ Quang Huy",
+      "studentId": "CACULUS_394827",
+      "score": 88,
+      "totalQuestions": 40,
+      "correctCount": 35,
+      "answers": [],
+      "submittedAt": "2026-07-25T00:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-9",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-9",
+      "userName": "Hoàng Ngọc Ánh",
+      "studentId": "CACULUS_583920",
+      "score": 86,
+      "totalQuestions": 40,
+      "correctCount": 34,
+      "answers": [],
+      "submittedAt": "2026-07-24T20:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-10",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-10",
+      "userName": "Nguyễn Thành Long",
+      "studentId": "CACULUS_948201",
+      "score": 85,
+      "totalQuestions": 40,
+      "correctCount": 34,
+      "answers": [],
+      "submittedAt": "2026-07-24T16:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-11",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-11",
+      "userName": "Lương Gia Huy",
+      "studentId": "CACULUS_284719",
+      "score": 84,
+      "totalQuestions": 40,
+      "correctCount": 34,
+      "answers": [],
+      "submittedAt": "2026-07-24T12:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-12",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-12",
+      "userName": "Trịnh Như Quỳnh",
+      "studentId": "CACULUS_472910",
+      "score": 82,
+      "totalQuestions": 40,
+      "correctCount": 33,
+      "answers": [],
+      "submittedAt": "2026-07-24T08:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-13",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-13",
+      "userName": "Phan Nhật Minh",
+      "studentId": "CACULUS_739201",
+      "score": 80,
+      "totalQuestions": 40,
+      "correctCount": 32,
+      "answers": [],
+      "submittedAt": "2026-07-24T04:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-14",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-14",
+      "userName": "Đào Khánh Linh",
+      "studentId": "CACULUS_193847",
+      "score": 79,
+      "totalQuestions": 40,
+      "correctCount": 32,
+      "answers": [],
+      "submittedAt": "2026-07-24T00:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-15",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-15",
+      "userName": "Đinh Tấn Phát",
+      "studentId": "CACULUS_582019",
+      "score": 77,
+      "totalQuestions": 40,
+      "correctCount": 31,
+      "answers": [],
+      "submittedAt": "2026-07-23T20:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-16",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-16",
+      "userName": "Phùng Hải Yến",
+      "studentId": "CACULUS_392018",
+      "score": 75,
+      "totalQuestions": 40,
+      "correctCount": 30,
+      "answers": [],
+      "submittedAt": "2026-07-23T16:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-17",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-17",
+      "userName": "Tạ Minh Khôi",
+      "studentId": "CACULUS_849201",
+      "score": 74,
+      "totalQuestions": 40,
+      "correctCount": 30,
+      "answers": [],
+      "submittedAt": "2026-07-23T12:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-18",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-18",
+      "userName": "Dương Thu Trang",
+      "studentId": "CACULUS_103928",
+      "score": 72,
+      "totalQuestions": 40,
+      "correctCount": 29,
+      "answers": [],
+      "submittedAt": "2026-07-23T08:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-19",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-19",
+      "userName": "Ngô Bảo Lâm",
+      "studentId": "CACULUS_592018",
+      "score": 70,
+      "totalQuestions": 40,
+      "correctCount": 28,
+      "answers": [],
+      "submittedAt": "2026-07-23T04:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-20",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-20",
+      "userName": "Cao Hoài Nam",
+      "studentId": "CACULUS_293049",
+      "score": 68,
+      "totalQuestions": 40,
+      "correctCount": 27,
+      "answers": [],
+      "submittedAt": "2026-07-23T00:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-21",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-21",
+      "userName": "Nguyễn Khánh Vy",
+      "studentId": "CACULUS_839201",
+      "score": 65,
+      "totalQuestions": 40,
+      "correctCount": 26,
+      "answers": [],
+      "submittedAt": "2026-07-22T20:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-22",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-22",
+      "userName": "Đặng Tuấn Kiệt",
+      "studentId": "CACULUS_492018",
+      "score": 63,
+      "totalQuestions": 40,
+      "correctCount": 25,
+      "answers": [],
+      "submittedAt": "2026-07-22T16:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-23",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-23",
+      "userName": "Trần Đức Thắng",
+      "studentId": "CACULUS_192038",
+      "score": 60,
+      "totalQuestions": 40,
+      "correctCount": 24,
+      "answers": [],
+      "submittedAt": "2026-07-22T12:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-24",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-24",
+      "userName": "Vũ Mỹ Duyên",
+      "studentId": "CACULUS_583920",
+      "score": 58,
+      "totalQuestions": 40,
+      "correctCount": 23,
+      "answers": [],
+      "submittedAt": "2026-07-22T08:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-25",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-25",
+      "userName": "Lê Gia Bảo",
+      "studentId": "CACULUS_930192",
+      "score": 55,
+      "totalQuestions": 40,
+      "correctCount": 22,
+      "answers": [],
+      "submittedAt": "2026-07-22T04:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-26",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-26",
+      "userName": "Phạm Quỳnh Anh",
+      "studentId": "CACULUS_482019",
+      "score": 52,
+      "totalQuestions": 40,
+      "correctCount": 21,
+      "answers": [],
+      "submittedAt": "2026-07-22T00:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-27",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-27",
+      "userName": "Bùi Duy Khánh",
+      "studentId": "CACULUS_193049",
+      "score": 50,
+      "totalQuestions": 40,
+      "correctCount": 20,
+      "answers": [],
+      "submittedAt": "2026-07-21T20:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-28",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-28",
+      "userName": "Đỗ Phương Nam",
+      "studentId": "CACULUS_593029",
+      "score": 48,
+      "totalQuestions": 40,
+      "correctCount": 19,
+      "answers": [],
+      "submittedAt": "2026-07-21T16:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-29",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-29",
+      "userName": "Hoàng Bảo Ngọc",
+      "studentId": "CACULUS_839102",
+      "score": 45,
+      "totalQuestions": 40,
+      "correctCount": 18,
+      "answers": [],
+      "submittedAt": "2026-07-21T12:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-mock-30",
+      "examId": "exam-2k9-1",
+      "moduleId": "mod-math-1",
+      "userId": "user-student-mock-30",
+      "userName": "Nguyễn Hải Đăng",
+      "studentId": "CACULUS_293840",
+      "score": 40,
+      "totalQuestions": 40,
+      "correctCount": 16,
+      "answers": [],
+      "submittedAt": "2026-07-21T08:00:16.996Z",
+      "antiCheatViolationCount": 0
+    },
+    {
+      "id": "sub-1785065056110",
       "examId": "exam-2k9-1",
       "moduleId": "mod-math-1",
       "userId": "user-student-1",
       "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "studentId": "CACULUS_496692",
       "score": 0,
-      "totalQuestions": 2,
+      "totalQuestions": 3,
       "correctCount": 0,
       "answers": [],
-      "submittedAt": "2026-07-24T16:22:01.561Z",
-      "antiCheatViolationCount": 0
-    },
-    {
-      "id": "sub-1784910138728",
-      "examId": "exam-2k9-2",
-      "moduleId": "mod-science-2",
-      "userId": "user-student-1",
-      "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
-      "score": 0,
-      "totalQuestions": 2,
-      "correctCount": 0,
-      "answers": [
-        {
-          "questionId": "q-read-16",
-          "selectedOptionId": "opt-b",
-          "timeSpentSeconds": 30,
-          "isCorrect": false
-        },
-        {
-          "questionId": "q-gen-32",
-          "selectedOptionId": "opt-13-d",
-          "timeSpentSeconds": 30,
-          "isCorrect": false
-        }
-      ],
-      "submittedAt": "2026-07-24T16:22:18.728Z",
+      "submittedAt": "2026-07-26T11:24:16.110Z",
       "antiCheatViolationCount": 0
     }
   ],
   "antiCheatLogs": [
     {
-      "id": "ac-1784887373890",
-      "userId": "user-student-1",
-      "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "id": "ac-1785061712941",
+      "userId": "user-admin-1",
+      "userName": "Quản trị viên hệ thống",
+      "studentId": "ADMIN-001",
       "examId": "exam-2k9-1",
-      "moduleId": "mod-science-1",
+      "moduleId": "mod-math-1",
       "eventType": "tab_switch",
-      "timestamp": "2026-07-24T10:02:53.890Z",
+      "timestamp": "2026-07-26T10:28:32.941Z",
       "details": "Thí sinh chuyển tab (Lần 1)"
     },
     {
-      "id": "ac-1784887373882",
-      "userId": "user-student-1",
-      "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "id": "ac-1785061712931",
+      "userId": "user-admin-1",
+      "userName": "Quản trị viên hệ thống",
+      "studentId": "ADMIN-001",
       "examId": "exam-2k9-1",
-      "moduleId": "mod-science-1",
+      "moduleId": "mod-math-1",
       "eventType": "tab_switch",
-      "timestamp": "2026-07-24T10:02:53.882Z",
+      "timestamp": "2026-07-26T10:28:32.931Z",
       "details": "Thí sinh chuyển tab (Lần 1)"
-    },
-    {
-      "id": "ac-1784887373873",
-      "userId": "user-student-1",
-      "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
-      "examId": "exam-2k9-1",
-      "moduleId": "mod-science-1",
-      "eventType": "window_blur",
-      "timestamp": "2026-07-24T10:02:53.873Z",
-      "details": "Thí sinh rời khỏi cửa sổ làm bài"
     },
     {
       "id": "ac-1",
       "userId": "user-student-1",
       "userName": "Nguyễn Cường",
-      "studentId": "AECK496692",
+      "studentId": "CACULUS_496692",
       "examId": "exam-2k9-1",
       "moduleId": "mod-reading-1",
       "eventType": "tab_switch",
       "timestamp": "2026-07-24T15:10:22.000Z",
       "details": "Thí sinh rời màn hình bài thi (Chuyển tab trình duyệt)"
     }
-  ]
+  ],
+  "questionGroups": []
 }

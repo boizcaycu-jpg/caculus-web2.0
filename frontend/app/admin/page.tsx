@@ -198,9 +198,17 @@ export default function AdminDashboardPage() {
         {/* TAB 2: EXAM MANAGEMENT & AUTO-UNLOCK SCHEDULES */}
         {activeTab === 'exams' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
-            <div>
-              <h2 className="font-extrabold text-slate-900 text-lg">Cấu hình Đề thi & Lịch mở tự động</h2>
-              <p className="text-xs text-slate-500">Thiết lập thời gian Giờ mở kíp cho từng Module (Toán, Đọc hiểu, Khoa học)</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="font-extrabold text-slate-900 text-lg">Cấu hình Đề thi & Lịch mở tự động</h2>
+                <p className="text-xs text-slate-500">Thiết lập thời gian Giờ mở kíp cho từng Module (Toán, Đọc hiểu, Khoa học)</p>
+              </div>
+              <a
+                href="/admin/exams/editor"
+                className="bg-crimson hover:bg-rose-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" /> Mở Trình soạn thảo & Import đề thi (Authoring Workspace)
+              </a>
             </div>
 
             <div className="space-y-4">

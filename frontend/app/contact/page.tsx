@@ -25,7 +25,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Email Hỗ trợ</h3>
-              <p className="text-xs text-slate-600 font-mono">support@caculus.edu.vn</p>
+              <p className="text-xs text-slate-600 font-mono">support.caculus.edu.vn@gmail.com</p>
             </div>
 
             <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-2">
@@ -33,7 +33,7 @@ export default function ContactPage() {
                 <Phone className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-slate-900 text-sm">Hotline Kỹ thuật</h3>
-              <p className="text-xs text-slate-600 font-mono">1900 - 2026 - TSA</p>
+              <p className="text-xs text-slate-600 font-mono">0767588269</p>
             </div>
 
             <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-2">

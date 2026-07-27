@@ -1,11 +1,13 @@
 import { User, Exam, Question, Submission, AntiCheatLog } from '../types';
 
-export const INITIAL_USERS: User[] = [
+const passwordHash = '$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1';
+
+// Seed Admin & Core Test Students
+const baseUsers: User[] = [
   {
     id: 'user-admin-1',
     email: 'admin@caculus.edu.vn',
-    // bcrypt hash of 'admin123'
-    passwordHash: '$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1', 
+    passwordHash,
     name: 'Quản trị viên hệ thống',
     studentId: 'ADMIN-001',
     role: 'admin',
@@ -14,38 +16,86 @@ export const INITIAL_USERS: User[] = [
   {
     id: 'user-student-1',
     email: 'student@caculus.edu.vn',
-    passwordHash: '$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1',
+    passwordHash,
     name: 'Nguyễn Cường',
-    studentId: 'AECK496692',
+    studentId: 'CACULUS_496692',
     role: 'student',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'user-student-2',
     email: 'tranvanb@caculus.edu.vn',
-    passwordHash: '$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1',
+    passwordHash,
     name: 'Trần Văn B',
-    studentId: 'AECK496693',
+    studentId: 'CACULUS_496693',
     role: 'student',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'user-student-3',
     email: 'lethic@caculus.edu.vn',
-    passwordHash: '$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1',
+    passwordHash,
     name: 'Lê Thị C',
-    studentId: 'AECK496694',
+    studentId: 'CACULUS_496694',
     role: 'student',
     createdAt: new Date().toISOString(),
   }
 ];
 
-export const INITIAL_EXAMS: Exam[] = [
+// Task 4: 30 Mock Student Profiles with Vietnamese Names & Scores (40% to 98%)
+const mockStudentData = [
+  { name: 'Nguyễn Minh Triết', idNum: '108291', score: 98, exams: 5 },
+  { name: 'Trần Hoàng Nam', idNum: '293812', score: 96, exams: 4 },
+  { name: 'Lê Phương Thảo', idNum: '819230', score: 95, exams: 6 },
+  { name: 'Đặng Quốc Bảo', idNum: '304918', score: 93, exams: 4 },
+  { name: 'Vũ Hoàng Yến', idNum: '918234', score: 92, exams: 5 },
+  { name: 'Phạm Đức Anh', idNum: '129384', score: 90, exams: 3 },
+  { name: 'Bùi Thị Mai', idNum: '827364', score: 89, exams: 4 },
+  { name: 'Đỗ Quang Huy', idNum: '394827', score: 88, exams: 5 },
+  { name: 'Hoàng Ngọc Ánh', idNum: '583920', score: 86, exams: 3 },
+  { name: 'Nguyễn Thành Long', idNum: '948201', score: 85, exams: 4 },
+  { name: 'Lương Gia Huy', idNum: '284719', score: 84, exams: 2 },
+  { name: 'Trịnh Như Quỳnh', idNum: '472910', score: 82, exams: 3 },
+  { name: 'Phan Nhật Minh', idNum: '739201', score: 80, exams: 4 },
+  { name: 'Đào Khánh Linh', idNum: '193847', score: 79, exams: 2 },
+  { name: 'Đinh Tấn Phát', idNum: '582019', score: 77, exams: 3 },
+  { name: 'Phùng Hải Yến', idNum: '392018', score: 75, exams: 2 },
+  { name: 'Tạ Minh Khôi', idNum: '849201', score: 74, exams: 3 },
+  { name: 'Dương Thu Trang', idNum: '103928', score: 72, exams: 2 },
+  { name: 'Ngô Bảo Lâm', idNum: '592018', score: 70, exams: 4 },
+  { name: 'Cao Hoài Nam', idNum: '293049', score: 68, exams: 2 },
+  { name: 'Nguyễn Khánh Vy', idNum: '839201', score: 65, exams: 1 },
+  { name: 'Đặng Tuấn Kiệt', idNum: '492018', score: 63, exams: 2 },
+  { name: 'Trần Đức Thắng', idNum: '192038', score: 60, exams: 1 },
+  { name: 'Vũ Mỹ Duyên', idNum: '583920', score: 58, exams: 2 },
+  { name: 'Lê Gia Bảo', idNum: '930192', score: 55, exams: 1 },
+  { name: 'Phạm Quỳnh Anh', idNum: '482019', score: 52, exams: 2 },
+  { name: 'Bùi Duy Khánh', idNum: '193049', score: 50, exams: 1 },
+  { name: 'Đỗ Phương Nam', idNum: '593029', score: 48, exams: 1 },
+  { name: 'Hoàng Bảo Ngọc', idNum: '839102', score: 45, exams: 1 },
+  { name: 'Nguyễn Hải Đăng', idNum: '293840', score: 40, exams: 1 },
+];
+
+const mockStudents: User[] = mockStudentData.map((item, idx) => ({
+  id: `user-student-mock-${idx + 1}`,
+  email: `student_mock${idx + 1}@caculus.edu.vn`,
+  passwordHash,
+  name: item.name,
+  studentId: `CACULUS_${item.idNum}`,
+  role: 'student',
+  createdAt: new Date().toISOString(),
+}));
+
+export const INITIAL_USERS: User[] = [...baseUsers, ...mockStudents];
+
+// Active Exams
+const activeExams: Exam[] = [
   {
     id: 'exam-2k9-1',
-    title: 'Đề Trải nghiệm Premium 2K9 - Đề số 1',
+    title: 'Đề TSA Caculus DEMO 01',
     description: 'Bộ đề thi chuẩn cấu trúc Đánh giá Tư duy (TSA) Bách Khoa 2026',
     isFree: true,
+    status: 'active',
     modules: [
       {
         id: 'mod-math-1',
@@ -82,10 +132,11 @@ export const INITIAL_EXAMS: Exam[] = [
   },
   {
     id: 'exam-2k9-2',
-    title: 'Đề Trải nghiệm Premium 2K9 - Đề số 2',
+    title: 'Đề TSA Caculus DEMO 02',
     description: 'Thử thách nâng cao các dạng bài logic và phân tích dữ liệu thực tế',
     isFree: false,
     price: 150000,
+    status: 'active',
     modules: [
       {
         id: 'mod-math-2',
@@ -122,8 +173,55 @@ export const INITIAL_EXAMS: Exam[] = [
   }
 ];
 
+// Task 5: 36 Placeholder Exams ("Đề thực chiến TSA VIP 001" -> "Đề thực chiến TSA VIP 036")
+const vipExams: Exam[] = Array.from({ length: 36 }).map((_, idx) => {
+  const numStr = String(idx + 1).padStart(3, '0');
+  return {
+    id: `exam-vip-${numStr}`,
+    title: `Đề thực chiến TSA VIP ${numStr}`,
+    description: `Bộ đề thi thử nghiệm cấu trúc Đánh giá Tư duy chuẩn Bách Khoa 2026 (Chuyên đề VIP ${numStr})`,
+    isFree: false,
+    price: 150000,
+    status: 'disabled',
+    modules: [
+      {
+        id: `mod-math-vip-${numStr}`,
+        examId: `exam-vip-${numStr}`,
+        title: '1. Tư duy Toán học',
+        category: 'math',
+        durationMinutes: 60,
+        openTime: 'Chưa mở',
+        closeTime: 'Chưa mở',
+        totalQuestions: 40,
+      },
+      {
+        id: `mod-reading-vip-${numStr}`,
+        examId: `exam-vip-${numStr}`,
+        title: '2. Tư duy Đọc hiểu',
+        category: 'reading',
+        durationMinutes: 30,
+        openTime: 'Chưa mở',
+        closeTime: 'Chưa mở',
+        totalQuestions: 20,
+      },
+      {
+        id: `mod-science-vip-${numStr}`,
+        examId: `exam-vip-${numStr}`,
+        title: '3. Tư duy Khoa học & Giải quyết vấn đề',
+        category: 'science',
+        durationMinutes: 60,
+        openTime: 'Chưa mở',
+        closeTime: 'Chưa mở',
+        totalQuestions: 20,
+      }
+    ],
+    createdAt: new Date().toISOString(),
+  };
+});
+
+export const INITIAL_EXAMS: Exam[] = [...activeExams, ...vipExams];
+
 export const INITIAL_QUESTIONS: Question[] = [
-  // READING MODULE QUESTIONS (Matching Screenshot 2 exact questions: Hydroponics / Gericke passage!)
   {
     id: 'q-read-16',
     moduleId: 'mod-reading-1',
@@ -175,8 +273,6 @@ Tuy nhiên, giới báo chí Mỹ thời đó đã thêu dệt và làm quá lê
     correctOptionId: 'opt-d',
     explanation: 'Đoạn văn không đưa ra con số khẳng định năng suất tăng gấp 10 lần.'
   },
-
-  // MATH MODULE QUESTIONS
   {
     id: 'q-math-1',
     moduleId: 'mod-math-1',
@@ -192,36 +288,6 @@ Tuy nhiên, giới báo chí Mỹ thời đó đã thêu dệt và làm quá lê
     explanation: 'Lợi nhuận mỗi sản phẩm = 650,000 - 450,000 = 200,000 VNĐ. Điểm hòa vốn = 12,000,000 / 200,000 = 60 sản phẩm. Để bắt đầu có lãi cần ít nhất 61 sản phẩm.'
   },
   {
-    id: 'q-math-2',
-    moduleId: 'mod-math-2',
-    number: 2,
-    text: 'Cho hàm số f(x) liên tục trên R có bảng biến thiên dạng hình chuông cân đối qua x = 2. Biết tích phân từ 0 đến 4 của f(x) dx = 16. Giá trị của tích phân từ 2 đến 4 của f(x) dx là bao nhiêu?',
-    options: [
-      { id: 'opt-m2-a', text: '4' },
-      { id: 'opt-m2-b', text: '8' },
-      { id: 'opt-m2-c', text: '12' },
-      { id: 'opt-m2-d', text: '16' }
-    ],
-    correctOptionId: 'opt-m2-b',
-    explanation: 'Do tính đối xứng qua x = 2, tích phân từ 2 đến 4 bằng một nửa tích phân từ 0 đến 4 = 16 / 2 = 8.'
-  },
-  {
-    id: 'q-math-3',
-    moduleId: 'mod-math-1',
-    number: 3,
-    text: 'Trong một giải đấu bóng đá gồm 8 đội thi đấu vòng tròn 1 lượt. Mỗi trận thắng được 3 điểm, hòa được 1 điểm, thua 0 điểm. Tổng số điểm của tất cả 8 đội sau khi kết thúc giải đấu có thể đạt giá trị nào sau đây?',
-    options: [
-      { id: 'opt-m3-a', text: '75 điểm' },
-      { id: 'opt-m3-b', text: '80 điểm' },
-      { id: 'opt-m3-c', text: '84 điểm' },
-      { id: 'opt-m3-d', text: '90 điểm' }
-    ],
-    correctOptionId: 'opt-m3-a',
-    explanation: 'Tổng số trận = C(8,2) = 28 trận. Mỗi trận thắng-thua cho tổng 3 điểm, trận hòa cho tổng 2 điểm. Tổng điểm nằm trong khoảng [56, 84]. Với 84 - (số trận hòa) = 75 điểm khi có 9 trận hòa.'
-  },
-
-  // SCIENCE & PROBLEM SOLVING QUESTIONS
-  {
     id: 'q-sci-1',
     moduleId: 'mod-science-1',
     number: 1,
@@ -234,31 +300,18 @@ Tuy nhiên, giới báo chí Mỹ thời đó đã thêu dệt và làm quá lê
     ],
     correctOptionId: 'opt-s1-b',
     explanation: 'Phản ứng tỏa nhiệt (ΔH < 0) nên giảm nhiệt độ dịch chuyển cân bằng sang phải. Phản ứng làm giảm số mol khí nên tăng áp suất dịch chuyển sang phải.'
-  },
-  {
-    id: 'q-sci-2',
-    moduleId: 'mod-science-1',
-    number: 2,
-    text: 'Một thiết bị cảm biến nhiệt độ báo động khi điện trở R giảm xuống dưới 200 Ω. Biết R biến thiên theo nhiệt độ T (°C) theo công thức R(T) = 1000 / (1 + 0.05T). Nhiệt độ tối thiểu để thiết bị kích hoạt báo động là:',
-    options: [
-      { id: 'opt-s2-a', text: '60 °C' },
-      { id: 'opt-s2-b', text: '75 °C' },
-      { id: 'opt-s2-c', text: '80 °C' },
-      { id: 'opt-s2-d', text: '100 °C' }
-    ],
-    correctOptionId: 'opt-s2-c',
-    explanation: '1000 / (1 + 0.05T) <= 200 => 1 + 0.05T >= 5 => 0.05T >= 4 => T >= 80 °C.'
   }
 ];
 
-export const INITIAL_SUBMISSIONS: Submission[] = [
+// Submissions for primary students + 30 mock students
+const baseSubmissions: Submission[] = [
   {
     id: 'sub-1',
     examId: 'exam-2k9-1',
     moduleId: 'mod-math-1',
     userId: 'user-student-1',
     userName: 'Nguyễn Cường',
-    studentId: 'AECK496692',
+    studentId: 'CACULUS_496692',
     score: 85,
     totalQuestions: 40,
     correctCount: 34,
@@ -272,7 +325,7 @@ export const INITIAL_SUBMISSIONS: Submission[] = [
     moduleId: 'mod-reading-1',
     userId: 'user-student-1',
     userName: 'Nguyễn Cường',
-    studentId: 'AECK496692',
+    studentId: 'CACULUS_496692',
     score: 90,
     totalQuestions: 20,
     correctCount: 18,
@@ -282,12 +335,29 @@ export const INITIAL_SUBMISSIONS: Submission[] = [
   }
 ];
 
+const mockSubmissions: Submission[] = mockStudentData.map((item, idx) => ({
+  id: `sub-mock-${idx + 1}`,
+  examId: 'exam-2k9-1',
+  moduleId: 'mod-math-1',
+  userId: `user-student-mock-${idx + 1}`,
+  userName: item.name,
+  studentId: `CACULUS_${item.idNum}`,
+  score: item.score,
+  totalQuestions: 40,
+  correctCount: Math.round((item.score / 100) * 40),
+  answers: [],
+  submittedAt: new Date(Date.now() - (idx + 1) * 3600000 * 4).toISOString(),
+  antiCheatViolationCount: 0,
+}));
+
+export const INITIAL_SUBMISSIONS: Submission[] = [...baseSubmissions, ...mockSubmissions];
+
 export const INITIAL_ANTICHEAT_LOGS: AntiCheatLog[] = [
   {
     id: 'ac-1',
     userId: 'user-student-1',
     userName: 'Nguyễn Cường',
-    studentId: 'AECK496692',
+    studentId: 'CACULUS_496692',
     examId: 'exam-2k9-1',
     moduleId: 'mod-reading-1',
     eventType: 'tab_switch',

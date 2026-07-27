@@ -78,7 +78,7 @@ export default function ExamDetailPage() {
             </div>
             <div className="text-right space-y-1">
               <div className="text-slate-500 font-medium">Mã định danh:</div>
-              <div className="font-mono font-bold text-crimson text-base">{user?.studentId || 'AECK496692'}</div>
+              <div className="font-mono font-bold text-crimson text-base">{user?.studentId || 'CACULUS_496692'}</div>
             </div>
           </div>
 

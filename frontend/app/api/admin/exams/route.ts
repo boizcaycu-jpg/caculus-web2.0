@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getExams, createExam, updateExam } from '@/lib/db';
+import { getExams, createExam, updateExam, saveQuestionsForModule, saveQuestionGroupsForModule } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
 function checkAdmin(req: NextRequest) {
@@ -45,11 +45,25 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { id, ...updates } = await req.json();
-    const updated = updateExam(id, updates);
-    return NextResponse.json({ success: true, exam: updated });
+    const body = await req.json();
+    const { id, moduleId, questions, questionGroups, ...updates } = body;
+
+    let updatedExam = null;
+    if (id) {
+      updatedExam = updateExam(id, updates);
+    }
+
+    if (moduleId && Array.isArray(questions)) {
+      saveQuestionsForModule(moduleId, questions);
+    }
+
+    if (moduleId && Array.isArray(questionGroups)) {
+      saveQuestionGroupsForModule(moduleId, questionGroups);
+    }
+
+    return NextResponse.json({ success: true, exam: updatedExam });
   } catch (error) {
-    console.error('Error updating exam:', error);
+    console.error('Error updating exam/questions:', error);
     return NextResponse.json({ error: 'Lỗi cập nhật đề thi' }, { status: 500 });
   }
 }

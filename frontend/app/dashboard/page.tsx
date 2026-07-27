@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-import { User, Award, BookOpen, Clock, PlayCircle, CheckCircle, Trophy, BarChart2 } from 'lucide-react';
+import { User, Award, BookOpen, Clock, PlayCircle, CheckCircle, Trophy, BarChart2, ChevronDown } from 'lucide-react';
 import { TokenPayload } from '@/lib/auth';
 
 export default function DashboardPage() {
@@ -11,6 +11,9 @@ export default function DashboardPage() {
   const [exams, setExams] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Requirement 2: Collapsible Accordion State for "Phòng luyện đề TSA" list
+  const [isExamsExpanded, setIsExamsExpanded] = useState(true);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -34,12 +37,12 @@ export default function DashboardPage() {
   const highestScore = submissions.reduce((max, s) => Math.max(max, s.score), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         
-        {/* Top Profile Summary Banner (Matching Screenshot 5) */}
+        {/* Top Profile Summary Banner */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
           {/* User Avatar & Name */}
           <div className="flex items-center gap-4 md:col-span-1 border-b md:border-b-0 md:border-r border-slate-100 pb-4 md:pb-0 md:pr-4">
@@ -67,42 +70,64 @@ export default function DashboardPage() {
             <div className="text-[11px] text-slate-400">thang điểm %</div>
           </div>
 
-          {/* Role & Identification */}
+          {/* Role & Identification (Requirement 1: Scrubbed Safe Student ID) */}
           <div className="text-right">
             <div className="text-xs text-slate-400 font-semibold">Vai trò</div>
             <div className="text-base font-black text-crimson tracking-wide uppercase">HỌC SINH</div>
-            <div className="text-xs font-mono text-slate-500 mt-0.5">{user?.studentId || 'AECK496692'}</div>
+            <div className="text-xs font-mono font-bold text-slate-600 mt-0.5">{user?.studentId || 'CACULUS_496692'}</div>
           </div>
         </div>
 
-        {/* Action Grid Cards matching Screenshot 5 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1: Main Practice Exams */}
+        {/* Action Grid Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          
+          {/* Card 1: Main Practice Exams with Collapsible Accordion (Requirement 2) */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4 hover:shadow-md transition">
+            
+            {/* Accordion Header */}
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-crimson" />
                 Phòng luyện đề TSA
               </h3>
-              <Link href="/exams" className="text-xs font-bold text-crimson hover:underline">
-                Xem tất cả
-              </Link>
+              
+              <div className="flex items-center gap-3">
+                <Link href="/exams" className="text-xs font-bold text-crimson hover:underline">
+                  Xem tất cả
+                </Link>
+
+                <button
+                  onClick={() => setIsExamsExpanded(!isExamsExpanded)}
+                  className="p-1 text-slate-400 hover:text-crimson hover:bg-rose-50 rounded-lg transition"
+                  title={isExamsExpanded ? 'Thu gọn danh sách đề' : 'Mở rộng danh sách đề'}
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExamsExpanded ? 'rotate-180 text-crimson' : ''}`} />
+                </button>
+              </div>
             </div>
-            <div className="space-y-3">
-              {exams.map((exam) => (
-                <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">{exam.title}</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{exam.modules.length} kíp thi tự động</p>
+
+            {/* Smooth Collapsible Accordion Container */}
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${
+                isExamsExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 overflow-hidden'
+              }`}
+            >
+              <div className="overflow-hidden space-y-3 pt-1">
+                {exams.map((exam) => (
+                  <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">{exam.title}</h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{exam.modules?.length || 3} kíp thi tự động</p>
+                    </div>
+                    <Link
+                      href={`/exams/${exam.id}`}
+                      className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
+                    >
+                      <PlayCircle className="w-3.5 h-3.5" /> Thi ngay
+                    </Link>
                   </div>
-                  <Link
-                    href={`/exams/${exam.id}`}
-                    className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
-                  >
-                    <PlayCircle className="w-3.5 h-3.5" /> Thi ngay
-                  </Link>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
@@ -136,7 +161,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               {submissions.length > 0 ? (
-                submissions.slice(0, 3).map((sub, idx) => (
+                submissions.slice(0, 3).map((sub) => (
                   <div key={sub.id} className="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg text-xs">
                     <span className="font-medium text-slate-700 truncate max-w-[200px]">
                       {sub.moduleId === 'mod-math-1' ? 'Tư duy Toán học' : 'Tư duy Đọc hiểu'}
@@ -151,7 +176,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* History Table Banner matching Screenshot 5 */}
+        {/* History Table Banner */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
           <h3 className="font-bold text-slate-900 text-base">Lịch sử bài thi gần đây</h3>
           
@@ -170,7 +195,7 @@ export default function DashboardPage() {
                 {submissions.map((sub) => (
                   <tr key={sub.id} className="hover:bg-slate-50 transition">
                     <td className="p-3 font-semibold text-slate-900">
-                      {sub.examId === 'exam-2k9-1' ? 'Đề Trải nghiệm Premium 2K9 - Đề số 1' : 'Đề Trải nghiệm Premium 2K9 - Đề số 2'}
+                      {sub.examId === 'exam-2k9-1' ? 'Đề TSA Caculus DEMO 01' : 'Đề TSA Caculus DEMO 02'}
                     </td>
                     <td className="p-3 text-slate-500">{new Date(sub.submittedAt).toLocaleDateString('vi-VN')}</td>
                     <td className="p-3 font-mono text-slate-700">{sub.correctCount}/{sub.totalQuestions} câu</td>

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       email,
       passwordHash,
       name,
-      studentId: studentId || 'AECK' + Math.floor(100000 + Math.random() * 900000),
+      studentId: studentId || 'CACULUS_' + Math.floor(100000 + Math.random() * 900000),
       role: role || 'student',
       createdAt: new Date().toISOString(),
     });

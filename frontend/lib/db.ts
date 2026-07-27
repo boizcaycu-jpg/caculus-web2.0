@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import { User, Exam, Question, Submission, AntiCheatLog } from '../types';
+import { User, Exam, Question, QuestionGroup, Submission, AntiCheatLog } from '../types';
 import { INITIAL_USERS, INITIAL_EXAMS, INITIAL_QUESTIONS, INITIAL_SUBMISSIONS, INITIAL_ANTICHEAT_LOGS } from './mockData';
 
 interface DatabaseSchema {
   users: User[];
   exams: Exam[];
   questions: Question[];
+  questionGroups?: QuestionGroup[];
   submissions: Submission[];
   antiCheatLogs: AntiCheatLog[];
 }
@@ -25,6 +26,7 @@ function ensureDbFile(): DatabaseSchema {
         users: INITIAL_USERS,
         exams: INITIAL_EXAMS,
         questions: INITIAL_QUESTIONS,
+        questionGroups: [],
         submissions: INITIAL_SUBMISSIONS,
         antiCheatLogs: INITIAL_ANTICHEAT_LOGS,
       };
@@ -40,6 +42,7 @@ function ensureDbFile(): DatabaseSchema {
       users: INITIAL_USERS,
       exams: INITIAL_EXAMS,
       questions: INITIAL_QUESTIONS,
+      questionGroups: [],
       submissions: INITIAL_SUBMISSIONS,
       antiCheatLogs: INITIAL_ANTICHEAT_LOGS,
     };
@@ -139,6 +142,25 @@ export function createQuestion(question: Question): Question {
   db.questions.push(question);
   saveDb(db);
   return question;
+}
+
+export function saveQuestionsForModule(moduleId: string, newQuestions: Question[]): void {
+  const db = ensureDbFile();
+  db.questions = db.questions.filter(q => q.moduleId !== moduleId);
+  db.questions.push(...newQuestions);
+  saveDb(db);
+}
+
+export function getQuestionGroupsByModule(moduleId: string): QuestionGroup[] {
+  const db = ensureDbFile();
+  return (db.questionGroups || []).filter(g => g.moduleId === moduleId);
+}
+
+export function saveQuestionGroupsForModule(moduleId: string, newGroups: QuestionGroup[]): void {
+  const db = ensureDbFile();
+  const currentGroups = db.questionGroups || [];
+  db.questionGroups = currentGroups.filter(g => g.moduleId !== moduleId).concat(newGroups);
+  saveDb(db);
 }
 
 // Submissions
