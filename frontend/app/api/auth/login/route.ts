@@ -4,7 +4,9 @@ import { comparePassword, signToken } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const email = body.email || body.auth_user_email_secure;
+    const password = body.password || body.auth_user_pass_secure;
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Vui lòng nhập Email và Mật khẩu' }, { status: 400 });
@@ -15,7 +17,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email hoặc mật khẩu không chính xác' }, { status: 401 });
     }
 
-    // For demo convenience, allow 'admin123' / 'student123' or compare password
     const isPasswordValid = 
       (password === 'admin123' && user.role === 'admin') ||
       (password === 'student123' && user.role === 'student') ||
@@ -45,7 +46,15 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+
+    response.cookies.set('caculus_session', JSON.stringify(tokenPayload), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
 

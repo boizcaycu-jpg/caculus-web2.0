@@ -137,7 +137,10 @@ export default function DashboardPage() {
             >
               <div className="overflow-hidden space-y-3 pt-1">
                 {exams.map((exam) => {
-                  const isLocked = exam.status === 'CHƯA UPDATE' || exam.isPublished === false;
+                  const isPublished = exam.isPublished ?? (exam.status !== 'CHƯA UPDATE');
+                  const isUserVip = user?.isVip ?? true;
+                  const isDemoExam = exam.title.includes('DEMO');
+                  const canAccess = isPublished && (isDemoExam || isUserVip || user?.role === 'admin');
 
                   return (
                     <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
@@ -151,12 +154,19 @@ export default function DashboardPage() {
                         <p className="text-[11px] text-slate-500">{exam.modules?.length || 3} kíp thi tự động</p>
                       </div>
 
-                      {isLocked ? (
+                      {!isPublished ? (
                         <button
                           disabled
                           className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-not-allowed flex items-center gap-1 shadow-2xs"
                         >
-                          🔒 Đề đang khóa
+                          🔒 Đề chưa mở
+                        </button>
+                      ) : !canAccess ? (
+                        <button
+                          disabled
+                          className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-not-allowed flex items-center gap-1 shadow-2xs"
+                        >
+                          🔒 Cần tài khoản VIP
                         </button>
                       ) : (
                         <Link

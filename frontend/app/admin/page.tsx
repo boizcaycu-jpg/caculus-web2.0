@@ -299,25 +299,35 @@ export default function AdminDashboardPage() {
                         <p className="text-xs text-slate-500">{exam.description}</p>
                       </div>
 
-                      {/* BUG 3 Controls: Status Dropdown & Publish Toggle (Date picker removed per user spec) */}
-                      <div className="flex items-center gap-3">
+                      {/* Phase 2 Target 1: Independent Exam Publishing Toggle */}
+                      <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-extrabold text-slate-600">Trạng thái xuất bản:</span>
-                          <select
-                            value={currentStatus}
-                            onChange={(e) => {
-                              const newStatus = e.target.value;
-                              handleUpdateExam(exam.id, {
-                                status: newStatus,
-                                isPublished: newStatus !== 'CHƯA UPDATE'
-                              });
+                          <span className="text-xs font-extrabold text-slate-700">Xuất bản đề thi:</span>
+                          <button
+                            onClick={async () => {
+                              const isCurrentlyPublished = exam.isPublished ?? (exam.status !== 'CHƯA UPDATE');
+                              try {
+                                const res = await fetch(`/api/admin/exams/${exam.id}/toggle`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ isPublished: !isCurrentlyPublished }),
+                                });
+                                const data = await res.json();
+                                if (res.ok && data.success) {
+                                  setExams(prev => prev.map(e => e.id === exam.id ? { ...e, ...data.exam } : e));
+                                }
+                              } catch (err) {
+                                console.error('Error toggling exam publish:', err);
+                              }
                             }}
-                            className={`text-xs px-3.5 py-1.5 rounded-xl border transition focus:outline-none cursor-pointer ${badgeStyle}`}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 shadow-2xs border ${
+                              (exam.isPublished ?? (exam.status !== 'CHƯA UPDATE'))
+                                ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-slate-200 hover:bg-slate-300 text-slate-600 border-slate-300'
+                            }`}
                           >
-                            <option value="CHƯA UPDATE">🔴 CHƯA UPDATE (Đề đang khóa)</option>
-                            <option value="ĐÃ UPDATE">🟡 ĐÃ UPDATE (Đã mở thi)</option>
-                            <option value="ĐÃ THI">🟢 ĐÃ THI (Đã mở thi)</option>
-                          </select>
+                            {(exam.isPublished ?? (exam.status !== 'CHƯA UPDATE')) ? '🟢 ĐÃ XUẤT BẢN' : '⚪ KHÓA ĐỀ THI'}
+                          </button>
                         </div>
                       </div>
                     </div>
