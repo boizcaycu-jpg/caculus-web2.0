@@ -299,31 +299,25 @@ export default function AdminDashboardPage() {
                         <p className="text-xs text-slate-500">{exam.description}</p>
                       </div>
 
-                      {/* BUG 5 Controls: Status Dropdown & Datetime-local Auto-Publish Scheduler */}
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-slate-500">Trạng thái:</span>
+                      {/* BUG 3 Controls: Status Dropdown & Publish Toggle (Date picker removed per user spec) */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-extrabold text-slate-600">Trạng thái xuất bản:</span>
                           <select
                             value={currentStatus}
-                            onChange={(e) => handleUpdateExam(exam.id, { status: e.target.value })}
-                            className={`text-xs px-3 py-1.5 rounded-xl border transition focus:outline-none ${badgeStyle}`}
+                            onChange={(e) => {
+                              const newStatus = e.target.value;
+                              handleUpdateExam(exam.id, {
+                                status: newStatus,
+                                isPublished: newStatus !== 'CHƯA UPDATE'
+                              });
+                            }}
+                            className={`text-xs px-3.5 py-1.5 rounded-xl border transition focus:outline-none cursor-pointer ${badgeStyle}`}
                           >
-                            <option value="CHƯA UPDATE">🔴 CHƯA UPDATE</option>
-                            <option value="ĐÃ UPDATE">🟡 ĐÃ UPDATE</option>
-                            <option value="ĐÃ THI">🟢 ĐÃ THI</option>
+                            <option value="CHƯA UPDATE">🔴 CHƯA UPDATE (Đề đang khóa)</option>
+                            <option value="ĐÃ UPDATE">🟡 ĐÃ UPDATE (Đã mở thi)</option>
+                            <option value="ĐÃ THI">🟢 ĐÃ THI (Đã mở thi)</option>
                           </select>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5 text-crimson" /> Lịch tự động mở:
-                          </span>
-                          <input
-                            type="datetime-local"
-                            value={exam.publishDate || ''}
-                            onChange={(e) => handleUpdateExam(exam.id, { publishDate: e.target.value })}
-                            className="bg-white border border-slate-300 rounded-xl px-3 py-1 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-crimson"
-                          />
                         </div>
                       </div>
                     </div>

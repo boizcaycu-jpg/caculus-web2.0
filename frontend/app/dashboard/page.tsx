@@ -21,6 +21,19 @@ export default function DashboardPage() {
       .then(data => {
         if (data.authenticated) {
           setUser(data.user);
+        } else if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem('caculus_user');
+          if (stored) {
+            try { setUser(JSON.parse(stored)); } catch (e) {}
+          }
+        }
+      })
+      .catch(() => {
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem('caculus_user');
+          if (stored) {
+            try { setUser(JSON.parse(stored)); } catch (e) {}
+          }
         }
       });
 
@@ -50,9 +63,15 @@ export default function DashboardPage() {
               <User className="w-7 h-7" />
             </div>
             <div>
-              <div className="text-xs text-slate-400 font-semibold">Xin chào,</div>
-              <h2 className="text-lg font-extrabold text-slate-900">{user?.name || 'Nguyễn Cường'}</h2>
-              <div className="text-xs text-slate-500">{user?.email || 'student@caculus.edu.vn'}</div>
+              <div className="text-xs text-slate-400 font-semibold">
+                {user ? `Xin chào, ${user.name}` : 'Chào mừng học sinh đến phòng luyện TSA'}
+              </div>
+              <h2 className="text-lg font-extrabold text-slate-900">
+                {user ? user.name : 'Học sinh'}
+              </h2>
+              <div className="text-xs text-slate-500">
+                {user ? user.email : 'Hệ thống Khảo thí & Đánh giá tư duy Bách Khoa'}
+              </div>
             </div>
           </div>
 
@@ -70,18 +89,22 @@ export default function DashboardPage() {
             <div className="text-[11px] text-slate-400">thang điểm %</div>
           </div>
 
-          {/* Role & Identification (Requirement 1: Scrubbed Safe Student ID) */}
+          {/* Role & Identification */}
           <div className="text-right">
             <div className="text-xs text-slate-400 font-semibold">Vai trò</div>
-            <div className="text-base font-black text-crimson tracking-wide uppercase">HỌC SINH</div>
-            <div className="text-xs font-mono font-bold text-slate-600 mt-0.5">{user?.studentId || 'CACULUS_496692'}</div>
+            <div className="text-base font-black text-crimson tracking-wide uppercase">
+              {user?.role === 'admin' ? 'ADMIN' : 'HỌC SINH'}
+            </div>
+            <div className="text-xs font-mono font-bold text-slate-600 mt-0.5">
+              {user?.studentId ? `Mã số: ${user.studentId}` : 'Mã số: CHƯA ĐĂNG NHẬP'}
+            </div>
           </div>
         </div>
 
-        {/* Action Grid Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        {/* Action Cards & Exam Room List */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Card 1: Main Practice Exams with Collapsible Accordion (Requirement 2) */}
+          {/* Card 1: TSA Test Room */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4 hover:shadow-md transition">
             
             {/* Accordion Header */}
@@ -91,7 +114,7 @@ export default function DashboardPage() {
                 Phòng luyện đề TSA
               </h3>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Link href="/exams" className="text-xs font-bold text-crimson hover:underline">
                   Xem tất cả
                 </Link>
@@ -114,9 +137,7 @@ export default function DashboardPage() {
             >
               <div className="overflow-hidden space-y-3 pt-1">
                 {exams.map((exam) => {
-                  const isUserVip = user?.isVip ?? true;
-                  const isDemoExam = exam.title.includes('DEMO');
-                  const isUnlocked = isDemoExam || isUserVip || user?.role === 'admin';
+                  const isLocked = exam.status === 'CHƯA UPDATE' || exam.isPublished === false;
 
                   return (
                     <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
@@ -130,20 +151,20 @@ export default function DashboardPage() {
                         <p className="text-[11px] text-slate-500">{exam.modules?.length || 3} kíp thi tự động</p>
                       </div>
 
-                      {isUnlocked ? (
+                      {isLocked ? (
+                        <button
+                          disabled
+                          className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-not-allowed flex items-center gap-1 shadow-2xs"
+                        >
+                          🔒 Đề đang khóa
+                        </button>
+                      ) : (
                         <Link
                           href={`/exams/${exam.id}`}
-                          className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
+                          className="bg-crimson hover:bg-rose-700 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs"
                         >
                           <PlayCircle className="w-3.5 h-3.5" /> Vào thi / Làm bài
                         </Link>
-                      ) : (
-                        <button
-                          disabled
-                          className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3 py-1.5 rounded-lg cursor-not-allowed flex items-center gap-1"
-                        >
-                          🔒 Cần tài khoản VIP
-                        </button>
                       )}
                     </div>
                   );

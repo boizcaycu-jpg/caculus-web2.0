@@ -62,7 +62,7 @@ export interface Exam {
   isFree: boolean;
   price?: number;
   status?: 'CHƯA UPDATE' | 'ĐÃ UPDATE' | 'ĐÃ THI' | 'active' | 'disabled' | 'coming_soon' | string;
-  publishDate?: string; // ISO or datetime string for auto-publish scheduling
+  isPublished?: boolean; // True if published, false if locked
   modules: ExamModule[];
   createdAt: string;
 }
