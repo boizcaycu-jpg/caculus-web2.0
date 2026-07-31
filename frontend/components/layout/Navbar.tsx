@@ -44,7 +44,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="bg-crimson border-b border-rose-800 sticky top-0 z-40 shadow-md text-white">
+    <header className="bg-[#d90429] border-b border-rose-800 sticky top-0 z-40 shadow-md text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ export default function Navbar() {
               alt="CACULUS Logo"
               width={180}
               height={48}
-              className="h-10 w-44 object-contain brightness-0 invert"
+              className="h-10 w-auto object-contain shrink-0"
               priority
             />
             <div className="hidden sm:flex flex-col border-l border-white/30 pl-3">
