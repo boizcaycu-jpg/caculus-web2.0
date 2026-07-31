@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Lock, Mail, ShieldAlert, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,11 +42,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickLogin = (quickEmail: string, quickPass: string) => {
-    setEmail(quickEmail);
-    setPassword(quickPass);
   };
 
   return (
@@ -126,36 +121,6 @@ export default function LoginPage() {
               {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
-
-          {/* Quick Login options */}
-          <div className="pt-4 border-t border-slate-100 space-y-2">
-            <span className="text-[11px] font-bold uppercase text-slate-400 tracking-wider block text-center">
-              Chọn tài khoản thử nghiệm nhanh
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('student@caculus.edu.vn', 'student123')}
-                className="text-left p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-crimson/30 transition text-xs space-y-0.5"
-              >
-                <div className="font-bold text-slate-800 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-crimson" /> Thí sinh Demo
-                </div>
-                <div className="text-[10px] text-slate-500">Tài khoản thí sinh</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin@caculus.edu.vn', 'admin123')}
-                className="text-left p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-400/40 transition text-xs space-y-0.5"
-              >
-                <div className="font-bold text-amber-800 flex items-center gap-1">
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-600" /> Admin
-                </div>
-                <div className="text-[10px] text-slate-500">Quản trị viên</div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
