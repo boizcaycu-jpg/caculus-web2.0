@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       role: user.role,
       name: user.name,
       studentId: user.studentId,
+      isVip: user.isVip ?? true,
     };
 
     const token = signToken(tokenPayload);

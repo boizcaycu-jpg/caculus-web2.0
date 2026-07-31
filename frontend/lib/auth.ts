@@ -9,6 +9,7 @@ export interface TokenPayload {
   role: 'admin' | 'student';
   name: string;
   studentId: string;
+  isVip?: boolean;
 }
 
 export async function hashPassword(password: string): Promise<string> {

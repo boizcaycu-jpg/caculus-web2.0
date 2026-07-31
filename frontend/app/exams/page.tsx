@@ -57,49 +57,35 @@ export default function ExamsPortalPage() {
         {/* Exams Grid View */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {filteredExams.map((exam) => {
-            const isVip = exam.title.includes('VIP') || exam.status === 'disabled';
+            const isDemoExam = exam.title.includes('DEMO');
+            const isUnlocked = isDemoExam || exam.isFree;
 
             return (
               <div
                 key={exam.id}
-                className={`bg-white rounded-2xl border p-6 shadow-xs space-y-5 transition flex flex-col justify-between ${
-                  isVip ? 'border-slate-200 opacity-90' : 'border-slate-200 hover:shadow-md hover:border-rose-200'
-                }`}
+                className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${
-                      isVip 
-                        ? 'bg-slate-100 text-slate-500 border border-slate-200'
-                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    }`}>
-                      {isVip ? 'Gói VIP' : 'Miễn phí'}
+                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold px-3 py-1 rounded-full">
+                      Miễn phí
                     </span>
-                    <span className="text-xs font-mono font-semibold text-slate-400">
-                      {isVip ? 'Khóa bài thi' : 'Sẵn sàng'}
+                    <span className="text-xs font-mono font-bold text-slate-500">
+                      Sẵn sàng
                     </span>
                   </div>
 
-                  <h3 className="font-extrabold text-slate-900 text-lg">{exam.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{exam.description}</p>
+                  <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl">{exam.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{exam.description}</p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
-                  {isVip ? (
-                    <button
-                      disabled
-                      className="w-full bg-slate-100 text-slate-400 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed border border-slate-200"
-                    >
-                      🔒 Cần tài khoản VIP
-                    </button>
-                  ) : (
-                    <Link
-                      href={`/exams/${exam.id}`}
-                      className="w-full bg-crimson hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-xs"
-                    >
-                      <PlayCircle className="w-4 h-4" /> Tham gia khảo thí
-                    </Link>
-                  )}
+                <div className="pt-4 border-t border-slate-100 mt-4">
+                  <Link
+                    href={`/exams/${exam.id}`}
+                    className="w-full bg-crimson hover:bg-rose-700 text-white font-extrabold py-3 rounded-xl transition text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs"
+                  >
+                    <PlayCircle className="w-4 h-4" /> Tham gia khảo thí
+                  </Link>
                 </div>
               </div>
             );

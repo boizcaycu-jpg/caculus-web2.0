@@ -5,13 +5,13 @@
   --foreground: #0f172a;
   --primary-red: #d90429;
   --primary-red-hover: #ef233c;
-  --crimson-dark: #8d99ae;
+  --crimson-dark: #b8001c;
 }
 
 body {
   background-color: #f8fafc;
   color: #0f172a;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -52,3 +52,11 @@ body {
   background-color: #b8001c;
 }
 
+/* Global Interactive Micro-Animations */
+button, a, input, select {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active, a.btn:active, .clickable-active:active {
+  transform: scale(0.96);
+}

@@ -7,6 +7,7 @@ export interface User {
   name: string;
   studentId: string; // e.g. CACULUS_496692
   role: Role;
+  isVip?: boolean;
   createdAt: string;
 }
 
@@ -56,11 +57,12 @@ export interface ExamModule {
 
 export interface Exam {
   id: string;
-  title: string; // e.g., "Đề Trải nghiệm Premium 2K9 - Đề số 1"
+  title: string;
   description: string;
   isFree: boolean;
   price?: number;
-  status?: 'active' | 'disabled' | 'coming_soon';
+  status?: 'CHƯA UPDATE' | 'ĐÃ UPDATE' | 'ĐÃ THI' | 'active' | 'disabled' | 'coming_soon' | string;
+  publishDate?: string; // ISO or datetime string for auto-publish scheduling
   modules: ExamModule[];
   createdAt: string;
 }

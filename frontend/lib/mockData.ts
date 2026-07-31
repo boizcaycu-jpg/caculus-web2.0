@@ -11,6 +11,7 @@ const baseUsers: User[] = [
     name: 'Quản trị viên hệ thống',
     studentId: 'ADMIN-001',
     role: 'admin',
+    isVip: true,
     createdAt: new Date().toISOString(),
   },
   {
@@ -20,6 +21,7 @@ const baseUsers: User[] = [
     name: 'Nguyễn Cường',
     studentId: 'CACULUS_496692',
     role: 'student',
+    isVip: true,
     createdAt: new Date().toISOString(),
   },
   {

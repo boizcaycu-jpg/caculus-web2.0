@@ -114,7 +114,10 @@ export default function DashboardPage() {
             >
               <div className="overflow-hidden space-y-3 pt-1">
                 {exams.map((exam) => {
-                  const isVip = exam.title.includes('VIP') || exam.status === 'disabled';
+                  const isUserVip = user?.isVip ?? true;
+                  const isDemoExam = exam.title.includes('DEMO');
+                  const isUnlocked = isDemoExam || isUserVip || user?.role === 'admin';
+
                   return (
                     <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
                       <div className="space-y-1">
@@ -127,20 +130,20 @@ export default function DashboardPage() {
                         <p className="text-[11px] text-slate-500">{exam.modules?.length || 3} kíp thi tự động</p>
                       </div>
 
-                      {isVip ? (
+                      {isUnlocked ? (
+                        <Link
+                          href={`/exams/${exam.id}`}
+                          className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
+                        >
+                          <PlayCircle className="w-3.5 h-3.5" /> Vào thi / Làm bài
+                        </Link>
+                      ) : (
                         <button
                           disabled
                           className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3 py-1.5 rounded-lg cursor-not-allowed flex items-center gap-1"
                         >
                           🔒 Cần tài khoản VIP
                         </button>
-                      ) : (
-                        <Link
-                          href={`/exams/${exam.id}`}
-                          className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
-                        >
-                          <PlayCircle className="w-3.5 h-3.5" /> Thi ngay
-                        </Link>
                       )}
                     </div>
                   );

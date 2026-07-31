@@ -21,6 +21,10 @@ export default function AdminDashboardPage() {
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('student123');
 
+  // Student search & sort state
+  const [studentSearch, setStudentSearch] = useState('');
+  const [studentSort, setStudentSort] = useState<'newest' | 'oldest' | 'name_asc'>('newest');
+
   // Exam Schedule Edit State
   const [editingExam, setEditingExam] = useState<Exam | null>(null);
 
@@ -49,6 +53,25 @@ export default function AdminDashboardPage() {
       setLoading(false);
     }
   };
+
+  const filteredUsers = users
+    .filter(u => {
+      const q = studentSearch.toLowerCase();
+      return (
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.studentId.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      if (studentSort === 'newest') {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      } else if (studentSort === 'oldest') {
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      } else {
+        return a.name.localeCompare(b.name);
+      }
+    });
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +113,22 @@ export default function AdminDashboardPage() {
       }
     } catch (e) {
       alert('Không thể xóa tài khoản');
+    }
+  };
+
+  const handleUpdateExam = async (examId: string, updates: Partial<Exam>) => {
+    try {
+      const res = await fetch('/api/admin/exams', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: examId, ...updates }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      }
+    } catch (e) {
+      console.error('Error updating exam status:', e);
     }
   };
 
@@ -139,7 +178,7 @@ export default function AdminDashboardPage() {
         {/* TAB 1: USER MANAGEMENT */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h2 className="font-extrabold text-slate-900 text-lg">Danh sách học sinh & Cấp tài khoản</h2>
                 <p className="text-xs text-slate-500">Phân quyền thủ công (Manual Provisioning) - Không mở đăng ký tự do</p>
@@ -150,6 +189,33 @@ export default function AdminDashboardPage() {
               >
                 <Plus className="w-4 h-4" /> Cấp tài khoản học sinh
               </button>
+            </div>
+
+            {/* BUG 7: Search Bar & Sort Dropdown */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm theo tên, email hoặc mã thí sinh..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-crimson"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Sắp xếp:</span>
+                <select
+                  value={studentSort}
+                  onChange={(e) => setStudentSort(e.target.value as any)}
+                  className="bg-white border border-slate-300 text-xs font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-crimson"
+                >
+                  <option value="newest">📅 Mới nhất</option>
+                  <option value="oldest">⏳ Cũ nhất</option>
+                  <option value="name_asc">🔤 Tên (A - Z)</option>
+                </select>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -164,7 +230,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {users.map((u) => (
+                  {filteredUsers.map((u) => (
                     <tr key={u.id} className="hover:bg-slate-50 transition">
                       <td className="p-3 font-bold text-slate-900">{u.name}</td>
                       <td className="p-3 text-slate-600 font-mono">{u.email}</td>
@@ -212,35 +278,74 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="space-y-4">
-              {exams.map((exam) => (
-                <div key={exam.id} className="p-5 border border-slate-200 rounded-2xl bg-slate-50/50 space-y-4">
-                  <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-                    <div>
-                      <h3 className="font-black text-slate-900 text-base">{exam.title}</h3>
-                      <p className="text-xs text-slate-500">{exam.description}</p>
-                    </div>
-                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs px-3 py-1 rounded-full">
-                      {exam.isFree ? 'Miễn phí' : `${exam.price?.toLocaleString()} VNĐ`}
-                    </span>
-                  </div>
+              {exams.map((exam) => {
+                const currentStatus = exam.status || 'ĐÃ THI';
+                const badgeStyle = currentStatus === 'CHƯA UPDATE' 
+                  ? 'bg-rose-100 text-rose-800 border-rose-300 font-extrabold'
+                  : currentStatus === 'ĐÃ UPDATE'
+                    ? 'bg-amber-100 text-amber-800 border-amber-300 font-extrabold'
+                    : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-extrabold';
 
-                  {/* Modules list */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {exam.modules.map((mod) => (
-                      <div key={mod.id} className="bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
-                        <div className="font-bold text-slate-900 text-sm flex items-center justify-between">
-                          <span>{mod.title}</span>
-                          <span className="text-slate-400 font-mono">{mod.durationMinutes} phút</span>
+                return (
+                  <div key={exam.id} className="p-5 border border-slate-200 rounded-2xl bg-slate-50/50 space-y-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-200 pb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-black text-slate-900 text-base">{exam.title}</h3>
+                          <span className="bg-slate-200 text-slate-700 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md">
+                            {exam.id}
+                          </span>
                         </div>
-                        <div className="text-slate-600 space-y-1">
-                          <div><strong>Giờ mở:</strong> {mod.openTime}</div>
-                          <div><strong>Giờ đóng:</strong> {mod.closeTime}</div>
+                        <p className="text-xs text-slate-500">{exam.description}</p>
+                      </div>
+
+                      {/* BUG 5 Controls: Status Dropdown & Datetime-local Auto-Publish Scheduler */}
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-slate-500">Trạng thái:</span>
+                          <select
+                            value={currentStatus}
+                            onChange={(e) => handleUpdateExam(exam.id, { status: e.target.value })}
+                            className={`text-xs px-3 py-1.5 rounded-xl border transition focus:outline-none ${badgeStyle}`}
+                          >
+                            <option value="CHƯA UPDATE">🔴 CHƯA UPDATE</option>
+                            <option value="ĐÃ UPDATE">🟡 ĐÃ UPDATE</option>
+                            <option value="ĐÃ THI">🟢 ĐÃ THI</option>
+                          </select>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-crimson" /> Lịch tự động mở:
+                          </span>
+                          <input
+                            type="datetime-local"
+                            value={exam.publishDate || ''}
+                            onChange={(e) => handleUpdateExam(exam.id, { publishDate: e.target.value })}
+                            className="bg-white border border-slate-300 rounded-xl px-3 py-1 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:border-crimson"
+                          />
                         </div>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Modules list */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {exam.modules.map((mod) => (
+                        <div key={mod.id} className="bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
+                          <div className="font-bold text-slate-900 text-sm flex items-center justify-between">
+                            <span>{mod.title}</span>
+                            <span className="text-slate-400 font-mono">{mod.durationMinutes} phút</span>
+                          </div>
+                          <div className="text-slate-600 space-y-1">
+                            <div><strong>Giờ mở:</strong> {mod.openTime}</div>
+                            <div><strong>Giờ đóng:</strong> {mod.closeTime}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

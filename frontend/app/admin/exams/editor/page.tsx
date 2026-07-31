@@ -274,12 +274,13 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
     handleUpdateActiveQuestion('options', updatedOpts);
   };
 
-  const handleAddQuestion = (groupId?: string) => {
+  const handleAddQuestion = (targetGroupId?: string) => {
     const newNum = questions.length + 1;
+    const newQId = `q-new-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const newQ: Question = {
-      id: `q-new-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: newQId,
       moduleId: currentModule.id,
-      groupId,
+      groupId: targetGroupId,
       number: newNum,
       type: 'single_choice',
       text: `Câu hỏi số ${newNum}: Cho phương trình $f(x) = ...$`,
@@ -295,10 +296,18 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
     };
 
     setQuestions(prev => [...prev, newQ]);
-    if (groupId) {
-      setQuestionGroups(prev => prev.map(g => g.id === groupId ? { ...g, questionIds: [...g.questionIds, newQ.id] } : g));
+
+    if (targetGroupId) {
+      setQuestionGroups(prev => prev.map(g => {
+        if (g.id === targetGroupId) {
+          const currentIds = g.questionIds || [];
+          return { ...g, questionIds: [...currentIds, newQId] };
+        }
+        return g;
+      }));
     }
-    setActiveSelection({ type: 'question', id: newQ.id });
+
+    setActiveSelection({ type: 'question', id: newQId });
     setIsDirty(true);
   };
 
@@ -682,7 +691,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
                   type="text"
                   value={activeGroup.title || ''}
                   onChange={(e) => handleUpdateGroup('title', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-purple-500"
                 />
               </div>
 
@@ -694,7 +703,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
                   rows={6}
                   value={activeGroup.passage || ''}
                   onChange={(e) => handleUpdateGroup('passage', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-serif text-slate-800 focus:outline-none focus:border-purple-500 leading-relaxed font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono text-slate-800 focus:outline-none focus:border-purple-500 leading-relaxed"
                 />
               </div>
 
@@ -704,11 +713,23 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
                     <Calculator className="w-4 h-4 text-indigo-600" />
                     Hiển thị công thức Toán/Khoa học KaTeX xem trước:
                   </div>
-                  <div className="p-3 bg-white rounded-xl border border-indigo-100 text-sm">
+                  <div className="p-3 bg-white rounded-xl border border-indigo-100 text-sm sm:text-base">
                     <MathText content={activeGroup.passage} />
                   </div>
                 </div>
               )}
+
+              <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <span className="text-xs font-bold text-slate-600">
+                  Số câu hỏi con hiện tại: <strong className="text-purple-700 font-black">{activeGroup.questionIds?.length || 0} câu</strong>
+                </span>
+                <button
+                  onClick={() => handleAddQuestion(activeGroup.id)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition shadow-xs flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Thêm câu hỏi thuộc bối cảnh này
+                </button>
+              </div>
             </div>
           )}
 

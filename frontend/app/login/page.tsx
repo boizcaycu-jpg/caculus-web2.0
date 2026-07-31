@@ -6,8 +6,8 @@ import { Lock, Mail, ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('student@caculus.edu.vn');
-  const [password, setPassword] = useState('student123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +25,9 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('caculus_user', JSON.stringify({ ...data.user, isVip: true }));
+        }
         if (data.user.role === 'admin') {
           router.push('/admin');
         } else {
@@ -77,7 +80,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700">Email *</label>
               <div className="relative">
@@ -87,6 +90,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="off"
                   placeholder="demo@gmail.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-crimson/20 focus:border-crimson transition"
                 />
@@ -102,6 +106,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="off"
                   placeholder="••••••••"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-crimson/20 focus:border-crimson transition"
                 />
