@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
           student = data;
         }
       } catch (sbErr) {
-        console.error('Supabase login query error:', sbErr);
+        console.error('Supabase login query fetch failed, falling back to local DB:', sbErr);
       }
     }
 
-    // Fallback to local DB if not found in Supabase
+    // Fallback to local DB if not found in Supabase or fetch failed
     if (!student) {
       const localUser = getUserByEmail(email);
       if (localUser) {
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
 

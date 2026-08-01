@@ -7,27 +7,31 @@ import { revalidatePath } from 'next/cache';
 export async function GET(req: NextRequest) {
   try {
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        const formatted = data.map((s) => ({
-          id: s.id,
-          name: s.name,
-          email: s.email,
-          studentId: s.student_id || s.studentId || ('CACULUS_' + String(s.id).slice(-6)),
-          role: s.role || 'student',
-          isVip: s.is_vip ?? s.isVip ?? true,
-          createdAt: s.created_at || s.createdAt || new Date().toISOString(),
-        }));
+        if (!error && data && data.length > 0) {
+          const formatted = data.map((s) => ({
+            id: s.id,
+            name: s.name,
+            email: s.email,
+            studentId: s.student_id || s.studentId || ('CACULUS_' + String(s.id).slice(-6)),
+            role: s.role || 'student',
+            isVip: s.is_vip ?? s.isVip ?? true,
+            createdAt: s.created_at || s.createdAt || new Date().toISOString(),
+          }));
 
-        return NextResponse.json({ success: true, students: formatted, users: formatted });
+          return NextResponse.json({ success: true, students: formatted, users: formatted });
+        }
+      } catch (sbErr) {
+        console.error('Supabase fetch failed during GET /students, falling back to local DB:', sbErr);
       }
     }
 
-    // Fallback to local DB if Supabase isn't configured or returns empty
+    // Fallback to local DB if Supabase isn't configured or returns empty or fetch fails
     const localUsers = getUsers();
     const formattedLocal = localUsers.map((u) => ({
       ...u,
@@ -66,63 +70,64 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
     };
 
+    let createdFromSupabase: any = null;
+
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from('students')
-        .insert([supabasePayload])
-        .select();
-
-      if (error) {
-        console.error('Supabase student insert error:', error);
-        return NextResponse.json({ success: false, error: error.message || 'Lỗi lưu thông tin học sinh vào CSDL Supabase' }, { status: 500 });
-      }
-
-      // Sync with local backup db as fallback
       try {
-        createUser({
-          id: newId,
-          email,
-          passwordHash,
-          name,
-          studentId: finalStudentId,
-          role: role || 'student',
-          isVip: isVip ?? true,
-          createdAt: supabasePayload.created_at,
-        });
-      } catch (e) {}
+        const { data, error } = await supabase
+          .from('students')
+          .insert([supabasePayload])
+          .select();
 
-      revalidatePath('/admin');
-      revalidatePath('/admin/students');
-
-      const created = data && data[0] ? {
-        id: data[0].id,
-        name: data[0].name,
-        email: data[0].email,
-        studentId: data[0].student_id || finalStudentId,
-        role: data[0].role || 'student',
-        isVip: data[0].is_vip ?? true,
-        createdAt: data[0].created_at,
-      } : supabasePayload;
-
-      return NextResponse.json({ success: true, data: created, student: created, user: created });
+        if (!error && data && data.length > 0) {
+          createdFromSupabase = data[0];
+        } else if (error) {
+          console.error('Supabase student insert error:', error.message);
+        }
+      } catch (sbErr) {
+        console.error('Supabase network fetch failed, falling back to local DB:', sbErr);
+      }
     }
 
-    // Local DB fallback
-    const createdLocal = createUser({
-      id: newId,
-      email,
-      passwordHash,
-      name,
-      studentId: finalStudentId,
-      role: role || 'student',
-      isVip: isVip ?? true,
-      createdAt: new Date().toISOString(),
-    });
+    // Sync with local backup db as fallback
+    let createdLocal: any = null;
+    try {
+      createdLocal = createUser({
+        id: newId,
+        email,
+        passwordHash,
+        name,
+        studentId: finalStudentId,
+        role: role || 'student',
+        isVip: isVip ?? true,
+        createdAt: supabasePayload.created_at,
+      });
+    } catch (e) {
+      console.error('Local DB createUser error:', e);
+    }
 
     revalidatePath('/admin');
     revalidatePath('/admin/students');
 
-    return NextResponse.json({ success: true, data: createdLocal, student: createdLocal, user: createdLocal });
+    const created = createdFromSupabase ? {
+      id: createdFromSupabase.id,
+      name: createdFromSupabase.name,
+      email: createdFromSupabase.email,
+      studentId: createdFromSupabase.student_id || finalStudentId,
+      role: createdFromSupabase.role || 'student',
+      isVip: createdFromSupabase.is_vip ?? true,
+      createdAt: createdFromSupabase.created_at,
+    } : (createdLocal || {
+      id: newId,
+      name,
+      email,
+      studentId: finalStudentId,
+      role: role || 'student',
+      isVip: isVip ?? true,
+      createdAt: supabasePayload.created_at,
+    });
+
+    return NextResponse.json({ success: true, data: created, student: created, user: created });
   } catch (error: any) {
     console.error('Error creating student:', error);
     return NextResponse.json({ success: false, error: error.message || 'Không thể tạo tài khoản học sinh' }, { status: 500 });
