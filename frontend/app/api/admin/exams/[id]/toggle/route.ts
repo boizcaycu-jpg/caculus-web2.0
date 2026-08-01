@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateExam, getExamById } from '@/lib/db';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 
 export async function PATCH(
@@ -20,20 +19,6 @@ export async function PATCH(
         : !(existing?.isPublished ?? (existing?.status !== 'CHƯA UPDATE'));
 
     const nextStatus = nextPublished ? 'ĐÃ UPDATE' : 'CHƯA UPDATE';
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase
-          .from('exams')
-          .update({
-            is_published: nextPublished,
-            status: nextStatus,
-          })
-          .eq('id', examId);
-      } catch (sbErr) {
-        console.error('Supabase update exam error:', sbErr);
-      }
-    }
 
     const updated = updateExam(examId, {
       isPublished: nextPublished,
