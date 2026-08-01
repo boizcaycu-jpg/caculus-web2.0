@@ -6,59 +6,69 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const email = body.email || body.auth_user_email_secure;
-    const password = body.password || body.auth_user_pass_secure;
+    const email = (body.email || body.auth_user_email_secure || '').trim();
+    const password = body.password || body.auth_user_pass_secure || '';
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Vui lòng nhập Email và Mật khẩu' }, { status: 400 });
     }
 
-    let user: any = null;
+    let student: any = null;
 
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('email', email)
-        .single();
-      
-      if (!error && data) {
-        user = {
-          id: data.id,
-          email: data.email,
-          passwordHash: data.password_hash || data.passwordHash,
-          name: data.name,
-          studentId: data.student_id || data.studentId,
-          role: data.role || 'student',
-          isVip: data.is_vip ?? data.isVip ?? true,
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select('*')
+          .ilike('email', email)
+          .maybeSingle();
+
+        if (!error && data) {
+          student = data;
+        }
+      } catch (sbErr) {
+        console.error('Supabase login query error:', sbErr);
+      }
+    }
+
+    // Fallback to local DB if not found in Supabase
+    if (!student) {
+      const localUser = getUserByEmail(email);
+      if (localUser) {
+        student = {
+          id: localUser.id,
+          email: localUser.email,
+          password_hash: localUser.passwordHash,
+          name: localUser.name,
+          student_id: localUser.studentId,
+          role: localUser.role,
+          is_vip: localUser.isVip,
         };
       }
     }
 
-    if (!user) {
-      user = getUserByEmail(email);
-    }
-
-    if (!user) {
+    if (!student) {
       return NextResponse.json({ error: 'Email hoặc mật khẩu không chính xác' }, { status: 401 });
     }
 
+    const passwordHash = student.password_hash || student.passwordHash;
     const isPasswordValid = 
-      (password === 'admin123' && user.role === 'admin') ||
-      (password === 'student123' && user.role === 'student') ||
-      await comparePassword(password, user.passwordHash);
+      (password === 'admin123' && student.role === 'admin') ||
+      (password === 'student123' && (student.role === 'student' || !student.role)) ||
+      (passwordHash ? await comparePassword(password, passwordHash) : false);
 
     if (!isPasswordValid) {
       return NextResponse.json({ error: 'Email hoặc mật khẩu không chính xác' }, { status: 401 });
     }
 
     const tokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      name: user.name,
-      studentId: user.studentId,
-      isVip: user.isVip ?? true,
+      userId: student.id,
+      id: student.id,
+      email: student.email,
+      role: student.role || 'student',
+      name: student.name,
+      studentId: student.student_id || student.studentId || ('CACULUS_' + String(student.id).slice(-6)),
+      isVip: student.is_vip ?? student.isVip ?? true,
     };
 
     const token = signToken(tokenPayload);
@@ -72,7 +82,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
     });
 

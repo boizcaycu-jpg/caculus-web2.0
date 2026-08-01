@@ -35,9 +35,9 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const resUsers = await fetch('/api/admin/users');
+      const resUsers = await fetch('/api/admin/students');
       const dataUsers = await resUsers.json();
-      setUsers(dataUsers.users || []);
+      setUsers(dataUsers.students || dataUsers.users || []);
 
       const resExams = await fetch('/api/admin/exams');
       const dataExams = await resExams.json();
@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
       return (
         u.name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
-        u.studentId.toLowerCase().includes(q)
+        (u.studentId || '').toLowerCase().includes(q)
       );
     })
     .sort((a, b) => {
@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch('/api/admin/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -84,21 +84,22 @@ export default function AdminDashboardPage() {
           password: newPassword,
           name: newName,
           role: 'student',
+          isVip: true,
         }),
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         alert(`Đã cấp tài khoản thành công cho ${newName}!\nMật khẩu ban đầu: ${newPassword}`);
         setShowAddUserModal(false);
         setNewEmail('');
         setNewName('');
         fetchData();
       } else {
-        alert(data.error || 'Không thể tạo tài khoản');
+        alert(data.error || 'Không thể tạo tài khoản học sinh');
       }
-    } catch (e) {
-      alert('Lỗi tạo tài khoản');
+    } catch (e: any) {
+      alert('Lỗi tạo tài khoản: ' + (e?.message || 'Lỗi hệ thống'));
     }
   };
 
