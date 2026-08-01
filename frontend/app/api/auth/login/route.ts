@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
 import { getUserByEmail } from '@/lib/db';
 import { comparePassword, signToken } from '@/lib/auth';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,25 +13,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Vui lòng nhập Email và Mật khẩu' }, { status: 400 });
     }
 
+    const supabase = await createClient();
     let student: any = null;
 
-    if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('students')
-          .select('*')
-          .ilike('email', email)
-          .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .ilike('email', email)
+        .maybeSingle();
 
-        if (!error && data) {
-          student = data;
-        }
-      } catch (sbErr) {
-        console.error('Supabase login query fetch failed, falling back to local DB:', sbErr);
+      if (!error && data) {
+        student = data;
       }
+    } catch (sbErr) {
+      console.error('Supabase SSR login query error:', sbErr);
     }
 
-    // Fallback to local DB if not found in Supabase or fetch failed
+    // Fallback to local DB if not found in Supabase
     if (!student) {
       const localUser = getUserByEmail(email);
       if (localUser) {
@@ -53,9 +52,8 @@ export async function POST(req: NextRequest) {
     }
 
     const storedPassword = student.password || student.password_hash || student.passwordHash;
-    
-    // Check password: plain match (e.g. '123456' from screenshot), admin/student defaults, or bcrypt hash
     let isPasswordValid = false;
+
     if (storedPassword && password === storedPassword) {
       isPasswordValid = true;
     } else if (password === 'admin123' && (student.role === 'admin' || student.student_id?.includes('ADMIN'))) {
