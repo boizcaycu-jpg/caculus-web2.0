@@ -4,8 +4,10 @@ export interface User {
   id: string;
   email: string;
   passwordHash: string;
-  name: string;
-  studentId: string; // e.g. CACULUS_496692
+  passwordPlain?: string;
+  name: string | null;
+  realName?: string | null;
+  studentId: string; // e.g. CACULUS_VIP_001
   role: Role;
   isVip?: boolean;
   createdAt: string;
@@ -63,6 +65,7 @@ export interface Exam {
   price?: number;
   status?: 'CHƯA UPDATE' | 'ĐÃ UPDATE' | 'ĐÃ THI' | 'active' | 'disabled' | 'coming_soon' | string;
   isPublished?: boolean; // True if published, false if locked
+  publishDate?: string;
   modules: ExamModule[];
   createdAt: string;
 }
@@ -98,6 +101,8 @@ export interface AntiCheatLog {
   examId: string;
   moduleId: string;
   eventType: 'tab_switch' | 'window_blur' | 'fullscreen_exit';
+  event?: string;
+  warningCount?: number;
   timestamp: string;
   details?: string;
 }

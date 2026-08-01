@@ -12,8 +12,12 @@ export default function DashboardPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Requirement 2: Collapsible Accordion State for "Phòng luyện đề TSA" list
+  // Requirement: Collapsible Accordion State for "Phòng luyện đề TSA" list
   const [isExamsExpanded, setIsExamsExpanded] = useState(true);
+
+  // Requirement 3: Mandatory Name Entry State
+  const [inputRealName, setInputRealName] = useState('');
+  const [submittingName, setSubmittingName] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -49,8 +53,38 @@ export default function DashboardPage() {
   const totalTaken = submissions.length;
   const highestScore = submissions.reduce((max, s) => Math.max(max, s.score), 0);
 
+  const needsName = user && user.role === 'student' && (!user.name || user.name === 'null' || user.name.trim() === '');
+
+  const handleUpdateName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputRealName.trim()) return;
+
+    setSubmittingName(true);
+    try {
+      const res = await fetch('/api/student/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ realName: inputRealName.trim() }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUser(data.user);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('caculus_user', JSON.stringify(data.user));
+        }
+      } else {
+        alert(data.error || 'Không thể lưu tên');
+      }
+    } catch (err) {
+      alert('Lỗi cập nhật Họ và tên');
+    } finally {
+      setSubmittingName(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans relative">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -64,148 +98,153 @@ export default function DashboardPage() {
             </div>
             <div>
               <div className="text-xs text-slate-400 font-semibold">
-                {user ? `Xin chào, ${user.name}` : 'Chào mừng học sinh đến phòng luyện TSA'}
+                {user && user.name ? `Xin chào, ${user.name}` : 'Chào mừng thí sinh VIP'}
               </div>
               <h2 className="text-lg font-extrabold text-slate-900">
-                {user ? user.name : 'Học sinh'}
+                {user && user.name ? user.name : 'Thí sinh VIP'}
               </h2>
-              <div className="text-xs text-slate-500">
-                {user ? user.email : 'Hệ thống Khảo thí & Đánh giá tư duy Bách Khoa'}
-              </div>
-            </div>
-          </div>
-
-          {/* Stat 1: Total Exams Taken */}
-          <div className="text-center md:border-r border-slate-100 pr-4">
-            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Tổng bài đã làm</div>
-            <div className="text-3xl font-black text-crimson mt-1">{totalTaken}</div>
-            <div className="text-[11px] text-slate-400">bài thi</div>
-          </div>
-
-          {/* Stat 2: High Score */}
-          <div className="text-center md:border-r border-slate-100 pr-4">
-            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Điểm cao nhất</div>
-            <div className="text-3xl font-black text-slate-900 mt-1">{highestScore}</div>
-            <div className="text-[11px] text-slate-400">thang điểm %</div>
-          </div>
-
-          {/* Role & Identification */}
-          <div className="text-right">
-            <div className="text-xs text-slate-400 font-semibold">Vai trò</div>
-            <div className="text-base font-black text-crimson tracking-wide uppercase">
-              {user?.role === 'admin' ? 'ADMIN' : 'HỌC SINH'}
-            </div>
-            <div className="text-xs font-mono font-bold text-slate-600 mt-0.5">
-              {user?.studentId ? `Mã số: ${user.studentId}` : 'Mã số: CHƯA ĐĂNG NHẬP'}
-            </div>
-          </div>
-        </div>
-
-        {/* Action Cards & Exam Room List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Card 1: TSA Test Room */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4 hover:shadow-md transition">
-            
-            {/* Accordion Header */}
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-crimson" />
-                Phòng luyện đề TSA
-              </h3>
-              
-              <div className="flex items-center gap-2">
-                <Link href="/exams" className="text-xs font-bold text-crimson hover:underline">
-                  Xem tất cả
-                </Link>
-
-                <button
-                  onClick={() => setIsExamsExpanded(!isExamsExpanded)}
-                  className="p-1 text-slate-400 hover:text-crimson hover:bg-rose-50 rounded-lg transition"
-                  title={isExamsExpanded ? 'Thu gọn danh sách đề' : 'Mở rộng danh sách đề'}
-                >
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isExamsExpanded ? 'rotate-180 text-crimson' : ''}`} />
-                </button>
-              </div>
-            </div>
-
-            {/* Smooth Collapsible Accordion Container */}
-            <div
-              className={`grid transition-all duration-300 ease-in-out ${
-                isExamsExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 overflow-hidden'
-              }`}
-            >
-              <div className="overflow-hidden space-y-3 pt-1">
-                {exams.map((exam: any) => {
-                  const isPublished = (exam.is_published === true || exam.isPublished === true) || (exam.status !== 'CHƯA UPDATE' && exam.isPublished !== false && exam.is_published !== false);
-                  const isUserVip = Boolean((user as any)?.is_vip || user?.isVip);
-                  const isDemoExam = exam.title.includes('DEMO');
-                  const canAccess = isPublished && (isDemoExam || isUserVip || user?.role === 'admin');
-
-                  return (
-                    <div key={exam.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-xs font-bold text-slate-900">{exam.title}</h4>
-                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            Miễn phí
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500">{exam.modules?.length || 3} kíp thi tự động</p>
-                      </div>
-
-                      {!isPublished ? (
-                        <button
-                          disabled
-                          className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-not-allowed flex items-center gap-1 shadow-2xs"
-                        >
-                          🔒 Đề chưa mở
-                        </button>
-                      ) : !canAccess ? (
-                        <button
-                          disabled
-                          className="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-not-allowed flex items-center gap-1 shadow-2xs"
-                        >
-                          🔒 Cần tài khoản VIP
-                        </button>
-                      ) : (
-                        <Link
-                          href={`/exams/${exam.id}`}
-                          className="bg-crimson hover:bg-rose-700 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs"
-                        >
-                          <PlayCircle className="w-3.5 h-3.5" /> Vào thi / Làm bài
-                        </Link>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: IRT Assessment */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4 hover:shadow-md transition">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-blue-600" />
-                Bài thi chuẩn hóa IRT
-              </h3>
-              <span className="text-xs font-bold text-slate-400">Xem tất cả</span>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-200 space-y-2">
-              <p className="text-xs text-slate-600 font-medium">Chưa có bài thi IRT nâng cao nào mở hôm nay</p>
-              <span className="inline-block bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold px-3 py-1 rounded-full">
-                Sắp diễn ra
+              <span className="inline-block mt-1 bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase">
+                Tài khoản VIP {user?.studentId ? `• ${user.studentId}` : ''}
               </span>
             </div>
           </div>
 
-          {/* Card 3: Top Performance */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4 hover:shadow-md transition">
+          {/* Quick Metrics */}
+          <div className="md:col-span-3 grid grid-cols-3 gap-4">
+            <div className="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+              <div className="text-xs text-slate-500 font-semibold mb-1 flex items-center justify-center gap-1">
+                <BookOpen className="w-4 h-4 text-crimson" /> Số đề đã làm
+              </div>
+              <div className="text-2xl font-black text-slate-900">{totalTaken}</div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+              <div className="text-xs text-slate-500 font-semibold mb-1 flex items-center justify-center gap-1">
+                <Award className="w-4 h-4 text-amber-500" /> Điểm cao nhất
+              </div>
+              <div className="text-2xl font-black text-crimson">{highestScore > 0 ? `${highestScore}%` : '--'}</div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+              <div className="text-xs text-slate-500 font-semibold mb-1 flex items-center justify-center gap-1">
+                <Clock className="w-4 h-4 text-emerald-600" /> Trạng thái
+              </div>
+              <div className="text-xs font-extrabold text-emerald-600 mt-2 bg-emerald-100 py-1 px-2 rounded-full inline-block">
+                Đã kích hoạt VIP
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Collapsible Accordion List Section: PHÒNG LUYỆN ĐỀ THI TSA */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+          {/* Accordion Header */}
+          <button
+            onClick={() => setIsExamsExpanded(!isExamsExpanded)}
+            className="w-full flex items-center justify-between p-6 bg-slate-50 hover:bg-slate-100/80 transition text-left border-b border-slate-200"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-8 bg-crimson rounded-full"></div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  Phòng Luyện Đề Thi Mô Phỏng TSA Bách Khoa
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Danh sách đề thi chuẩn hóa phân chia 3 phân môn (Toán, Đọc hiểu, Khoa học)
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold bg-rose-100 text-crimson px-3 py-1 rounded-full">
+                {exams.length} Đề thi
+              </span>
+              <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-200 ${isExamsExpanded ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+
+          {/* Accordion Content Body */}
+          {isExamsExpanded && (
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-200">
+              {exams.map((exam) => {
+                const isPublished = exam.isPublished ?? (exam.is_published ?? (exam.status !== 'CHƯA UPDATE'));
+                const isDemoExam = exam.isFree || exam.id === 'exam-2k9-1' || exam.id === 'exam-2k9-2';
+                const isUserVip = user?.isVip ?? true;
+
+                const canAccess = isPublished && (isDemoExam || isUserVip || user?.role === 'admin');
+
+                return (
+                  <div 
+                    key={exam.id}
+                    className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-4 group hover:border-rose-200"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                          isPublished ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {isPublished ? 'Hệ thống mở' : 'Khóa đóng'}
+                        </span>
+                        
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                          isDemoExam ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'
+                        }`}>
+                          {isDemoExam ? 'Đề Đánh giá' : 'Đề VIP'}
+                        </span>
+                      </div>
+
+                      <h4 className="font-bold text-slate-900 text-base group-hover:text-crimson transition line-clamp-1">
+                        {exam.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                        {exam.description || 'Bộ đề kiểm tra đánh giá tư duy theo cấu trúc mới nhất của Đại học Bách Khoa Hà Nội.'}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 space-y-3">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span>Số lượng Module:</span>
+                        <span className="font-bold text-slate-800">{exam.modules?.length || 3} Phần thi</span>
+                      </div>
+
+                      {canAccess ? (
+                        <Link
+                          href={`/exams/${exam.id}`}
+                          className="w-full bg-crimson hover:bg-red-700 text-white font-bold text-xs py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
+                        >
+                          <PlayCircle className="w-4 h-4" /> Vào thi / Làm bài
+                        </Link>
+                      ) : (
+                        <button
+                          disabled
+                          className="w-full bg-slate-100 text-slate-400 font-semibold text-xs py-2.5 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-1 border border-slate-200"
+                        >
+                          {!isPublished ? '🔒 Đề chưa mở' : '🔒 Cần tài khoản VIP'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Section: Leaderboard Preview & History */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+            <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-crimson" /> Thống kê Luyện tập
+            </h3>
+            <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              <p className="text-xs text-slate-500">Hoàn thành bài thi để theo dõi biểu đồ tiến độ điểm số cá nhân</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-amber-500" />
-                Top 5 điểm cao nhất
+                <Trophy className="w-5 h-5 text-amber-500" /> Top điểm cao
               </h3>
               <Link href="/leaderboard" className="text-xs font-bold text-crimson hover:underline">
                 Bảng xếp hạng
@@ -228,50 +267,46 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* History Table Banner */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <h3 className="font-bold text-slate-900 text-base">Lịch sử bài thi gần đây</h3>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
-                <tr>
-                  <th className="p-3">Tên bài thi / Kíp thi</th>
-                  <th className="p-3">Ngày nộp bài</th>
-                  <th className="p-3">Số câu đúng</th>
-                  <th className="p-3">Thang điểm</th>
-                  <th className="p-3">Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {submissions.map((sub) => (
-                  <tr key={sub.id} className="hover:bg-slate-50 transition">
-                    <td className="p-3 font-semibold text-slate-900">
-                      {sub.examId === 'exam-2k9-1' ? 'Đề TSA Caculus DEMO 01' : 'Đề TSA Caculus DEMO 02'}
-                    </td>
-                    <td className="p-3 text-slate-500">{new Date(sub.submittedAt).toLocaleDateString('vi-VN')}</td>
-                    <td className="p-3 font-mono text-slate-700">{sub.correctCount}/{sub.totalQuestions} câu</td>
-                    <td className="p-3 font-mono font-bold text-crimson">{sub.score}%</td>
-                    <td className="p-3">
-                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                        Đã nộp bài
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {submissions.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="p-6 text-center text-slate-400 text-xs">
-                      Bạn chưa thực hiện bài thi nào. Vào <Link href="/exams" className="text-crimson font-bold underline">Phòng khảo thí</Link> để bắt đầu!
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      </main>
+
+      {/* MANDATORY NAME ENTRY MODAL FOR FIRST LOGIN */}
+      {needsName && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 space-y-6">
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 bg-rose-100 text-crimson rounded-full flex items-center justify-center mx-auto border border-rose-200">
+                <User className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Xác nhận Họ & Tên Thí sinh</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Tài khoản <strong>{user?.email}</strong> cần nhập Họ và tên chính xác lần đầu để tham gia luyện thi và ghi nhận bảng vàng thành tích.
+              </p>
+            </div>
+
+            <form onSubmit={handleUpdateName} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">Họ và tên đầy đủ *</label>
+                <input
+                  type="text"
+                  required
+                  value={inputRealName}
+                  onChange={(e) => setInputRealName(e.target.value)}
+                  placeholder="Ví dụ: Nguyễn Văn Cường"
+                  className="w-full text-sm border border-slate-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#d90429] outline-none font-medium text-slate-900 shadow-xs"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingName}
+                className="w-full bg-crimson hover:bg-red-700 text-white font-bold text-sm py-3.5 rounded-xl transition shadow-md flex items-center justify-center gap-2 active:scale-98"
+              >
+                {submittingName ? 'Đang lưu thông tin...' : 'Xác nhận & Vào Phòng Luyện TSA'}
+              </button>
+            </form>
           </div>
         </div>
-
-      </main>
+      )}
     </div>
   );
 }

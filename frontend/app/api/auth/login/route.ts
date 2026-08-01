@@ -40,22 +40,24 @@ export async function POST(req: NextRequest) {
         isVip: true,
       };
     } else {
-      // 2. Check Student Account (VIP or Admin created)
+      // 2. Check 500 Pre-provisioned VIP Accounts in DB
       const user = getUserByEmail(email);
 
       if (user) {
         const isPasswordValid = 
+          password === user.passwordPlain ||
           (password === 'student123' && (user.role === 'student' || !user.role)) ||
           (user.passwordHash ? await comparePassword(password, user.passwordHash) : false);
 
         if (isPasswordValid) {
+          const nameVal = user.name || user.realName || null;
           tokenPayload = {
             userId: user.id,
             email: user.email,
             role: user.role || 'student',
-            name: user.name,
+            name: nameVal as any,
             studentId: user.studentId || ('CACULUS_' + String(user.id).slice(-6)),
-            isVip: user.isVip ?? true,
+            isVip: true,
           };
         }
       }

@@ -2,28 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { User, Exam, AntiCheatLog, Submission } from '@/types';
-import { Users, FileText, ShieldAlert, Plus, Trash2, Key, Calendar, Clock, CheckCircle2, Search } from 'lucide-react';
+import { Exam, AntiCheatLog, Submission } from '@/types';
+import { FileText, ShieldAlert, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<'users' | 'exams' | 'monitoring'>('users');
+  const [activeTab, setActiveTab] = useState<'exams' | 'monitoring'>('exams');
   
   // Data states
-  const [users, setUsers] = useState<User[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [antiCheatLogs, setAntiCheatLogs] = useState<AntiCheatLog[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // User Provisioning Form Modal State
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [newName, setNewName] = useState('');
-  const [newPassword, setNewPassword] = useState('student123');
-
-  // Student search & sort state
-  const [studentSearch, setStudentSearch] = useState('');
-  const [studentSort, setStudentSort] = useState<'newest' | 'oldest' | 'name_asc'>('newest');
 
   // Exam Schedule Edit State
   const [editingExam, setEditingExam] = useState<Exam | null>(null);
@@ -35,10 +24,6 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const resUsers = await fetch('/api/admin/students');
-      const dataUsers = await resUsers.json();
-      setUsers(dataUsers.students || dataUsers.users || []);
-
       const resExams = await fetch('/api/admin/exams');
       const dataExams = await resExams.json();
       setExams(dataExams.exams || []);
@@ -54,66 +39,21 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const filteredUsers = users
-    .filter(u => {
-      const q = studentSearch.toLowerCase();
-      return (
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        (u.studentId || '').toLowerCase().includes(q)
-      );
-    })
-    .sort((a, b) => {
-      if (studentSort === 'newest') {
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-      } else if (studentSort === 'oldest') {
-        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
-      } else {
-        return a.name.localeCompare(b.name);
-      }
-    });
-
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTogglePublish = async (examId: string, currentPublished: boolean) => {
     try {
-      const res = await fetch('/api/admin/students', {
-        method: 'POST',
+      const res = await fetch(`/api/admin/exams/${examId}/toggle`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: newEmail,
-          password: newPassword,
-          name: newName,
-          role: 'student',
-          isVip: true,
-        }),
+        body: JSON.stringify({ isPublished: !currentPublished }),
       });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        alert(`Đã cấp tài khoản thành công cho ${newName}!\nMật khẩu ban đầu: ${newPassword}`);
-        setShowAddUserModal(false);
-        setNewEmail('');
-        setNewName('');
-        fetchData();
-      } else {
-        alert(data.error || 'Không thể tạo tài khoản học sinh');
-      }
-    } catch (e: any) {
-      alert('Lỗi tạo tài khoản: ' + (e?.message || 'Lỗi hệ thống'));
-    }
-  };
-
-  const handleDeleteUser = async (id: string, name: string) => {
-    if (!confirm(`Bạn có chắc chắn muốn thu hồi tài khoản của ${name}?`)) return;
-
-    try {
-      const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        fetchData();
+        setExams(prev =>
+          prev.map(e => (e.id === examId ? { ...e, isPublished: !currentPublished, status: !currentPublished ? 'ĐÃ UPDATE' : 'CHƯA UPDATE' } : e))
+        );
       }
     } catch (e) {
-      alert('Không thể xóa tài khoản');
+      alert('Lỗi chuyển trạng thái đề thi');
     }
   };
 
@@ -126,273 +66,187 @@ export default function AdminDashboardPage() {
       });
       const data = await res.json();
       if (data.success) {
+        alert('Cập nhật thông tin đề thi thành công!');
+        setEditingExam(null);
         fetchData();
       }
     } catch (e) {
-      console.error('Error updating exam status:', e);
+      alert('Lỗi cập nhật đề thi');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-6">
-        {/* Admin Header Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Title */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 pb-6 border-b border-slate-200">
           <div>
-            <div className="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-md inline-block mb-1 border border-amber-200">
-              ADMIN CONTROL PANEL
-            </div>
-            <h1 className="text-2xl font-black text-slate-900">Quản trị Hệ thống Khảo thí CACULUS</h1>
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-2.5 h-7 bg-[#d90429] rounded-full inline-block"></span>
+              Quản trị Hệ thống Khảo thí CACULUS
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">
+              Quản lý 500 Tài khoản Thí sinh VIP, Xuất bản Đề thi & Giám sát Gian lận Thời gian thực
+            </p>
           </div>
 
-          {/* Tab Navigation Controls */}
-          <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'users' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Users className="w-4 h-4 text-blue-600" /> Quản lý tài khoản
-            </button>
+          {/* Tab Navigation */}
+          <div className="flex items-center bg-slate-200/80 p-1 rounded-xl mt-4 md:mt-0">
             <button
               onClick={() => setActiveTab('exams')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'exams' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                activeTab === 'exams'
+                  ? 'bg-white text-[#d90429] shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <FileText className="w-4 h-4 text-crimson" /> Quản lý bài thi
+              <FileText className="w-4 h-4" />
+              Quản lý Đề thi ({exams.length})
             </button>
             <button
               onClick={() => setActiveTab('monitoring')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'monitoring' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                activeTab === 'monitoring'
+                  ? 'bg-white text-[#d90429] shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <ShieldAlert className="w-4 h-4 text-amber-600" /> Giám sát Gian lận
+              <ShieldAlert className="w-4 h-4" />
+              Giám sát Gian lận ({antiCheatLogs.length})
             </button>
           </div>
         </div>
 
-        {/* TAB 1: USER MANAGEMENT */}
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+        {/* TAB 1: EXAMS MANAGEMENT */}
+        {activeTab === 'exams' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
               <div>
-                <h2 className="font-extrabold text-slate-900 text-lg">Danh sách học sinh & Cấp tài khoản</h2>
-                <p className="text-xs text-slate-500">Phân quyền thủ công (Manual Provisioning) - Không mở đăng ký tự do</p>
+                <h2 className="text-lg font-bold text-slate-900">Danh sách Đề thi TSA & Trạng thái Xuất bản</h2>
+                <p className="text-xs text-slate-500">Bật/tắt trạng thái xuất bản đề thi cho 500 thí sinh VIP</p>
               </div>
-              <button
-                onClick={() => setShowAddUserModal(true)}
-                className="bg-crimson hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-xs flex items-center gap-2"
+              <a
+                href="/admin/exams/editor"
+                className="bg-[#d90429] text-white font-medium text-sm px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-1.5 shadow-sm"
               >
-                <Plus className="w-4 h-4" /> Cấp tài khoản học sinh
-              </button>
+                + Tạo Đề thi Mới
+              </a>
             </div>
 
-            {/* BUG 7: Search Bar & Sort Dropdown */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <div className="relative w-full sm:w-80">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm theo tên, email hoặc mã thí sinh..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-crimson"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Sắp xếp:</span>
-                <select
-                  value={studentSort}
-                  onChange={(e) => setStudentSort(e.target.value as any)}
-                  className="bg-white border border-slate-300 text-xs font-bold rounded-xl px-3 py-1.5 focus:outline-none focus:border-crimson"
-                >
-                  <option value="newest">📅 Mới nhất</option>
-                  <option value="oldest">⏳ Cũ nhất</option>
-                  <option value="name_asc">🔤 Tên (A - Z)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200 text-left">
+                <thead className="bg-slate-50 text-slate-700 text-xs uppercase font-bold tracking-wider">
                   <tr>
-                    <th className="p-3">Họ và tên</th>
-                    <th className="p-3">Email đăng nhập</th>
-                    <th className="p-3">Mã dự thi (Student ID)</th>
-                    <th className="p-3">Vai trò</th>
-                    <th className="p-3 text-right">Thao tác</th>
+                    <th className="px-6 py-3.5">Tên Đề thi</th>
+                    <th className="px-6 py-3.5">Cấu trúc Module</th>
+                    <th className="px-6 py-3.5">Trạng thái Xuất bản</th>
+                    <th className="px-6 py-3.5">Lịch tự động</th>
+                    <th className="px-6 py-3.5 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50 transition">
-                      <td className="p-3 font-bold text-slate-900">{u.name}</td>
-                      <td className="p-3 text-slate-600 font-mono">{u.email}</td>
-                      <td className="p-3 font-mono font-bold text-crimson">{u.studentId}</td>
-                      <td className="p-3">
-                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                          u.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-blue-50 text-blue-700'
-                        }`}>
-                          {u.role.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        {u.role !== 'admin' && (
+                <tbody className="divide-y divide-slate-200 text-sm">
+                  {exams.map(exam => {
+                    const isPub = exam.isPublished ?? (exam.status !== 'CHƯA UPDATE');
+                    return (
+                      <tr key={exam.id} className="hover:bg-slate-50/80 transition">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-slate-900">{exam.title}</div>
+                          <div className="text-xs text-slate-500 line-clamp-1">{exam.description || 'Chưa có mô tả'}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-xs text-slate-600 font-medium">
+                            {exam.modules?.length || 0} Module ({exam.modules?.map(m => m.title).join(', ')})
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
                           <button
-                            onClick={() => handleDeleteUser(u.id, u.name)}
-                            title="Thu hồi tài khoản"
-                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                            onClick={() => handleTogglePublish(exam.id, isPub)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all shadow-xs ${
+                              isPub
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                                : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200'
+                            }`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <span className={`w-2 h-2 rounded-full ${isPub ? 'bg-emerald-600' : 'bg-rose-600'}`}></span>
+                            {isPub ? 'ĐÃ XUẤT BẢN' : 'CHƯA MỞ (ĐANG KHÓA)'}
                           </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-500">
+                          {exam.publishDate ? (
+                            <div className="flex items-center gap-1 text-slate-700 font-medium">
+                              <Calendar className="w-3.5 h-3.5 text-[#d90429]" />
+                              {new Date(exam.publishDate).toLocaleString('vi-VN')}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 font-italic">Chưa hẹn giờ</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => setEditingExam(exam)}
+                            className="text-[#d90429] hover:underline font-semibold text-xs px-2 py-1 rounded hover:bg-red-50"
+                          >
+                            Sửa lịch
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           </div>
         )}
 
-        {/* TAB 2: EXAM MANAGEMENT & AUTO-UNLOCK SCHEDULES */}
-        {activeTab === 'exams' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
-              <div>
-                <h2 className="font-extrabold text-slate-900 text-lg">Cấu hình Đề thi & Lịch mở tự động</h2>
-                <p className="text-xs text-slate-500">Thiết lập thời gian Giờ mở kíp cho từng Module (Toán, Đọc hiểu, Khoa học)</p>
-              </div>
-              <a
-                href="/admin/exams/editor"
-                className="bg-crimson hover:bg-rose-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" /> Mở Trình soạn thảo & Import đề thi (Authoring Workspace)
-              </a>
-            </div>
-
-            <div className="space-y-4">
-              {exams.map((exam) => {
-                const currentStatus = exam.status || 'ĐÃ THI';
-                const badgeStyle = currentStatus === 'CHƯA UPDATE' 
-                  ? 'bg-rose-100 text-rose-800 border-rose-300 font-extrabold'
-                  : currentStatus === 'ĐÃ UPDATE'
-                    ? 'bg-amber-100 text-amber-800 border-amber-300 font-extrabold'
-                    : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-extrabold';
-
-                return (
-                  <div key={exam.id} className="p-5 border border-slate-200 rounded-2xl bg-slate-50/50 space-y-4">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-200 pb-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-black text-slate-900 text-base">{exam.title}</h3>
-                          <span className="bg-slate-200 text-slate-700 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md">
-                            {exam.id}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500">{exam.description}</p>
-                      </div>
-
-                      {/* Phase 2 Target 1: Independent Exam Publishing Toggle */}
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-extrabold text-slate-700">Xuất bản đề thi:</span>
-                          <button
-                            onClick={async () => {
-                              const isCurrentlyPublished = exam.isPublished ?? (exam.status !== 'CHƯA UPDATE');
-                              try {
-                                const res = await fetch(`/api/admin/exams/${exam.id}/toggle`, {
-                                  method: 'PATCH',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ isPublished: !isCurrentlyPublished }),
-                                });
-                                const data = await res.json();
-                                if (res.ok && data.success) {
-                                  setExams(prev => prev.map(e => e.id === exam.id ? { ...e, ...data.exam } : e));
-                                }
-                              } catch (err) {
-                                console.error('Error toggling exam publish:', err);
-                              }
-                            }}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 shadow-2xs border ${
-                              (exam.isPublished ?? (exam.status !== 'CHƯA UPDATE'))
-                                ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-600'
-                                : 'bg-slate-200 hover:bg-slate-300 text-slate-600 border-slate-300'
-                            }`}
-                          >
-                            {(exam.isPublished ?? (exam.status !== 'CHƯA UPDATE')) ? '🟢 ĐÃ XUẤT BẢN' : '⚪ KHÓA ĐỀ THI'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Modules list */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {exam.modules.map((mod) => (
-                        <div key={mod.id} className="bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
-                          <div className="font-bold text-slate-900 text-sm flex items-center justify-between">
-                            <span>{mod.title}</span>
-                            <span className="text-slate-400 font-mono">{mod.durationMinutes} phút</span>
-                          </div>
-                          <div className="text-slate-600 space-y-1">
-                            <div><strong>Giờ mở:</strong> {mod.openTime}</div>
-                            <div><strong>Giờ đóng:</strong> {mod.closeTime}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: ANTI-CHEAT MONITORING & LIVE AUDIT LOGS */}
+        {/* TAB 2: MONITORING LOGS */}
         {activeTab === 'monitoring' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
-            <div>
-              <h2 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-amber-600" />
-                Nhật ký Giám sát Gian lận (Anti-Cheat Audit Logs)
-              </h2>
-              <p className="text-xs text-slate-500">Theo dõi hành vi rời khỏi bài thi, chuyển tab trình duyệt của học sinh theo thời gian thực</p>
+          <div className="space-y-6">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">Giám sát Gian lận Anti-Cheat (Real-Time)</h2>
+                <p className="text-xs text-slate-500">Ghi nhận thao tác chuyển tab, thoát toàn màn hình của thí sinh</p>
+              </div>
+              <span className="bg-rose-100 text-rose-700 font-bold text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                Đang giám sát
+              </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[11px]">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <table className="min-w-full divide-y divide-slate-200 text-left">
+                <thead className="bg-slate-50 text-slate-700 text-xs uppercase font-bold tracking-wider">
                   <tr>
-                    <th className="p-3">Thời gian ghi nhận</th>
-                    <th className="p-3">Họ và tên thí sinh</th>
-                    <th className="p-3">Mã dự thi</th>
-                    <th className="p-3">Loại vi phạm</th>
-                    <th className="p-3">Chi tiết sự kiện</th>
+                    <th className="px-6 py-3.5">Thí sinh</th>
+                    <th className="px-6 py-3.5">Mã bài thi</th>
+                    <th className="px-6 py-3.5">Hành vi ghi nhận</th>
+                    <th className="px-6 py-3.5">Thời gian</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {antiCheatLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-rose-50/50 transition">
-                      <td className="p-3 font-mono text-slate-500">
-                        {new Date(log.timestamp).toLocaleTimeString('vi-VN')} {new Date(log.timestamp).toLocaleDateString('vi-VN')}
+                <tbody className="divide-y divide-slate-200 text-sm">
+                  {antiCheatLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-slate-400 italic">
+                        Chưa ghi nhận vi phạm gian lận nào
                       </td>
-                      <td className="p-3 font-bold text-slate-900">{log.userName}</td>
-                      <td className="p-3 font-mono font-bold text-crimson">{log.studentId}</td>
-                      <td className="p-3">
-                        <span className="bg-rose-100 text-rose-800 font-bold text-[11px] px-2.5 py-0.5 rounded-full">
-                          {log.eventType === 'tab_switch' ? 'Chuyển Tab' : 'Rời màn hình'}
-                        </span>
-                      </td>
-                      <td className="p-3 text-slate-700">{log.details}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    antiCheatLogs.map(log => (
+                      <tr key={log.id} className="hover:bg-rose-50/40 transition">
+                        <td className="px-6 py-4 font-bold text-slate-900">{log.userId}</td>
+                        <td className="px-6 py-4 text-xs font-mono text-slate-600">{log.examId}</td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-800">
+                            ⚠️ {log.event} ({log.warningCount} lần)
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-500">
+                          {new Date(log.timestamp).toLocaleString('vi-VN')}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -400,66 +254,42 @@ export default function AdminDashboardPage() {
         )}
       </main>
 
-      {/* PROVISION NEW STUDENT MODAL */}
-      {showAddUserModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl border border-slate-200">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-extrabold text-slate-900 text-base">Cấp tài khoản học sinh mới</h3>
-              <button onClick={() => setShowAddUserModal(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
-            </div>
-
-            <form onSubmit={handleCreateUser} className="space-y-4 text-xs sm:text-sm">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Họ và tên học sinh *</label>
+      {/* EDIT EXAM SCHEDULE MODAL */}
+      {editingExam && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Hẹn giờ Xuất bản Tự động</h3>
+            <p className="text-xs text-slate-500 mb-4">{editingExam.title}</p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Ngày giờ xuất bản (YYYY-MM-DD THH:mm)</label>
                 <input
-                  type="text"
-                  required
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Ví dụ: Lê Hoàng Nam"
-                  className="w-full p-2.5 border border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
+                  type="datetime-local"
+                  defaultValue={editingExam.publishDate || ''}
+                  id="exam_publish_date_input"
+                  className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#d90429] outline-none"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Email nhận thông tin *</label>
-                <input
-                  type="email"
-                  required
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="nam.le@gmail.com"
-                  className="w-full p-2.5 border border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Mật khẩu cấp ban đầu</label>
-                <input
-                  type="text"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-2.5 border border-slate-300 rounded-xl bg-slate-50 focus:bg-white font-mono"
-                />
-              </div>
-
-              <div className="pt-2 flex gap-3">
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
                 <button
-                  type="button"
-                  onClick={() => setShowAddUserModal(false)}
-                  className="flex-1 border border-slate-300 font-bold py-2.5 rounded-xl text-slate-700"
+                  onClick={() => setEditingExam(null)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
                   Hủy
                 </button>
                 <button
-                  type="submit"
-                  className="flex-1 bg-crimson hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl transition"
+                  onClick={() => {
+                    const val = (document.getElementById('exam_publish_date_input') as HTMLInputElement)?.value;
+                    handleUpdateExam(editingExam.id, { publishDate: val });
+                  }}
+                  className="px-4 py-2 text-xs font-bold bg-[#d90429] text-white rounded-lg hover:bg-red-700 shadow-sm"
                 >
-                  Cấp tài khoản
+                  Lưu thiết lập
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
