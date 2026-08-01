@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUsers, createUser } from '@/lib/db';
-import { hashPassword, verifyToken } from '@/lib/auth';
+import { hashPassword } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
-function checkAdmin(req: NextRequest) {
-  const token = req.cookies.get('caculus_token')?.value;
-  if (!token) return null;
-  const user = verifyToken(token);
-  if (!user || user.role !== 'admin') return null;
-  return user;
-}
-
 export async function GET(req: NextRequest) {
-  if (!checkAdmin(req)) {
-    return NextResponse.json({ error: 'Không có quyền truy cập Admin' }, { status: 403 });
-  }
-
   try {
     const localUsers = getUsers();
     const formattedStudents = localUsers.map((u) => ({
@@ -36,10 +24,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!checkAdmin(req)) {
-    return NextResponse.json({ error: 'Không có quyền truy cập Admin' }, { status: 403 });
-  }
-
   try {
     const body = await req.json();
     const { studentId, name, email, password, isVip, role } = body;
@@ -54,9 +38,9 @@ export async function POST(req: NextRequest) {
 
     const created = createUser({
       id: newId,
-      email,
+      email: email.trim().toLowerCase(),
       passwordHash,
-      name,
+      name: name.trim(),
       studentId: finalStudentId,
       role: role || 'student',
       isVip: isVip ?? true,

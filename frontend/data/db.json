@@ -29,6 +29,56 @@
       "role": "student",
       "isVip": true,
       "createdAt": "2026-07-26T08:00:16.995Z"
+    },
+    {
+      "id": "user-student-mock-1",
+      "email": "trung.tsa2026@gmail.com",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Bùi Hoàng Trung",
+      "studentId": "CACULUS_819201",
+      "role": "student",
+      "isVip": true,
+      "createdAt": "2026-07-27T10:15:00.000Z"
+    },
+    {
+      "id": "user-student-mock-2",
+      "email": "linh.dang@gmail.com",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đặng Khánh Linh",
+      "studentId": "CACULUS_304918",
+      "role": "student",
+      "isVip": true,
+      "createdAt": "2026-07-28T09:20:00.000Z"
+    },
+    {
+      "id": "user-student-mock-3",
+      "email": "minh.phan@gmail.com",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Phan Nhật Minh",
+      "studentId": "CACULUS_739201",
+      "role": "student",
+      "isVip": true,
+      "createdAt": "2026-07-29T14:45:00.000Z"
+    },
+    {
+      "id": "user-student-mock-4",
+      "email": "thao.le@gmail.com",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Lê Phương Thảo",
+      "studentId": "CACULUS_108291",
+      "role": "student",
+      "isVip": true,
+      "createdAt": "2026-07-30T11:10:00.000Z"
+    },
+    {
+      "id": "user-student-mock-5",
+      "email": "huy.do@gmail.com",
+      "passwordHash": "$2a$10$w6M7q3p/k9Zz9t.g3/6VyeGz3/U9eD2eF3.L/M9X8/1Y1Y1Y1Y1Y1",
+      "name": "Đỗ Quang Huy",
+      "studentId": "CACULUS_583920",
+      "role": "student",
+      "isVip": true,
+      "createdAt": "2026-07-31T16:30:00.000Z"
     }
   ],
   "exams": [
