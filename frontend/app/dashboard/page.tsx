@@ -136,9 +136,9 @@ export default function DashboardPage() {
               }`}
             >
               <div className="overflow-hidden space-y-3 pt-1">
-                {exams.map((exam) => {
-                  const isPublished = exam.isPublished ?? (exam.status !== 'CHƯA UPDATE');
-                  const isUserVip = user?.isVip ?? true;
+                {exams.map((exam: any) => {
+                  const isPublished = (exam.is_published === true || exam.isPublished === true) || (exam.status !== 'CHƯA UPDATE' && exam.isPublished !== false && exam.is_published !== false);
+                  const isUserVip = Boolean((user as any)?.is_vip || user?.isVip);
                   const isDemoExam = exam.title.includes('DEMO');
                   const canAccess = isPublished && (isDemoExam || isUserVip || user?.role === 'admin');
 

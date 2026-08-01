@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByEmail } from '@/lib/db';
 import { comparePassword, signToken } from '@/lib/auth';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +13,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Vui lòng nhập Email và Mật khẩu' }, { status: 400 });
     }
 
-    const user = getUserByEmail(email);
+    let user: any = null;
+
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .eq('email', email)
+        .single();
+      
+      if (!error && data) {
+        user = {
+          id: data.id,
+          email: data.email,
+          passwordHash: data.password_hash || data.passwordHash,
+          name: data.name,
+          studentId: data.student_id || data.studentId,
+          role: data.role || 'student',
+          isVip: data.is_vip ?? data.isVip ?? true,
+        };
+      }
+    }
+
+    if (!user) {
+      user = getUserByEmail(email);
+    }
+
     if (!user) {
       return NextResponse.json({ error: 'Email hoặc mật khẩu không chính xác' }, { status: 401 });
     }
