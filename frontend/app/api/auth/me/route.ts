@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { verifyJoseToken, verifyToken } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get('caculus_token')?.value;
@@ -8,7 +8,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ authenticated: false, user: null }, { status: 401 });
   }
 
-  const payload = verifyToken(token);
+  let payload = await verifyJoseToken(token);
+  if (!payload) {
+    payload = verifyToken(token);
+  }
+
   if (!payload) {
     return NextResponse.json({ authenticated: false, user: null }, { status: 401 });
   }
