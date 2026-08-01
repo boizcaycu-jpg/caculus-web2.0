@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { hashPassword } from '@/lib/auth';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { getUsers, createUser } from '@/lib/db';
@@ -10,8 +11,7 @@ export async function GET(req: NextRequest) {
       try {
         const { data, error } = await supabase
           .from('students')
-          .select('*')
-          .order('created_at', { ascending: false });
+          .select('*');
 
         if (!error && data && data.length > 0) {
           const formatted = data.map((s) => ({
@@ -57,35 +57,56 @@ export async function POST(req: NextRequest) {
 
     const finalStudentId = studentId || ('CACULUS_' + Math.floor(100000 + Math.random() * 900000));
     const passwordHash = await hashPassword(password);
-    const newId = 'user-' + Date.now();
-
-    const supabasePayload = {
-      id: newId,
-      student_id: finalStudentId,
-      name,
-      email,
-      password_hash: passwordHash,
-      is_vip: isVip ?? true,
-      role: role || 'student',
-      created_at: new Date().toISOString(),
-    };
+    const newUuid = crypto.randomUUID();
 
     let createdFromSupabase: any = null;
 
     if (isSupabaseConfigured) {
       try {
+        // Try inserting with columns matching screenshot schema
         const { data, error } = await supabase
           .from('students')
-          .insert([supabasePayload])
+          .insert([
+            {
+              id: newUuid,
+              student_id: finalStudentId,
+              name: name,
+              email: email,
+              password: password,
+            }
+          ])
           .select();
 
         if (!error && data && data.length > 0) {
           createdFromSupabase = data[0];
         } else if (error) {
           console.error('Supabase student insert error:', error.message);
+          // Try alternative payload if table has additional columns
+          const { data: data2, error: error2 } = await supabase
+            .from('students')
+            .insert([
+              {
+                id: newUuid,
+                student_id: finalStudentId,
+                name: name,
+                email: email,
+                password: password,
+                password_hash: passwordHash,
+                is_vip: isVip ?? true,
+                role: role || 'student',
+                created_at: new Date().toISOString(),
+              }
+            ])
+            .select();
+
+          if (!error2 && data2 && data2.length > 0) {
+            createdFromSupabase = data2[0];
+          } else if (error2) {
+            console.error('Supabase student insert retry error:', error2.message);
+          }
         }
       } catch (sbErr) {
-        console.error('Supabase network fetch failed, falling back to local DB:', sbErr);
+        console.error('Supabase network fetch failed during POST /students:', sbErr);
       }
     }
 
@@ -93,14 +114,14 @@ export async function POST(req: NextRequest) {
     let createdLocal: any = null;
     try {
       createdLocal = createUser({
-        id: newId,
+        id: newUuid,
         email,
         passwordHash,
         name,
         studentId: finalStudentId,
         role: role || 'student',
         isVip: isVip ?? true,
-        createdAt: supabasePayload.created_at,
+        createdAt: new Date().toISOString(),
       });
     } catch (e) {
       console.error('Local DB createUser error:', e);
@@ -116,15 +137,15 @@ export async function POST(req: NextRequest) {
       studentId: createdFromSupabase.student_id || finalStudentId,
       role: createdFromSupabase.role || 'student',
       isVip: createdFromSupabase.is_vip ?? true,
-      createdAt: createdFromSupabase.created_at,
+      createdAt: createdFromSupabase.created_at || new Date().toISOString(),
     } : (createdLocal || {
-      id: newId,
+      id: newUuid,
       name,
       email,
       studentId: finalStudentId,
       role: role || 'student',
       isVip: isVip ?? true,
-      createdAt: supabasePayload.created_at,
+      createdAt: new Date().toISOString(),
     });
 
     return NextResponse.json({ success: true, data: created, student: created, user: created });
