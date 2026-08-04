@@ -9,6 +9,7 @@ export interface TokenPayload {
   email: string;
   role: 'admin' | 'student';
   name: string;
+  realName?: string | null;
   studentId: string;
   isVip?: boolean;
 }

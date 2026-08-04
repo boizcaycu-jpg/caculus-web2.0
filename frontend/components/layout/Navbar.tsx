@@ -68,21 +68,12 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-2">
           <Link
             href="/dashboard"
-            className={`flex items-center gap-1.5 text-sm font-extrabold px-3.5 py-2 rounded-xl transition ${
-              pathname === '/dashboard' ? 'bg-white/20 text-white shadow-xs' : 'text-rose-100 hover:bg-white/15 hover:text-white'
+            className={`flex items-center gap-1.5 text-sm font-extrabold px-4 py-2 rounded-xl transition ${
+              pathname === '/dashboard' || pathname === '/' ? 'bg-white/20 text-white shadow-xs' : 'text-rose-100 hover:bg-white/15 hover:text-white'
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
             Tổng quan
-          </Link>
-          <Link
-            href="/exams"
-            className={`flex items-center gap-1.5 text-sm font-extrabold px-3.5 py-2 rounded-xl transition ${
-              pathname.startsWith('/exams') ? 'bg-white/20 text-white shadow-xs' : 'text-rose-100 hover:bg-white/15 hover:text-white'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            Phòng khảo thí
           </Link>
           <Link
             href="/documents"
@@ -128,7 +119,7 @@ export default function Navbar() {
           {user ? (
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <div className="text-sm font-black text-white">{user.name}</div>
+                <div className="text-sm font-black text-white">{user.name || user.realName || 'Thí sinh VIP'}</div>
                 <div className="text-[11px] font-mono text-rose-100">{user.studentId} • VIP ACCOUNT</div>
               </div>
               <button
@@ -142,7 +133,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="bg-white text-crimson font-black px-4 py-2 rounded-xl text-sm hover:bg-rose-50 transition shadow-sm"
+              className="bg-white text-[#d90429] font-black px-4 py-2 rounded-xl text-sm hover:bg-rose-50 transition shadow-sm"
             >
               Đăng nhập
             </Link>
@@ -162,7 +153,6 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-rose-900 border-b border-rose-800 px-4 pt-2 pb-4 space-y-2 text-white">
           <Link href="/dashboard" className="block font-bold py-2 px-3 rounded-lg hover:bg-white/10">Tổng quan</Link>
-          <Link href="/exams" className="block font-bold py-2 px-3 rounded-lg hover:bg-white/10">Phòng khảo thí</Link>
           <Link href="/documents" className="block font-bold py-2 px-3 rounded-lg hover:bg-white/10">Tài liệu ôn tập</Link>
           <Link href="/leaderboard" className="block font-bold py-2 px-3 rounded-lg hover:bg-white/10">Bảng xếp hạng</Link>
           <Link href="/contact" className="block font-bold py-2 px-3 rounded-lg hover:bg-white/10">Liên hệ trợ giúp</Link>

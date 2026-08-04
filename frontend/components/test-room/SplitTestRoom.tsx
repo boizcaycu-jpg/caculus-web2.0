@@ -480,6 +480,34 @@ export default function SplitTestRoom({
                 </div>
               )}
 
+              {/* EXPLANATION SECTION (TEXT + IMAGE + AI GENERATOR) */}
+              {(currentQuestion?.explanation || currentQuestion?.explanationImageUrl || isPreview) && (
+                <div className="pl-0 sm:pl-16 pt-4 border-t border-slate-100">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <span className="font-extrabold text-xs uppercase tracking-wider text-crimson flex items-center gap-1.5">
+                        <FileText className="w-4 h-4" /> Lời giải chi tiết & Đáp án
+                      </span>
+                    </div>
+
+                    {currentQuestion?.explanation && (
+                      <div className="text-sm font-medium text-slate-800 leading-relaxed font-serif">
+                        <MathText content={currentQuestion.explanation} />
+                      </div>
+                    )}
+
+                    {currentQuestion?.explanationImageUrl && (
+                      <div className="pt-2">
+                        <img
+                          src={currentQuestion.explanationImageUrl}
+                          alt="Ảnh lời giải chi tiết"
+                          className="max-h-80 w-auto object-contain rounded-xl border border-slate-200 shadow-2xs"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

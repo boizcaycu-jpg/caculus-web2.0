@@ -1,22 +1,25 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import MathText from '@/components/ui/MathText';
 import { Question, QuestionGroup, Exam } from '@/types';
 import { 
   Save, Eye, Upload, Plus, Trash2, ArrowUp, ArrowDown, Search, 
-  FileText, CheckSquare, HelpCircle, Layers, Image as ImageIcon,
-  CheckCircle2, AlertCircle, RefreshCw, Sparkles, BookOpen, FolderPlus, Calculator, Code
+  FileText, CheckSquare, Layers, Image as ImageIcon,
+  CheckCircle2, AlertCircle, Sparkles, BookOpen, FolderPlus,
+  ChevronLeft, ChevronRight, Maximize2, Minimize2, Check, X
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ExamAuthoringEditorPage() {
+function ExamAuthoringEditorContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryId = searchParams.get('id');
 
   // State
   const [exams, setExams] = useState<Exam[]>([]);
-  const [selectedExamId, setSelectedExamId] = useState<string>('exam-2k9-1');
+  const [selectedExamId, setSelectedExamId] = useState<string>('exam-demo-01');
   const [activeCategory, setActiveCategory] = useState<'math' | 'reading' | 'science'>('math');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>([]);
@@ -24,25 +27,20 @@ export default function ExamAuthoringEditorPage() {
   // Active item selection
   const [activeSelection, setActiveSelection] = useState<{ type: 'question' | 'group'; id: string } | null>(null);
 
+  // UI Workspace State: Collapsible Left Panel for maximum canvas area
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Live KaTeX Math Preview Toggle
-  const [showMathPreview, setShowMathPreview] = useState(true);
-
   // AI Explanation Generation State
   const [generatingAiExplanation, setGeneratingAiExplanation] = useState(false);
 
-  // TRI-TAB DROPZONE IMPORT MODAL STATE
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importTab, setImportTab] = useState<'math' | 'reading' | 'science'>('math');
-  const [isDraggingFile, setIsDraggingFile] = useState(false);
-  const [parsingFile, setParsingFile] = useState(false);
-  const [importStatus, setImportStatus] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const imageFileInputRef = useRef<HTMLInputElement>(null);
+  // File Upload Input Refs
+  const questionImageInputRef = useRef<HTMLInputElement>(null);
+  const explanationImageInputRef = useRef<HTMLInputElement>(null);
+  const groupImageInputRef = useRef<HTMLInputElement>(null);
 
   // Load Exams
   useEffect(() => {
@@ -51,9 +49,14 @@ export default function ExamAuthoringEditorPage() {
       .then(data => {
         if (data.exams && data.exams.length > 0) {
           setExams(data.exams);
+          if (queryId && data.exams.some((e: any) => e.id === queryId)) {
+            setSelectedExamId(queryId);
+          } else {
+            setSelectedExamId(data.exams[0].id);
+          }
         }
       });
-  }, []);
+  }, [queryId]);
 
   const currentExam = exams.find(e => e.id === selectedExamId) || exams[0];
   
@@ -68,7 +71,7 @@ export default function ExamAuthoringEditorPage() {
     totalQuestions: activeCategory === 'reading' ? 20 : 40,
   };
 
-  // Load questions & groups for active module from Database API (with sample fallback)
+  // Load questions & groups for active module
   useEffect(() => {
     if (!currentModule?.id) return;
 
@@ -80,77 +83,52 @@ export default function ExamAuthoringEditorPage() {
           setQuestionGroups(data.questionGroups || []);
           setActiveSelection({ type: 'question', id: data.questions[0].id });
         } else {
-          // Sample fallback if module is pristine
-          const sampleGroups: QuestionGroup[] = activeCategory !== 'math' ? [
-            {
-              id: `group-${activeCategory}-1`,
-              moduleId: currentModule.id,
-              title: `Bối cảnh ${activeCategory === 'reading' ? 'Đọc hiểu 1' : 'Khoa học 1'}`,
-              passage: `[Bối cảnh Đọc hiểu / Thí nghiệm Khoa học]
-Trong phản ứng tổng hợp Ammonia: $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, $\\Delta H < 0$.
-Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến thiên theo nhiệt độ T.`,
-              imageUrl: '',
-              imageSize: 'medium',
-              questionIds: [`q-${activeCategory}-1`, `q-${activeCategory}-2`],
-            }
-          ] : [];
-
+          // Default Sample Image-Based Questions
           const sampleQuestions: Question[] = [
             {
               id: `q-${activeCategory}-1`,
               moduleId: currentModule.id,
-              groupId: activeCategory !== 'math' ? `group-${activeCategory}-1` : undefined,
               number: 1,
               type: 'single_choice',
-              text: activeCategory === 'math' 
-                ? 'Cho hàm số $f(x) = \\frac{x^2 - 4}{x - 2}$. Tính giới hạn $\\lim_{x \\to 2} f(x)$ và xác định giá trị để hàm số liên tục trên $\\mathbb{R}$.'
-                : 'Trong phương trình cân bằng $N_2(k) + 3H_2(k) \\rightleftharpoons 2NH_3(k)$, yếu tố nào làm biến thiên $\\Delta H$?',
+              text: 'Câu hỏi dạng ảnh 1',
+              imageUrl: '',
               options: [
-                { id: 'opt-a', text: 'Giới hạn bằng 4, hàm số liên tục tại x = 2' },
-                { id: 'opt-b', text: 'Giới hạn bằng 2, $f(2) = 4$' },
-                { id: 'opt-c', text: 'Tăng áp suất làm dịch chuyển cân bằng sang phải' },
-                { id: 'opt-d', text: 'Nhiệt độ T tăng làm hằng số $K_c$ giảm' }
+                { id: 'opt-a', text: 'Đáp án A' },
+                { id: 'opt-b', text: 'Đáp án B' },
+                { id: 'opt-c', text: 'Đáp án C' },
+                { id: 'opt-d', text: 'Đáp án D' }
               ],
               correctOptionId: 'opt-a',
-              explanation: 'Biến đổi $\\frac{x^2 - 4}{x - 2} = x + 2$. Khi $x \\to 2$, giới hạn là $2 + 2 = 4$.',
-              imageSize: 'medium',
+              explanation: 'Lời giải chi tiết cho câu hỏi 1. Ta có: $\\lim_{x \\to 2} f(x) = 4$.',
+              explanationImageUrl: '',
             },
             {
               id: `q-${activeCategory}-2`,
               moduleId: currentModule.id,
-              groupId: activeCategory !== 'math' ? `group-${activeCategory}-1` : undefined,
               number: 2,
               type: 'multiple_choice',
-              text: 'Cho tích phân $I = \\int_0^1 (2x + 1) dx$. Những phát biểu nào sau đây ĐÚNG?',
+              text: 'Câu hỏi dạng ảnh 2 (Đúng/Sai)',
+              imageUrl: '',
               options: [
-                { id: 'opt-2a', text: 'Nguyên hàm của $2x + 1$ là $F(x) = x^2 + x$' },
-                { id: 'opt-2b', text: 'Giá trị tích phân $I = 2$' },
-                { id: 'opt-2c', text: 'Giá trị tích phân $I = 1$' },
-                { id: 'opt-2d', text: 'Nếu đổi biến $u = 2x+1$ thì $du = 2dx$' }
+                { id: 'opt-2a', text: 'Ý a' },
+                { id: 'opt-2b', text: 'Ý b' },
+                { id: 'opt-2c', text: 'Ý c' },
+                { id: 'opt-2d', text: 'Ý d' }
               ],
-              correctOptionIds: ['opt-2a', 'opt-2b', 'opt-2d'],
-              explanation: '$F(1) - F(0) = (1 + 1) - 0 = 2$. Do đó A, B, D đúng.',
+              correctOptionIds: ['opt-2a', 'opt-2b'],
+              explanation: 'Phân tích các ý đúng sai dựa vào đồ thị.',
+              explanationImageUrl: '',
             },
-            {
-              id: `q-${activeCategory}-3`,
-              moduleId: currentModule.id,
-              number: 3,
-              type: 'fill_blank',
-              text: 'Biết điện trở $R(T) = \\frac{1000}{1 + 0.05T} \\le 200 \\,\\Omega$. Nhiệt độ tối thiểu $T$ (°C) là bao nhiêu?',
-              options: [],
-              fillBlankAnswers: ['80', '80.0', 't=80'],
-              explanation: '$1000 / (1 + 0.05T) \\le 200 \\Rightarrow 1 + 0.05T \\ge 5 \\Rightarrow T \\ge 80$.',
-            }
           ];
 
           setQuestions(sampleQuestions);
-          setQuestionGroups(sampleGroups);
+          setQuestionGroups([]);
           setActiveSelection({ type: 'question', id: sampleQuestions[0].id });
         }
         setIsDirty(false);
       })
       .catch(e => {
-        console.error('Error fetching active module questions:', e);
+        console.error('Error fetching questions:', e);
         setIsDirty(false);
       });
   }, [activeCategory, selectedExamId, currentModule?.id]);
@@ -162,54 +140,6 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
   const activeGroup = activeSelection?.type === 'group'
     ? questionGroups.find(g => g.id === activeSelection.id)
     : null;
-
-  // TRI-TAB GEMINI 2.5 FLASH PDF PARSER UPLOAD
-  const handleFileUpload = async (file: File, targetCategory: 'math' | 'reading' | 'science' = importTab) => {
-    setParsingFile(true);
-    setImportStatus('✨ Đang gửi tập tin PDF tới Gemini 2.5 Flash API để phân tích...');
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('moduleId', `mod-${targetCategory}-${selectedExamId}`);
-      formData.append('category', targetCategory);
-
-      const res = await fetch('/api/admin/parse-pdf', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.success && data.questions?.length > 0) {
-        setActiveCategory(targetCategory);
-        setQuestions(data.questions);
-        if (data.questionGroups) setQuestionGroups(data.questionGroups);
-        setActiveSelection({ type: 'question', id: data.questions[0].id });
-        setIsDirty(true);
-
-        const statusMsg = data.aiPowered
-          ? `✨ Gemini 2.5 Flash đã bóc tách thành công ${data.questions.length} câu hỏi phần ${targetCategory.toUpperCase()}!`
-          : `Đã bóc tách thành công ${data.questions.length} câu hỏi theo cấu trúc!`;
-        setImportStatus(statusMsg);
-        setTimeout(() => setShowImportModal(false), 2000);
-      } else {
-        setImportStatus(data.error || 'Không tìm thấy cấu trúc câu hỏi hợp lệ.');
-      }
-    } catch (e) {
-      console.error(e);
-      setImportStatus('Không thể kết nối máy chủ Gemini 2.5 Flash PDF Parser.');
-    } finally {
-      setParsingFile(false);
-    }
-  };
-
-  const handleDropFile = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDraggingFile(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0], importTab);
-    }
-  };
 
   // AI EXPLANATION GENERATOR (GEMINI 2.5 FLASH)
   const handleGenerateAiExplanation = async () => {
@@ -225,7 +155,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          questionText: activeQuestion.text,
+          questionText: activeQuestion.text || `Câu hỏi số ${activeQuestion.number}`,
           options: activeQuestion.options,
           passage: activeGroupPassage,
           category: activeCategory,
@@ -237,7 +167,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
       if (data.success && data.explanation) {
         handleUpdateActiveQuestion('explanation', data.explanation);
       } else {
-        alert(data.error || 'Không thể tạo lời giải bằng Gemini API');
+        alert(data.error || 'Không thể tự động tạo lời giải bằng AI.');
       }
     } catch (e) {
       console.error(e);
@@ -247,14 +177,16 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
     }
   };
 
-  // Base64 Image Select
-  const handleImageFileSelect = (file: File, target: 'question' | 'group') => {
+  // Base64 Image Upload Handlers
+  const handleImageUpload = (file: File, targetField: 'imageUrl' | 'explanationImageUrl' | 'groupImageUrl') => {
     const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      const base64Url = uploadEvent.target?.result as string;
-      if (target === 'question' && activeQuestion) {
+    reader.onload = (e) => {
+      const base64Url = e.target?.result as string;
+      if (targetField === 'imageUrl' && activeQuestion) {
         handleUpdateActiveQuestion('imageUrl', base64Url);
-      } else if (target === 'group' && activeGroup) {
+      } else if (targetField === 'explanationImageUrl' && activeQuestion) {
+        handleUpdateActiveQuestion('explanationImageUrl', base64Url);
+      } else if (targetField === 'groupImageUrl' && activeGroup) {
         handleUpdateGroup('imageUrl', base64Url);
       }
     };
@@ -283,16 +215,17 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
       groupId: targetGroupId,
       number: newNum,
       type: 'single_choice',
-      text: `Câu hỏi số ${newNum}: Cho phương trình $f(x) = ...$`,
+      text: `Câu hỏi số ${newNum}`,
+      imageUrl: '',
       options: [
-        { id: 'opt-a', text: 'Phương án A: $x = 1$' },
-        { id: 'opt-b', text: 'Phương án B: $x = 2$' },
-        { id: 'opt-c', text: 'Phương án C: $x = 3$' },
-        { id: 'opt-d', text: 'Phương án D: $x = 4$' },
+        { id: 'opt-a', text: 'Đáp án A' },
+        { id: 'opt-b', text: 'Đáp án B' },
+        { id: 'opt-c', text: 'Đáp án C' },
+        { id: 'opt-d', text: 'Đáp án D' },
       ],
       correctOptionId: 'opt-a',
-      explanation: 'Lời giải chi tiết bằng công thức KaTeX.',
-      imageSize: 'medium',
+      explanation: 'Lời giải chi tiết câu hỏi...',
+      explanationImageUrl: '',
     };
 
     setQuestions(prev => [...prev, newQ]);
@@ -317,8 +250,8 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
       id: newGroupId,
       moduleId: currentModule.id,
       title: `Nhóm bối cảnh ${questionGroups.length + 1}`,
-      passage: `[Đoạn văn Đọc hiểu / Thí nghiệm Khoa học]\nCho đồ thị năng lượng phản ứng $N_2 + 3H_2 \\rightleftharpoons 2NH_3$...`,
-      imageSize: 'medium',
+      passage: `[Bối cảnh Đọc hiểu / Khoa học dạng bài đọc hoặc hình ảnh]`,
+      imageUrl: '',
       questionIds: [],
     };
     setQuestionGroups(prev => [...prev, newGroup]);
@@ -414,29 +347,24 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
       <Navbar />
 
-      {/* TOP TOOLBAR */}
-      <header className="bg-slate-900 text-white border-b border-slate-800 px-6 py-3 sticky top-16 z-30 shadow-md">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* ULTRA-COMPACT TOP TOOLBAR (OPTIMIZED WORKSPACE) */}
+      <header className="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-2.5 sticky top-16 z-30 shadow-md">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="bg-crimson text-white font-black text-xs px-2.5 py-1 rounded-md tracking-wider">
-                AUTHORING WORKSPACE v4.0 (Gemini 2.5 Flash AI)
-              </span>
-              <select
-                value={selectedExamId}
-                onChange={(e) => setSelectedExamId(e.target.value)}
-                className="bg-slate-800 text-white font-bold text-sm border border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-crimson"
-              >
-                {exams.map(e => (
-                  <option key={e.id} value={e.id}>{e.title}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={selectedExamId}
+              onChange={(e) => setSelectedExamId(e.target.value)}
+              className="bg-slate-800 text-white font-bold text-xs sm:text-sm border border-slate-700 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#d90429]"
+            >
+              {exams.map(e => (
+                <option key={e.id} value={e.id}>{e.title}</option>
+              ))}
+            </select>
 
             {isDirty ? (
               <span className="text-[11px] font-bold text-amber-400 bg-amber-950/80 border border-amber-800 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" /> Chưa lưu vào CSDL
+                <AlertCircle className="w-3 h-3" /> Chưa lưu CSDL
               </span>
             ) : (
               <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -445,7 +373,7 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
             )}
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
             {saveSuccess && (
               <span className="text-xs text-emerald-400 font-bold animate-pulse">
                 ✓ Đã lưu CSDL thành công!
@@ -453,298 +381,355 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
             )}
 
             <button
-              onClick={() => setShowMathPreview(!showMathPreview)}
-              className={`text-xs font-bold px-3 py-2 rounded-xl border transition flex items-center gap-1.5 ${
-                showMathPreview ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-800 text-slate-300 border-slate-700'
-              }`}
-            >
-              <Calculator className="w-4 h-4" /> Live Math Preview {showMathPreview ? 'BẬT' : 'TẮT'}
-            </button>
-
-            <button
               onClick={handleSaveChanges}
               disabled={saving}
-              className="flex-1 sm:flex-initial bg-crimson hover:bg-rose-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-initial bg-[#d90429] hover:bg-red-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 active:scale-98"
             >
               <Save className="w-4 h-4" />
-              {saving ? 'Đang lưu...' : 'Lưu thay đổi (Save Changes)'}
+              {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
             </button>
 
             <button
               onClick={handleLivePreview}
-              className="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs px-4 py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-amber-950 font-extrabold text-xs px-4 py-2 rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 active:scale-98"
             >
               <Eye className="w-4 h-4" />
-              Xem trước như thí sinh (Live Test Preview)
+              Xem trước bài thi
             </button>
           </div>
         </div>
       </header>
 
-      {/* 3 MANDATORY TSA SECTIONS NAVIGATION */}
-      <div className="bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex justify-between items-center overflow-x-auto">
-          <div className="flex gap-2 py-3">
+      {/* MAIN WORKSPACE CANVAS */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col md:flex-row gap-4 sm:gap-6 relative">
+        
+        {/* COLLAPSIBLE LEFT SIDEBAR (DANH SÁCH CÂU HỎI & PHẦN THI) */}
+        <div className={`transition-all duration-300 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden shrink-0 ${
+          isSidebarCollapsed ? 'w-full md:w-16' : 'w-full md:w-80 lg:w-96'
+        }`}>
+          {/* Sidebar Toggle Header */}
+          <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            {!isSidebarCollapsed && (
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-5 bg-[#d90429] rounded-full inline-block"></span>
+                <span className="font-bold text-slate-900 text-xs uppercase tracking-wide">
+                  Phần thi & Câu hỏi
+                </span>
+              </div>
+            )}
             <button
-              onClick={() => setActiveCategory('math')}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 ${
-                activeCategory === 'math'
-                  ? 'bg-crimson text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 rounded-lg transition mx-auto"
+              title={isSidebarCollapsed ? 'Mở rộng bảng câu hỏi' : 'Thu gọn bảng câu hỏi'}
             >
-              <BookOpen className="w-4 h-4" />
-              1. Tư duy Toán học (40 câu)
-            </button>
-
-            <button
-              onClick={() => setActiveCategory('reading')}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 ${
-                activeCategory === 'reading'
-                  ? 'bg-crimson text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              2. Tư duy Đọc hiểu (20 câu)
-            </button>
-
-            <button
-              onClick={() => setActiveCategory('science')}
-              className={`px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 ${
-                activeCategory === 'science'
-                  ? 'bg-crimson text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              <Layers className="w-4 h-4" />
-              3. Tư duy Khoa học & GQVĐ (40 câu)
+              {isSidebarCollapsed ? <ChevronRight className="w-5 h-5 text-[#d90429]" /> : <ChevronLeft className="w-5 h-5" />}
             </button>
           </div>
 
-          <button
-            onClick={() => setShowImportModal(true)}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-xs whitespace-nowrap"
-          >
-            <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-            AI Tri-Tab PDF Parser (Gemini 2.5 Flash)
-          </button>
-        </div>
-      </div>
-
-      {/* MAIN WORKSPACE */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col md:flex-row gap-6">
-        
-        {/* LEFT PANEL */}
-        <div className="w-full md:w-80 lg:w-96 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-100 space-y-3">
-            <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-slate-900 text-sm">
-                Danh sách câu hỏi & Nhóm bối cảnh
-              </h3>
-              <div className="flex gap-1">
-                {activeCategory !== 'math' && (
-                  <button
-                    onClick={handleAddQuestionGroup}
-                    className="bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold text-xs px-2 py-1 rounded-lg border border-purple-200 flex items-center gap-1"
-                  >
-                    <FolderPlus className="w-3.5 h-3.5" /> +Bối cảnh
-                  </button>
-                )}
+          {!isSidebarCollapsed && (
+            <>
+              {/* Category Sub-tabs */}
+              <div className="p-2 bg-slate-100 border-b border-slate-200 flex gap-1">
                 <button
-                  onClick={() => handleAddQuestion()}
-                  className="bg-rose-50 text-crimson hover:bg-rose-100 font-bold text-xs px-2 py-1 rounded-lg border border-rose-200 flex items-center gap-1"
+                  onClick={() => setActiveCategory('math')}
+                  className={`flex-1 py-1.5 text-[11px] font-bold rounded-lg transition ${
+                    activeCategory === 'math' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-200'
+                  }`}
                 >
-                  <Plus className="w-3.5 h-3.5" /> +Câu
+                  🔵 Toán (40)
+                </button>
+                <button
+                  onClick={() => setActiveCategory('reading')}
+                  className={`flex-1 py-1.5 text-[11px] font-bold rounded-lg transition ${
+                    activeCategory === 'reading' ? 'bg-purple-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  🟣 Đọc (20)
+                </button>
+                <button
+                  onClick={() => setActiveCategory('science')}
+                  className={`flex-1 py-1.5 text-[11px] font-bold rounded-lg transition ${
+                    activeCategory === 'science' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  🟢 KH (20)
                 </button>
               </div>
-            </div>
 
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm câu..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-crimson"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[650px]">
-            {/* Question Groups */}
-            {questionGroups.map((g, gIdx) => {
-              const isGroupActive = activeSelection?.type === 'group' && activeSelection.id === g.id;
-
-              return (
-                <div
-                  key={`group-${g.id}-${gIdx}`}
-                  className={`p-3 rounded-2xl border-2 transition space-y-2 ${
-                    isGroupActive ? 'border-purple-600 bg-purple-50/40 shadow-xs' : 'border-purple-200 bg-purple-50/10 hover:border-purple-300'
-                  }`}
-                >
-                  <div
-                    onClick={() => setActiveSelection({ type: 'group', id: g.id })}
-                    className="flex justify-between items-center cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-purple-700" />
-                      <span className="font-extrabold text-xs text-purple-900">
-                        {g.title || `Bối cảnh ${gIdx + 1}`}
-                      </span>
-                    </div>
-                    <span className="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      {g.questionIds.length} câu con
-                    </span>
-                  </div>
-
-                  <div className="text-[11px] text-slate-600 line-clamp-2 italic font-serif">
-                    <MathText content={g.passage} />
+              {/* Action Toolbar & Search */}
+              <div className="p-3 border-b border-slate-100 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-500">
+                    Tổng: {questions.length} câu
+                  </span>
+                  <div className="flex gap-1">
+                    {activeCategory !== 'math' && (
+                      <button
+                        onClick={handleAddQuestionGroup}
+                        className="bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold text-xs px-2 py-1 rounded-lg border border-purple-200 flex items-center gap-1"
+                      >
+                        <FolderPlus className="w-3.5 h-3.5" /> +Bối cảnh
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleAddQuestion()}
+                      className="bg-rose-50 text-[#d90429] hover:bg-rose-100 font-bold text-xs px-2.5 py-1 rounded-lg border border-rose-200 flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> +Thêm câu
+                    </button>
                   </div>
                 </div>
-              );
-            })}
 
-            {/* Questions */}
-            {filteredQuestions.map((q, idx) => {
-              const isQActive = activeSelection?.type === 'question' && activeSelection.id === q.id;
-              const typeLabel = q.type === 'multiple_choice' ? 'Nhiều đ/án' : q.type === 'fill_blank' ? 'Điền từ' : '1 Đáp án';
-
-              return (
-                <div
-                  key={`q-${q.id}-${idx}`}
-                  onClick={() => setActiveSelection({ type: 'question', id: q.id })}
-                  className={`p-3 rounded-xl border transition cursor-pointer space-y-2 relative group ${
-                    isQActive
-                      ? 'border-crimson bg-rose-50/40 shadow-xs'
-                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-slate-900 text-white font-extrabold text-xs w-6 h-6 rounded-md flex items-center justify-center">
-                        {q.number || idx + 1}
-                      </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        q.type === 'multiple_choice'
-                          ? 'bg-purple-50 text-purple-700 border-purple-200'
-                          : q.type === 'fill_blank'
-                            ? 'bg-amber-50 text-amber-800 border-amber-200'
-                            : 'bg-blue-50 text-blue-700 border-blue-200'
-                      }`}>
-                        {typeLabel}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleMoveQuestion(idx, 'up'); }}
-                        disabled={idx === 0}
-                        className="p-1 text-slate-400 hover:text-slate-900 disabled:opacity-20"
-                      >
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleMoveQuestion(idx, 'down'); }}
-                        disabled={idx === questions.length - 1}
-                        className="p-1 text-slate-400 hover:text-slate-900 disabled:opacity-20"
-                      >
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteQuestion(q.id); }}
-                        className="p-1 text-slate-400 hover:text-crimson"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-slate-700 font-medium line-clamp-2 leading-relaxed">
-                    <MathText content={q.text} />
-                  </div>
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Lọc số câu..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d90429]"
+                  />
                 </div>
-              );
-            })}
-          </div>
+              </div>
+
+              {/* Questions List Items */}
+              <div className="flex-1 overflow-y-auto p-2.5 space-y-2 max-h-[620px]">
+                {/* Question Groups (Bối cảnh) */}
+                {questionGroups.map((g, gIdx) => {
+                  const isGroupActive = activeSelection?.type === 'group' && activeSelection.id === g.id;
+
+                  return (
+                    <div
+                      key={`group-${g.id}-${gIdx}`}
+                      onClick={() => setActiveSelection({ type: 'group', id: g.id })}
+                      className={`p-2.5 rounded-xl border transition cursor-pointer space-y-1 ${
+                        isGroupActive ? 'border-purple-600 bg-purple-50/60 shadow-2xs' : 'border-purple-200 bg-purple-50/20 hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-purple-700" />
+                          <span className="font-extrabold text-xs text-purple-900 truncate max-w-[160px]">
+                            {g.title || `Bối cảnh ${gIdx + 1}`}
+                          </span>
+                        </div>
+                        <span className="bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          {g.questionIds.length} câu
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Individual Question Item Cards */}
+                {filteredQuestions.map((q, idx) => {
+                  const isQActive = activeSelection?.type === 'question' && activeSelection.id === q.id;
+                  const typeLabel = q.type === 'multiple_choice' ? 'Đúng/Sai' : q.type === 'fill_blank' ? 'Điền từ' : '1 Đáp án';
+
+                  return (
+                    <div
+                      key={`q-${q.id}-${idx}`}
+                      onClick={() => setActiveSelection({ type: 'question', id: q.id })}
+                      className={`p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-2 group ${
+                        isQActive
+                          ? 'border-[#d90429] bg-rose-50/50 shadow-2xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="bg-slate-900 text-white font-extrabold text-xs w-6 h-6 rounded-md flex items-center justify-center shrink-0">
+                          {q.number || idx + 1}
+                        </span>
+                        <div className="truncate">
+                          <div className="text-xs font-bold text-slate-800 truncate">
+                            Câu {q.number || idx + 1} {q.imageUrl ? '📷 [Ảnh]' : ''}
+                          </div>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                            q.type === 'multiple_choice' ? 'bg-purple-100 text-purple-700' : q.type === 'fill_blank' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {typeLabel}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-0.5 opacity-80 group-hover:opacity-100 shrink-0">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleMoveQuestion(idx, 'up'); }}
+                          disabled={idx === 0}
+                          className="p-1 text-slate-400 hover:text-slate-900 disabled:opacity-20"
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleMoveQuestion(idx, 'down'); }}
+                          disabled={idx === questions.length - 1}
+                          className="p-1 text-slate-400 hover:text-slate-900 disabled:opacity-20"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteQuestion(q.id); }}
+                          className="p-1 text-slate-400 hover:text-[#d90429]"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
 
-        {/* RIGHT PANEL: RICH KATEX EDITOR & GEMINI AI EXPLANATION */}
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6 overflow-y-auto max-h-[750px]">
+        {/* RIGHT MAIN EDITOR CANVAS (TO ĐẸP, RÕ RÀNG, TỐI ƯU KHÔNG GIAN) */}
+        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-xs p-4 sm:p-6 space-y-6 overflow-y-auto max-h-[720px]">
           
-          {/* GROUP EDITOR */}
+          {/* GROUP BỐI CẢNH EDITOR (ĐỌC HIỂU & KHOA HỌC) */}
           {activeSelection?.type === 'group' && activeGroup && (
             <div className="space-y-6">
-              <div className="border-b border-slate-100 pb-4">
-                <span className="bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
-                  BỐI CẢNH / ĐOẠN VĂN ĐỌC HIỂU (KATEX MATH ENABLED)
-                </span>
-                <h2 className="font-extrabold text-slate-900 text-xl mt-2">{activeGroup.title}</h2>
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                  <span className="bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
+                    BỐI CẢNH / ĐOẠN VĂN ĐỌC HIỂU & KHOA HỌC
+                  </span>
+                  <h2 className="font-extrabold text-slate-900 text-lg sm:text-xl mt-1">{activeGroup.title}</h2>
+                </div>
+
+                <button
+                  onClick={() => handleAddQuestion(activeGroup.id)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition shadow-md flex items-center gap-1.5 active:scale-98"
+                >
+                  <Plus className="w-4 h-4" /> + Thêm câu hỏi thuộc bối cảnh này
+                </button>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase">
-                  Tiêu đề bối cảnh
-                </label>
+                <label className="block text-xs font-bold text-slate-700 uppercase">Tiêu đề bối cảnh *</label>
                 <input
                   type="text"
                   value={activeGroup.title || ''}
                   onChange={(e) => handleUpdateGroup('title', e.target.value)}
+                  placeholder="Ví dụ: Nhóm bối cảnh 1: Động lực học & Phản ứng Ammonia"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-purple-500"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase">
-                  Nội dung bối cảnh / Đoạn văn (Hỗ trợ KaTeX & LaTeX Formulas: $E=mc^2$) *
+                  Nội dung bài đọc / Bối cảnh văn bản (Hoặc nhập ghi chú)
                 </label>
                 <textarea
-                  rows={6}
+                  rows={5}
                   value={activeGroup.passage || ''}
                   onChange={(e) => handleUpdateGroup('passage', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono text-slate-800 focus:outline-none focus:border-purple-500 leading-relaxed"
+                  placeholder="Nhập nội dung đoạn văn hoặc ghi chú bối cảnh..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-800 focus:outline-none focus:border-purple-500 leading-relaxed font-serif"
                 />
               </div>
 
-              {showMathPreview && activeGroup.passage && (
-                <div className="p-4 bg-indigo-50/60 border border-indigo-200 rounded-2xl space-y-2">
-                  <div className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
-                    <Calculator className="w-4 h-4 text-indigo-600" />
-                    Hiển thị công thức Toán/Khoa học KaTeX xem trước:
-                  </div>
-                  <div className="p-3 bg-white rounded-xl border border-indigo-100 text-sm sm:text-base">
-                    <MathText content={activeGroup.passage} />
-                  </div>
+              {/* 📷 BỐI CẢNH DẠNG ẢNH / SƠ ĐỒ KHOA HỌC */}
+              <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-200 space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-purple-900 uppercase tracking-wide flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-purple-700" />
+                    Đính kèm Hình ảnh Bối cảnh / Sơ đồ Thí nghiệm (Nếu bối cảnh là Ảnh)
+                  </label>
+                  {activeGroup.imageUrl && (
+                    <button
+                      onClick={() => handleUpdateGroup('imageUrl', '')}
+                      className="text-xs text-rose-600 font-bold hover:underline"
+                    >
+                      Xóa ảnh bối cảnh
+                    </button>
+                  )}
                 </div>
-              )}
 
-              <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <span className="text-xs font-bold text-slate-600">
-                  Số câu hỏi con hiện tại: <strong className="text-purple-700 font-black">{activeGroup.questionIds?.length || 0} câu</strong>
-                </span>
-                <button
-                  onClick={() => handleAddQuestion(activeGroup.id)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition shadow-xs flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" /> Thêm câu hỏi thuộc bối cảnh này
-                </button>
+                {activeGroup.imageUrl ? (
+                  <div className="p-2 bg-white rounded-xl border border-slate-200 max-h-64 overflow-auto flex items-center justify-center">
+                    <img
+                      src={activeGroup.imageUrl}
+                      alt="Ảnh bối cảnh"
+                      className="max-h-60 w-auto object-contain rounded-lg"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => groupImageInputRef.current?.click()}
+                    className="border-2 border-dashed border-purple-300 hover:border-purple-600 hover:bg-purple-100/50 rounded-xl p-4 text-center cursor-pointer transition flex items-center justify-center gap-2 bg-white"
+                  >
+                    <Upload className="w-4 h-4 text-purple-700" />
+                    <span className="text-xs font-bold text-purple-900">Tải lên Ảnh Bối cảnh / Sơ đồ Bài đọc từ Máy tính</span>
+                    <input
+                      type="file"
+                      ref={groupImageInputRef}
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'groupImageUrl');
+                      }}
+                    />
+                  </div>
+                )}
               </div>
+
+              {/* 📋 DANH SÁCH CÂU HỎI CON THUỘC BỐI CẢNH */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                    Danh sách các câu hỏi thuộc Bối cảnh này ({(activeGroup.questionIds || []).length} câu)
+                  </span>
+                  <button
+                    onClick={() => handleAddQuestion(activeGroup.id)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition shadow-2xs flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> + Thêm câu hỏi
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {questions.filter(q => q.groupId === activeGroup.id).map(childQ => (
+                    <div
+                      key={childQ.id}
+                      onClick={() => setActiveSelection({ type: 'question', id: childQ.id })}
+                      className="p-3 bg-white rounded-xl border border-slate-200 hover:border-purple-400 transition flex items-center justify-between cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="bg-purple-600 text-white font-black text-xs px-2.5 py-1 rounded-md">
+                          Câu {childQ.number}
+                        </span>
+                        <span className="text-xs font-bold text-slate-800 truncate max-w-xs">
+                          {childQ.text}
+                        </span>
+                      </div>
+                      <span className="text-xs text-purple-700 font-bold hover:underline">Chỉnh sửa câu này →</span>
+                    </div>
+                  ))}
+
+                  {questions.filter(q => q.groupId === activeGroup.id).length === 0 && (
+                    <div className="text-xs text-slate-400 italic text-center py-4">
+                      Chưa có câu hỏi nào thuộc bối cảnh này. Nhấn nút "+ Thêm câu hỏi thuộc bối cảnh này" để tạo mới!
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
           )}
 
-          {/* QUESTION EDITOR */}
+          {/* MAIN QUESTION EDITOR (ĐỀ BÀI DẠNG ẢNH LÀM TRUNG TÂM) */}
           {activeSelection?.type === 'question' && activeQuestion && (
-            <>
-              {/* Question Header */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+            <div className="space-y-6">
+              
+              {/* Question Header & Type Selector */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
-                  <span className="bg-crimson text-white font-black text-base px-3.5 py-1.5 rounded-xl shadow-xs">
+                  <span className="bg-[#d90429] text-white font-black text-lg px-4 py-1.5 rounded-xl shadow-xs">
                     Câu {activeQuestion.number}
                   </span>
-                  <div className="space-y-0.5">
-                    <h2 className="font-extrabold text-slate-900 text-lg">Trình soạn thảo KaTeX & Đáp án</h2>
-                    <p className="text-xs text-slate-500">Hỗ trợ LaTeX formulas ($...$), công thức Hóa học & Bảng Markdown</p>
+                  <div>
+                    <h2 className="font-extrabold text-slate-900 text-lg">Trình soạn thảo Đề bài dạng Ảnh</h2>
+                    <p className="text-xs text-slate-500">Đề bài & Các phương án A/B/C/D đã hiển thị trực tiếp trong hình ảnh</p>
                   </div>
                 </div>
 
@@ -753,343 +738,265 @@ Giá trị hằng số cân bằng $K_c = \\frac{[NH_3]^2}{[N_2][H_2]^3}$ biến
                   <select
                     value={activeQuestion.type || 'single_choice'}
                     onChange={(e) => handleUpdateActiveQuestion('type', e.target.value)}
-                    className="bg-slate-50 border border-slate-300 font-bold text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-crimson"
+                    className="bg-slate-50 border border-slate-300 font-bold text-xs rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-[#d90429]"
                   >
                     <option value="single_choice">Trắc nghiệm (1 đáp án A/B/C/D)</option>
-                    <option value="multiple_choice">Chọn nhiều đáp án đúng</option>
-                    <option value="fill_blank">Điền từ / Số / Phân số (Fill-in-the-blank)</option>
+                    <option value="multiple_choice">Nhiều đáp án (Chọn Đúng/Sai từng ý)</option>
+                    <option value="fill_blank">Điền đáp án ngắn (Fill-in-the-blank)</option>
                   </select>
                 </div>
               </div>
 
-              {/* Question Prompt Editor */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide flex justify-between items-center">
-                  <span>{"Nội dung đề bài (Hỗ trợ LaTeX: $\\frac{a}{b}$, $\\sqrt{x}$, $\\Delta H$) *"}</span>
-                  <span className="text-[11px] text-slate-400 font-mono">{"Ví dụ: $f(x) = \\lim_{x \\to 2} \\frac{x^2-4}{x-2}$"}</span>
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Nhập đề bài..."
-                  value={activeQuestion.text}
-                  onChange={(e) => handleUpdateActiveQuestion('text', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-mono text-slate-900 focus:outline-none focus:border-crimson transition"
-                />
-
-                {showMathPreview && activeQuestion.text && (
-                  <div className="p-3 bg-rose-50/50 border border-rose-200 rounded-xl text-xs space-y-1">
-                    <span className="font-bold text-crimson text-[11px] uppercase tracking-wider block">
-                      Xem trước hiển thị đề bài KaTeX:
-                    </span>
-                    <div className="text-slate-900 font-medium bg-white p-2.5 rounded-lg border border-rose-100">
-                      <MathText content={activeQuestion.text} />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Question Image & Diagram Attachment Tool */}
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              {/* 📷 SECTION 1: MAIN QUESTION PROMPT IMAGE (ẢNH ĐỀ BÀI LÀM TRUNG TÂM) */}
+              <div className="p-5 bg-slate-50/80 rounded-2xl border-2 border-dashed border-rose-200 space-y-4">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
-                    <ImageIcon className="w-4 h-4 text-crimson" />
-                    Đính kèm hình ảnh câu hỏi / Sơ đồ khoa học
+                  <label className="text-xs font-extrabold text-[#d90429] uppercase tracking-wide flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-[#d90429]" />
+                    ĐÍNH KÈM HÌNH ẢNH ĐỀ BÀI (BAO GỒM NỘI DUNG CÂU HỎI & CÁC PHƯƠNG ÁN) *
                   </label>
                   {activeQuestion.imageUrl && (
                     <button
                       onClick={() => handleUpdateActiveQuestion('imageUrl', '')}
-                      className="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1"
+                      className="text-xs text-rose-600 font-bold hover:underline"
                     >
-                      <Trash2 className="w-3.5 h-3.5" /> Xóa ảnh
+                      Xóa ảnh đề bài
                     </button>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 items-center">
-                  <input
-                    type="text"
-                    placeholder="Dán URL hình ảnh (ví dụ: https://... hoặc /uploads/diagram.png)"
-                    value={activeQuestion.imageUrl || ''}
-                    onChange={(e) => handleUpdateActiveQuestion('imageUrl', e.target.value)}
-                    className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-crimson"
-                  />
-                  <label className="bg-white border border-slate-300 hover:bg-slate-100 font-bold text-xs px-3 py-2 rounded-xl text-slate-700 cursor-pointer flex items-center gap-1.5 shadow-xs whitespace-nowrap">
-                    <Upload className="w-3.5 h-3.5 text-crimson" /> Tải từ máy tính
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => e.target.files?.[0] && handleImageFileSelect(e.target.files[0], 'question')}
-                    />
-                  </label>
-                </div>
-
-                {activeQuestion.imageUrl && (
-                  <div className="space-y-2 pt-2 border-t border-slate-200">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Kích thước hiển thị:</span>
-                      <div className="flex gap-1.5">
-                        {(['small', 'medium', 'large', 'full'] as const).map((sz) => (
-                          <button
-                            key={sz}
-                            onClick={() => handleUpdateActiveQuestion('imageSize', sz)}
-                            className={`px-2.5 py-0.5 text-[11px] font-bold rounded-lg uppercase transition ${
-                              (activeQuestion.imageSize || 'medium') === sz
-                                ? 'bg-crimson text-white'
-                                : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-100'
-                            }`}
-                          >
-                            {sz === 'small' ? 'Nhỏ' : sz === 'medium' ? 'Vừa' : sz === 'large' ? 'Lớn' : 'Full'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-white p-3 rounded-xl border border-slate-200 flex justify-center items-center overflow-hidden">
+                {/* Question Image Preview */}
+                {activeQuestion.imageUrl ? (
+                  <div className="space-y-3">
+                    <div className="p-2 bg-white rounded-xl border border-slate-200 max-h-96 overflow-auto flex items-center justify-center">
                       <img
                         src={activeQuestion.imageUrl}
-                        alt="Question Preview"
-                        className={`object-contain max-h-64 rounded-lg ${
-                          activeQuestion.imageSize === 'small' ? 'w-1/3' : activeQuestion.imageSize === 'large' ? 'w-3/4' : activeQuestion.imageSize === 'full' ? 'w-full' : 'w-1/2'
-                        }`}
+                        alt="Đề bài dạng ảnh"
+                        className="max-h-80 w-auto object-contain rounded-lg shadow-2xs"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500 font-medium">URL ảnh:</span>
+                      <input
+                        type="text"
+                        value={activeQuestion.imageUrl}
+                        onChange={(e) => handleUpdateActiveQuestion('imageUrl', e.target.value)}
+                        className="flex-1 text-xs border border-slate-200 rounded-lg px-2.5 py-1 bg-white"
                       />
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Options Editor */}
-              <div className="space-y-4">
-                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700">
-                  Phương án A/B/C/D & KaTeX Formulas
-                </h4>
-
-                {(activeQuestion.type === 'single_choice' || !activeQuestion.type) && (
-                  <div className="space-y-3">
-                    {activeQuestion.options.map((opt, idx) => {
-                      const letter = String.fromCharCode(65 + idx);
-                      const isCorrect = activeQuestion.correctOptionId === opt.id;
-
-                      return (
-                        <div key={opt.id} className="space-y-1">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => handleUpdateActiveQuestion('correctOptionId', opt.id)}
-                              className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center transition ${
-                                isCorrect
-                                  ? 'bg-crimson text-white ring-2 ring-rose-500 shadow-xs'
-                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'
-                              }`}
-                            >
-                              {letter}
-                            </button>
-                            <input
-                              type="text"
-                              value={opt.text}
-                              onChange={(e) => handleOptionTextChange(opt.id, e.target.value)}
-                              className={`flex-1 bg-slate-50 border rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:outline-none focus:border-crimson ${
-                                isCorrect ? 'border-crimson bg-rose-50/30' : 'border-slate-200'
-                              }`}
-                            />
-                          </div>
-                          {showMathPreview && opt.text && (
-                            <div className="pl-11 text-xs text-slate-700">
-                              <MathText content={opt.text} />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {activeQuestion.type === 'multiple_choice' && (
-                  <div className="space-y-3">
-                    {activeQuestion.options.map((opt, idx) => {
-                      const letter = String.fromCharCode(65 + idx);
-                      const currentSelected = activeQuestion.correctOptionIds || [];
-                      const isCorrect = currentSelected.includes(opt.id);
-
-                      const toggleMultiple = () => {
-                        let nextIds: string[];
-                        if (isCorrect) {
-                          nextIds = currentSelected.filter(id => id !== opt.id);
-                        } else {
-                          nextIds = [...currentSelected, opt.id];
-                        }
-                        handleUpdateActiveQuestion('correctOptionIds', nextIds);
-                      };
-
-                      return (
-                        <div key={opt.id} className="space-y-1">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={toggleMultiple}
-                              className={`w-8 h-8 rounded-lg font-bold text-xs flex items-center justify-center transition ${
-                                isCorrect
-                                  ? 'bg-purple-600 text-white ring-2 ring-purple-400 shadow-xs'
-                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'
-                              }`}
-                            >
-                              {letter}
-                            </button>
-                            <input
-                              type="text"
-                              value={opt.text}
-                              onChange={(e) => handleOptionTextChange(opt.id, e.target.value)}
-                              className={`flex-1 bg-slate-50 border rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:outline-none focus:border-purple-500 ${
-                                isCorrect ? 'border-purple-400 bg-purple-50/30' : 'border-slate-200'
-                              }`}
-                            />
-                          </div>
-                          {showMathPreview && opt.text && (
-                            <div className="pl-11 text-xs text-slate-700">
-                              <MathText content={opt.text} />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {activeQuestion.type === 'fill_blank' && (
-                  <div className="space-y-3 bg-amber-50 border border-amber-200 p-4 rounded-2xl">
-                    <label className="block text-xs font-bold text-amber-900 uppercase">
-                      Danh sách kết quả đúng chấp nhận (Phân tách bằng dấu phẩy):
-                    </label>
+                ) : (
+                  <div
+                    onClick={() => questionImageInputRef.current?.click()}
+                    className="border-2 border-dashed border-slate-300 hover:border-[#d90429] hover:bg-rose-50/50 rounded-xl p-8 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2 bg-white"
+                  >
+                    <Upload className="w-8 h-8 text-[#d90429]" />
+                    <div className="text-xs font-extrabold text-slate-800">
+                      Nhấp vào đây để Tải lên Ảnh Đề bài từ Máy tính
+                    </div>
+                    <p className="text-[11px] text-slate-400">Hỗ trợ định dạng .PNG, .JPG, .JPEG, Base64</p>
                     <input
-                      type="text"
-                      placeholder="80, 80.0, 80.00, t=80"
-                      value={(activeQuestion.fillBlankAnswers || []).join(', ')}
+                      type="file"
+                      ref={questionImageInputRef}
+                      accept="image/*"
+                      className="hidden"
                       onChange={(e) => {
-                        const vals = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                        handleUpdateActiveQuestion('fillBlankAnswers', vals);
+                        if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'imageUrl');
                       }}
-                      className="w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
                   </div>
                 )}
               </div>
 
-              {/* REQUIREMENT 3: AI EXPLANATION GENERATOR WITH GEMINI BUTTON */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
+              {/* SECTION 2: ANSWERS & OPTIONS PICKER */}
+              <div className="space-y-4 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2 uppercase tracking-wide">
+                    <CheckSquare className="w-4 h-4 text-emerald-600" />
+                    Thiết lập Đáp án đúng & Lựa chọn
+                  </h3>
+                  <span className="text-xs text-slate-500">
+                    {activeQuestion.type === 'multiple_choice' ? 'Tích chọn các ý ĐÚNG' : activeQuestion.type === 'fill_blank' ? 'Nhập chuỗi đáp án ngắn chấp nhận' : 'Chọn 1 đáp án ĐÚNG duy nhất'}
+                  </span>
+                </div>
+
+                {/* Single Choice (A/B/C/D) */}
+                {(!activeQuestion.type || activeQuestion.type === 'single_choice') && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((optId, idx) => {
+                      const label = String.fromCharCode(65 + idx); // A, B, C, D
+                      const isSelected = activeQuestion.correctOptionId === optId;
+
+                      return (
+                        <button
+                          key={optId}
+                          type="button"
+                          onClick={() => handleUpdateActiveQuestion('correctOptionId', optId)}
+                          className={`p-3.5 rounded-xl border-2 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-2xs ${
+                            isSelected
+                              ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm scale-102'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
+                          <span>Đáp án {label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Multiple Choice (True/False per Statement) */}
+                {activeQuestion.type === 'multiple_choice' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {['opt-2a', 'opt-2b', 'opt-2c', 'opt-2d'].map((optId, idx) => {
+                      const label = `Ý ${String.fromCharCode(97 + idx)}`; // a, b, c, d
+                      const currentSelected = activeQuestion.correctOptionIds || [];
+                      const isSelected = currentSelected.includes(optId);
+
+                      return (
+                        <button
+                          key={optId}
+                          type="button"
+                          onClick={() => {
+                            const nextSelected = isSelected
+                              ? currentSelected.filter(id => id !== optId)
+                              : [...currentSelected, optId];
+                            handleUpdateActiveQuestion('correctOptionIds', nextSelected);
+                          }}
+                          className={`p-3 rounded-xl border-2 font-extrabold text-xs transition flex items-center justify-center gap-2 ${
+                            isSelected
+                              ? 'bg-purple-600 border-purple-700 text-white'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          <input type="checkbox" checked={isSelected} readOnly className="rounded" />
+                          <span>{label} (ĐÚNG)</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Fill in the blank */}
+                {activeQuestion.type === 'fill_blank' && (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-700">Các đáp án ngắn chấp nhận đúng (phân cách bằng dấu phẩy)</label>
+                    <input
+                      type="text"
+                      value={(activeQuestion.fillBlankAnswers || []).join(', ')}
+                      onChange={(e) => {
+                        const vals = e.target.value.split(',').map(s => s.trim());
+                        handleUpdateActiveQuestion('fillBlankAnswers', vals);
+                      }}
+                      placeholder="Ví dụ: 80, 80.0, t=80"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-mono text-slate-900"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 📖 SECTION 3: LỜI GIẢI CHI TIẾT & UPLOAD ẢNH ĐÁP ÁN */}
+              <div className="space-y-4 pt-4 border-t border-slate-200">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">
-                    Lời giải chi tiết (Explanation)
+                  <label className="text-xs font-extrabold text-slate-900 uppercase tracking-wide flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#d90429]" />
+                    Lời giải chi tiết (Hỗ trợ KaTeX LaTeX Text & Up Ảnh Đáp án)
                   </label>
-                  
+
                   <button
+                    type="button"
                     onClick={handleGenerateAiExplanation}
                     disabled={generatingAiExplanation}
-                    className="bg-crimson hover:bg-rose-700 disabled:opacity-50 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5"
+                    className="bg-[#d90429] hover:bg-red-700 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition shadow-xs flex items-center gap-1.5"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
-                    {generatingAiExplanation ? 'Gemini 2.5 Flash đang suy luận...' : '✨ AI tạo lời giải (Gemini 2.5 Flash)'}
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    {generatingAiExplanation ? 'AI đang viết lời giải...' : '✨ AI tạo lời giải (Gemini 2.5 Flash)'}
                   </button>
                 </div>
 
+                {/* Explanation KaTeX Textarea */}
                 <textarea
                   rows={4}
-                  placeholder="Giải thích từng bước cho học sinh (Hỗ trợ công thức KaTeX $...$)..."
                   value={activeQuestion.explanation || ''}
                   onChange={(e) => handleUpdateActiveQuestion('explanation', e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-crimson transition leading-relaxed"
+                  placeholder="Nhập bước giải chi tiết hoặc công thức KaTeX ($...$)...."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm font-mono text-slate-900 focus:outline-none focus:border-[#d90429]"
                 />
-                
-                {showMathPreview && activeQuestion.explanation && (
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
-                    <span className="font-bold text-slate-600 text-[11px] uppercase tracking-wider block">
+
+                {/* Live Explanation KaTeX Render Preview */}
+                {activeQuestion.explanation && (
+                  <div className="p-3.5 bg-indigo-50/50 border border-indigo-200 rounded-xl text-xs space-y-1">
+                    <span className="font-bold text-indigo-900 text-[11px] uppercase tracking-wider block">
                       Xem trước Lời giải KaTeX:
                     </span>
-                    <div className="text-slate-800 font-serif bg-white p-2.5 rounded-lg border border-slate-200">
+                    <div className="text-slate-900 font-medium bg-white p-3 rounded-lg border border-indigo-100">
                       <MathText content={activeQuestion.explanation} />
                     </div>
                   </div>
                 )}
+
+                {/* 🖼️ EXPLANATION IMAGE UPLOAD TOOL (UP ẢNH ĐÁP ÁN) */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-emerald-600" />
+                      Đính kèm Hình ảnh Lời giải / Sơ đồ Đáp án chi tiết
+                    </label>
+                    {activeQuestion.explanationImageUrl && (
+                      <button
+                        onClick={() => handleUpdateActiveQuestion('explanationImageUrl', '')}
+                        className="text-xs text-rose-600 font-bold hover:underline"
+                      >
+                        Xóa ảnh lời giải
+                      </button>
+                    )}
+                  </div>
+
+                  {activeQuestion.explanationImageUrl ? (
+                    <div className="space-y-2">
+                      <div className="p-2 bg-white rounded-xl border border-slate-200 max-h-64 overflow-auto flex items-center justify-center">
+                        <img
+                          src={activeQuestion.explanationImageUrl}
+                          alt="Ảnh lời giải chi tiết"
+                          className="max-h-60 w-auto object-contain rounded-lg"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => explanationImageInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/50 rounded-xl p-4 text-center cursor-pointer transition flex items-center justify-center gap-2 bg-white"
+                    >
+                      <Upload className="w-4 h-4 text-emerald-600" />
+                      <span className="text-xs font-bold text-slate-700">Tải lên Ảnh Lời giải / Đáp án chi tiết từ Máy tính</span>
+                      <input
+                        type="file"
+                        ref={explanationImageInputRef}
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'explanationImageUrl');
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
               </div>
-            </>
+
+            </div>
           )}
+
         </div>
       </main>
-
-      {/* REQUIREMENT 1: TRI-TAB DROPZONE IMPORT MODAL */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 space-y-5 shadow-2xl border border-slate-200">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                AI Tri-Tab PDF Parser (Gemini 2.5 Flash)
-              </h3>
-              <button onClick={() => setShowImportModal(false)} className="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
-            </div>
-
-            {/* 3 Dedicated Section Tabs */}
-            <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
-              <button
-                onClick={() => setImportTab('math')}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition ${
-                  importTab === 'math' ? 'bg-crimson text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                1. Toán học
-              </button>
-              <button
-                onClick={() => setImportTab('reading')}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition ${
-                  importTab === 'reading' ? 'bg-crimson text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                2. Đọc hiểu
-              </button>
-              <button
-                onClick={() => setImportTab('science')}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition ${
-                  importTab === 'science' ? 'bg-crimson text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                3. Khoa học & GQVĐ
-              </button>
-            </div>
-
-            {/* Dedicated Dropzone per Tab */}
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
-              onDragLeave={() => setIsDraggingFile(false)}
-              onDrop={handleDropFile}
-              onClick={() => fileInputRef.current?.click()}
-              className={`border-3 border-dashed rounded-3xl p-8 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-3 ${
-                isDraggingFile ? 'border-crimson bg-rose-50' : 'border-slate-300 hover:border-crimson hover:bg-slate-50'
-              }`}
-            >
-              <Upload className="w-10 h-10 text-crimson animate-bounce" />
-              <div>
-                <h4 className="font-extrabold text-slate-900 text-sm">
-                  Kéo thả tập tin PDF cho phần: {importTab === 'math' ? '1. Tư duy Toán học' : importTab === 'reading' ? '2. Tư duy Đọc hiểu' : '3. Tư duy Khoa học & GQVĐ'}
-                </h4>
-                <p className="text-xs text-slate-500 mt-1">Tự động nhận diện công thức KaTeX & hình ảnh sơ đồ bằng Gemini 2.5 Flash</p>
-              </div>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept=".pdf,.docx,.md,.txt"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) handleFileUpload(e.target.files[0], importTab);
-                }}
-              />
-            </div>
-
-            {importStatus && (
-              <div className={`p-3 rounded-xl text-xs font-bold ${
-                importStatus.includes('thành công') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-              }`}>
-                {importStatus}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
+  );
+}
+
+export default function ExamAuthoringEditorPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-900 text-white flex items-center justify-center font-bold text-sm">Đang tải Trình soạn thảo Chi tiết...</div>}>
+      <ExamAuthoringEditorContent />
+    </Suspense>
   );
 }

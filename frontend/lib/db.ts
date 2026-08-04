@@ -140,6 +140,17 @@ export function updateExam(id: string, updates: Partial<Exam>): Exam | null {
   return db.exams[idx];
 }
 
+export function deleteExam(id: string): boolean {
+  const db = ensureDbFile();
+  const initialLength = db.exams.length;
+  db.exams = db.exams.filter(e => e.id !== id);
+  if (db.exams.length !== initialLength) {
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
 // Question operations
 export function getQuestionsByModule(moduleId: string): Question[] {
   const db = ensureDbFile();

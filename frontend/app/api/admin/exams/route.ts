@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { getExams, createExam, updateExam, saveQuestionsForModule, saveQuestionGroupsForModule } from '@/lib/db';
-import { verifyToken } from '@/lib/auth';
+import { getExams, createExam, updateExam, deleteExam, saveQuestionsForModule, saveQuestionGroupsForModule } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-function checkAdmin(req: NextRequest) {
-  const token = req.cookies.get('caculus_token')?.value;
-  if (!token) return null;
-  const user = verifyToken(token);
-  if (!user || user.role !== 'admin') return null;
-  return user;
-}
 
 export async function GET(req: NextRequest) {
   const exams = getExams();
@@ -20,32 +11,31 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!checkAdmin(req)) {
-    return NextResponse.json({ error: 'Không có quyền truy cập Admin' }, { status: 403 });
-  }
-
   try {
     const body = await req.json();
-    const newId = 'exam-' + Date.now();
-    const isPub = body.isPublished ?? true;
+    const newId = body.id || 'exam-' + Date.now();
+    const isPub = body.isPublished ?? false;
     const stat = body.status || (isPub ? 'ĐÃ UPDATE' : 'CHƯA UPDATE');
 
     const newExam = createExam({
       id: newId,
       title: body.title,
       description: body.description || '',
-      isFree: body.isFree ?? true,
+      isFree: body.isFree ?? false,
+      isDemoExam: body.isDemoExam ?? false,
       isPublished: isPub,
+      category: body.category || 'THỰC CHIẾN',
+      subCategory: body.subCategory || 'math',
       status: stat,
-      price: body.price,
+      price: body.price || 0,
       modules: body.modules || [],
       createdAt: new Date().toISOString(),
     });
 
     revalidatePath('/exams');
     revalidatePath('/dashboard');
+    revalidatePath('/dashboard/exams');
     revalidatePath('/admin/exams');
-    revalidatePath('/admin/exams/editor');
 
     return NextResponse.json({ success: true, exam: newExam });
   } catch (error) {
@@ -55,10 +45,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  if (!checkAdmin(req)) {
-    return NextResponse.json({ error: 'Không có quyền truy cập Admin' }, { status: 403 });
-  }
-
   try {
     const body = await req.json();
     const { id, moduleId, questions, questionGroups, ...updates } = body;
@@ -78,8 +64,8 @@ export async function PUT(req: NextRequest) {
 
     revalidatePath('/exams');
     revalidatePath('/dashboard');
+    revalidatePath('/dashboard/exams');
     revalidatePath('/admin/exams');
-    revalidatePath('/admin/exams/editor');
     if (id) {
       revalidatePath(`/exams/${id}`);
       revalidatePath(`/exams/${id}/room`);
@@ -90,4 +76,22 @@ export async function PUT(req: NextRequest) {
     console.error('Error updating exam/questions:', error);
     return NextResponse.json({ error: 'Lỗi cập nhật đề thi' }, { status: 500 });
   }
+}
+
+export async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get('id');
+
+  if (!id) {
+    return NextResponse.json({ error: 'Thiếu ID bài thi' }, { status: 400 });
+  }
+
+  const success = deleteExam(id);
+
+  revalidatePath('/exams');
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/exams');
+  revalidatePath('/admin/exams');
+
+  return NextResponse.json({ success });
 }

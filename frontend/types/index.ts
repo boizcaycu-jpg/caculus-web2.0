@@ -36,13 +36,14 @@ export interface Question {
   type?: 'single_choice' | 'multiple_choice' | 'fill_blank';
   text: string;
   passage?: string; // Optional standalone reading passage or scientific data context
-  imageUrl?: string; // Base64 data URL, upload path, or external URL
+  imageUrl?: string; // Base64 data URL, upload path, or external URL for question prompt image
   imageSize?: 'small' | 'medium' | 'large' | 'full';
   options: QuestionOption[];
   correctOptionId?: string; // For single choice
   correctOptionIds?: string[]; // For multiple choice (exact match required)
   fillBlankAnswers?: string[]; // Acceptable correct values for fill in the blank
-  explanation?: string;
+  explanation?: string; // Text / KaTeX explanation
+  explanationImageUrl?: string; // Image upload URL for explanation / step-by-step solution
 }
 
 export interface ExamModule {
@@ -62,7 +63,10 @@ export interface Exam {
   title: string;
   description: string;
   isFree: boolean;
+  isDemoExam?: boolean;
   price?: number;
+  category?: 'LUYỆN TẬP' | 'THỰC CHIẾN' | string;
+  subCategory?: 'math' | 'reading' | 'science' | string;
   status?: 'CHƯA UPDATE' | 'ĐÃ UPDATE' | 'ĐÃ THI' | 'active' | 'disabled' | 'coming_soon' | string;
   isPublished?: boolean; // True if published, false if locked
   publishDate?: string;
