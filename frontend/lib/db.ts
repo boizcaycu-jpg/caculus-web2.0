@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { User, Exam, Question, QuestionGroup, Submission, AntiCheatLog } from '../types';
 import { INITIAL_USERS, INITIAL_EXAMS, INITIAL_QUESTIONS, INITIAL_SUBMISSIONS, INITIAL_ANTICHEAT_LOGS } from './mockData';
+import { readPersistentDb, writePersistentDb } from './cloud-db';
 
 interface DatabaseSchema {
   users: User[];
@@ -12,59 +13,35 @@ interface DatabaseSchema {
   antiCheatLogs: AntiCheatLog[];
 }
 
-const DB_FILE_PATH = path.join(process.cwd(), 'data', 'db.json');
+const defaultFallbackState: DatabaseSchema = {
+  users: INITIAL_USERS,
+  exams: INITIAL_EXAMS,
+  questions: INITIAL_QUESTIONS,
+  questionGroups: [],
+  submissions: INITIAL_SUBMISSIONS,
+  antiCheatLogs: INITIAL_ANTICHEAT_LOGS,
+};
 
 function ensureDbFile(): DatabaseSchema {
   try {
-    const dir = path.dirname(DB_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    if (!fs.existsSync(DB_FILE_PATH)) {
-      const initialDb: DatabaseSchema = {
-        users: INITIAL_USERS,
-        exams: INITIAL_EXAMS,
-        questions: INITIAL_QUESTIONS,
-        questionGroups: [],
-        submissions: INITIAL_SUBMISSIONS,
-        antiCheatLogs: INITIAL_ANTICHEAT_LOGS,
-      };
-      fs.writeFileSync(DB_FILE_PATH, JSON.stringify(initialDb, null, 2), 'utf-8');
-      return initialDb;
-    }
-
-    const fileContent = fs.readFileSync(DB_FILE_PATH, 'utf-8');
-    const parsed = JSON.parse(fileContent) as DatabaseSchema;
-
+    const raw = readPersistentDb(defaultFallbackState);
     return {
-      users: parsed.users || INITIAL_USERS,
-      exams: parsed.exams || INITIAL_EXAMS,
-      questions: parsed.questions || INITIAL_QUESTIONS,
-      questionGroups: parsed.questionGroups || [],
-      submissions: parsed.submissions || INITIAL_SUBMISSIONS,
-      antiCheatLogs: parsed.antiCheatLogs || INITIAL_ANTICHEAT_LOGS,
+      users: raw.users || INITIAL_USERS,
+      exams: raw.exams || INITIAL_EXAMS,
+      questions: raw.questions || INITIAL_QUESTIONS,
+      questionGroups: raw.questionGroups || [],
+      submissions: raw.submissions || INITIAL_SUBMISSIONS,
+      antiCheatLogs: raw.antiCheatLogs || INITIAL_ANTICHEAT_LOGS,
     };
   } catch (error) {
     console.error('Error reading DB file, returning fallback state:', error);
-    return {
-      users: INITIAL_USERS,
-      exams: INITIAL_EXAMS,
-      questions: INITIAL_QUESTIONS,
-      questionGroups: [],
-      submissions: INITIAL_SUBMISSIONS,
-      antiCheatLogs: INITIAL_ANTICHEAT_LOGS,
-    };
+    return defaultFallbackState;
   }
 }
 
 function saveDb(data: DatabaseSchema): void {
   try {
-    const dir = path.dirname(DB_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+    writePersistentDb(data);
   } catch (error) {
     console.error('Error writing DB file:', error);
   }

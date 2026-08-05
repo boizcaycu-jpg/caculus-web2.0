@@ -326,9 +326,13 @@ function ExamAuthoringEditorContent() {
     }
   };
 
-  // Live Draft Preview
-  const handleLivePreview = () => {
+  // Live Draft Preview (Auto-saves to CSDL first!)
+  const handleLivePreview = async () => {
     try {
+      // 1. Auto-save all changes to CSDL server storage first so no work is lost
+      if (isDirty) {
+        await handleSaveChanges();
+      }
       sessionStorage.setItem('caculus_draft_questions', JSON.stringify(questions));
       sessionStorage.setItem('caculus_draft_groups', JSON.stringify(questionGroups));
       router.push(`/exams/${selectedExamId}/room?module=${currentModule.id}&preview=true`);
