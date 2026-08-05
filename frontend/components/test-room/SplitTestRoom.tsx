@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Question, QuestionGroup, ExamModule, UserAnswer } from '@/types';
 import MathText from '@/components/ui/MathText';
-import { ChevronLeft, ChevronRight, Clock, AlertTriangle, CheckCircle, ShieldAlert, ArrowLeft, Eye, Layers, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, AlertTriangle, CheckCircle, ShieldAlert, ArrowLeft, Eye, Layers, FileText, Sparkles, Check, X, Coffee } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface SplitTestRoomProps {
@@ -38,10 +38,17 @@ export default function SplitTestRoom({
   const [questionSeconds, setQuestionSeconds] = useState(0);
   const [globalSeconds, setGlobalSeconds] = useState(module.durationMinutes * 60);
 
+  // Anti-cheat violation & Out-Web Modal State
   const [antiCheatViolations, setAntiCheatViolations] = useState(0);
   const [showAntiCheatModal, setShowAntiCheatModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 30-Second Rest Break State between sequential modules
+  const [showRestBreakModal, setShowRestBreakModal] = useState(false);
+  const [restBreakSeconds, setRestBreakSeconds] = useState(30);
+  const [restBreakNextModuleId, setRestBreakNextModuleId] = useState<string>('');
+  const [restBreakNextTitle, setRestBreakNextTitle] = useState<string>('');
 
   // Load preview draft state
   useEffect(() => {
@@ -106,7 +113,24 @@ export default function SplitTestRoom({
     return () => clearInterval(qTimer);
   }, [currentIndex]);
 
-  // Anti-cheat detector
+  // 30-Second Rest Break Countdown Timer
+  useEffect(() => {
+    if (!showRestBreakModal) return;
+
+    const breakTimer = setInterval(() => {
+      setRestBreakSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(breakTimer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(breakTimer);
+  }, [showRestBreakModal]);
+
+  // Out-Web Anti-cheat detector (triggers modal popup when focus is lost)
   useEffect(() => {
     if (isPreview) return;
 
@@ -114,23 +138,40 @@ export default function SplitTestRoom({
       if (document.hidden) {
         setAntiCheatViolations((prev) => {
           const count = prev + 1;
-          logAntiCheatEvent('tab_switch', `Thí sinh chuyển tab (Lần ${count})`);
+          logAntiCheatEvent('tab_switch', `Thí sinh rời khỏi màn hình/chuyển tab (Lần ${count})`);
           return count;
         });
         setShowAntiCheatModal(true);
       }
     };
 
+    const handleWindowBlur = () => {
+      setAntiCheatViolations((prev) => {
+        const count = prev + 1;
+        logAntiCheatEvent('window_blur', `Thí sinh mất tập trung cửa sổ làm bài (Lần ${count})`);
+        return count;
+      });
+      setShowAntiCheatModal(true);
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+    };
   }, [isPreview]);
 
-  const logAntiCheatEvent = async (eventType: string, details: string) => {
+  const logAntiCheatEvent = (eventType: 'tab_switch' | 'window_blur' | 'fullscreen_exit', details?: string) => {
     try {
-      await fetch('/api/student/anticheat', {
+      fetch('/api/student/anticheat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId: studentId,
+          userName: studentName,
+          studentId,
           examId,
           moduleId: module.id,
           eventType,
@@ -142,26 +183,21 @@ export default function SplitTestRoom({
     }
   };
 
-  const handleSingleSelect = (optionId: string) => {
-    if (!currentQuestion) return;
+  const handleSingleSelect = (optId: string) => {
     setUserAnswers((prev) => ({
       ...prev,
-      [currentQuestion.id]: optionId,
+      [currentQuestion.id]: optId,
     }));
   };
 
-  const handleMultipleSelect = (optionId: string) => {
-    if (!currentQuestion) return;
+  const handleMultipleSelect = (optId: string) => {
     const currentList: string[] = Array.isArray(userAnswers[currentQuestion.id])
       ? userAnswers[currentQuestion.id]
       : [];
 
-    let updated: string[];
-    if (currentList.includes(optionId)) {
-      updated = currentList.filter(id => id !== optionId);
-    } else {
-      updated = [...currentList, optionId];
-    }
+    const updated = currentList.includes(optId)
+      ? currentList.filter((id) => id !== optId)
+      : [...currentList, optId];
 
     setUserAnswers((prev) => ({
       ...prev,
@@ -170,7 +206,6 @@ export default function SplitTestRoom({
   };
 
   const handleFillBlankChange = (val: string) => {
-    if (!currentQuestion) return;
     setUserAnswers((prev) => ({
       ...prev,
       [currentQuestion.id]: val,
@@ -179,25 +214,26 @@ export default function SplitTestRoom({
 
   const handleNextQuestion = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex((prev) => prev + 1);
     }
   };
 
   const handlePrevQuestion = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+      setCurrentIndex((prev) => prev - 1);
     }
   };
 
   const handleAutoSubmit = () => {
-    executeSubmission();
+    handleSubmit(true);
   };
 
-  const executeSubmission = async () => {
-    if (isPreview) {
-      alert('Đang trong chế độ xem trước (Draft Preview). Bài làm không được lưu vào CSDL.');
-      setShowSubmitModal(false);
-      return;
+  const handleSubmit = async (isAuto = false) => {
+    if (isSubmitting) return;
+
+    if (!isAuto && answeredCount < questions.length) {
+      const confirmSubmit = confirm(`Bạn mới làm ${answeredCount}/${questions.length} câu hỏi. Bạn có chắc chắn muốn nộp phần thi này không?`);
+      if (!confirmSubmit) return;
     }
 
     setIsSubmitting(true);
@@ -228,6 +264,32 @@ export default function SplitTestRoom({
           spread: 70,
           origin: { y: 0.6 }
         });
+
+        // Fetch Exam Modules to determine Sequential Rest Break Flow (Math -> Reading -> Science)
+        const examRes = await fetch('/api/student/exams').then(r => r.json());
+        const foundExam = (examRes.exams || []).find((e: any) => e.id === examId);
+
+        if (foundExam && foundExam.modules) {
+          const mathMod = foundExam.modules.find((m: any) => m.category === 'math');
+          const readingMod = foundExam.modules.find((m: any) => m.category === 'reading');
+          const scienceMod = foundExam.modules.find((m: any) => m.category === 'science');
+
+          if (module.category === 'math' && readingMod) {
+            setRestBreakNextModuleId(readingMod.id);
+            setRestBreakNextTitle('Phần 2: Tư duy Đọc hiểu (30 Phút)');
+            setShowRestBreakModal(true);
+            setIsSubmitting(false);
+            return;
+          } else if (module.category === 'reading' && scienceMod) {
+            setRestBreakNextModuleId(scienceMod.id);
+            setRestBreakNextTitle('Phần 3: Tư duy Khoa học & GQVĐ (60 Phút)');
+            setShowRestBreakModal(true);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+
+        // All 3 parts completed -> Navigate to Final Total Results
         router.push(`/results/${data.submission.id}`);
       } else {
         alert(data.error || 'Có lỗi xảy ra khi nộp bài');
@@ -238,6 +300,11 @@ export default function SplitTestRoom({
       alert('Không thể kết nối máy chủ để nộp bài');
       setIsSubmitting(false);
     }
+  };
+
+  const handleStartNextModuleFromRestBreak = () => {
+    setShowRestBreakModal(false);
+    router.push(`/exams/${examId}/room?module=${restBreakNextModuleId}`);
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -273,18 +340,18 @@ export default function SplitTestRoom({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none text-slate-900">
       
       {/* Draft Preview Banner */}
       {isPreview && (
-        <div className="bg-amber-500 text-amber-950 px-4 py-2 text-xs font-bold flex items-center justify-between shadow-xs sticky top-0 z-40 border-b border-amber-600">
+        <div className="bg-amber-500 text-amber-950 px-4 py-2 text-xs font-extrabold flex items-center justify-between shadow-xs sticky top-0 z-40 border-b border-amber-600">
           <div className="flex items-center gap-2">
             <Eye className="w-4 h-4 text-amber-950 animate-bounce" />
-            <span>CHẾ ĐỘ XEM TRƯỚC DRAFT PREVIEW (Bài thi chưa ghi vào CSDL chính thức)</span>
+            <span>CHẾ ĐỘ XEM TRƯỚC PREVIEW (Chưa ghi nhận điểm chính thức)</span>
           </div>
           <button
-            onClick={() => router.push('/admin/exams/editor')}
-            className="bg-amber-950 text-white hover:bg-black font-bold px-3 py-1 rounded-md transition flex items-center gap-1 text-[11px]"
+            onClick={() => router.push(`/admin/exams/editor?id=${examId}`)}
+            className="bg-amber-950 text-white hover:bg-black font-extrabold px-3 py-1 rounded-md transition flex items-center gap-1 text-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Quay lại Trình soạn thảo Admin
           </button>
@@ -292,24 +359,26 @@ export default function SplitTestRoom({
       )}
 
       {/* Top Header Bar */}
-      <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-xs sticky top-0 z-30">
+      <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between shadow-xs sticky top-0 z-30">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-crimson font-black text-2xl tracking-tighter">TSA</span>
-            <span className="font-bold text-slate-800 text-base hidden sm:inline">
-              Kíp thi {module.title.replace(/^\d+\.\s*/, '')} {isPreview ? '[DRAFT PREVIEW]' : '- NỘI BỘ'}
+            <span className="bg-[#d90429] text-white font-black text-2xl tracking-tighter px-3 py-0.5 rounded-lg shadow-xs">
+              TSA
+            </span>
+            <span className="font-extrabold text-slate-900 text-base sm:text-lg hidden sm:inline">
+              Kíp thi {module.title.replace(/^\d+\.\s*/, '')} {isPreview ? '[PREVIEW]' : '- CHUẨN HOÁ'}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
-          <span className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Máy chủ trực tuyến
+        <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
+          <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Máy chủ khảo thí trực tuyến
           </span>
           {antiCheatViolations > 0 && !isPreview && (
-            <span className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-300">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              Cảnh báo tab: {antiCheatViolations}
+            <span className="flex items-center gap-1 text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-300 font-extrabold">
+              <ShieldAlert className="w-4 h-4" />
+              Vi phạm: {antiCheatViolations}/3
             </span>
           )}
         </div>
@@ -318,22 +387,22 @@ export default function SplitTestRoom({
       {/* Main Split Screen Container */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden max-w-[1600px] w-full mx-auto p-3 sm:p-6 gap-6">
         
-        {/* LEFT PANEL */}
-        <div className="flex-1 flex flex-col bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        {/* LEFT PANEL: QUESTION PROMPT & ANSWERS */}
+        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           
-          <div className="flex-1 p-6 overflow-y-auto space-y-6">
+          <div className="flex-1 p-5 sm:p-8 overflow-y-auto space-y-6">
             
             {/* Persistent Passage Context Container */}
             {activePassageText && (
-              <div className="bg-slate-50 border border-slate-300 p-5 rounded-2xl text-slate-800 text-sm leading-relaxed space-y-4 shadow-xs sticky top-0 z-10 max-h-96 overflow-y-auto">
-                <div className="font-extrabold text-xs uppercase tracking-wider text-crimson flex items-center justify-between border-b border-slate-200 pb-2">
+              <div className="bg-purple-50/50 border border-purple-200 p-5 sm:p-6 rounded-2xl text-slate-800 text-sm leading-relaxed space-y-4 shadow-2xs sticky top-0 z-10 max-h-96 overflow-y-auto">
+                <div className="font-extrabold text-xs uppercase tracking-wider text-purple-900 flex items-center justify-between border-b border-purple-200 pb-2">
                   <span className="flex items-center gap-1.5">
-                    <FileText className="w-4 h-4" />
+                    <FileText className="w-4 h-4 text-purple-700" />
                     {currentGroup?.title || 'Bối cảnh / Đoạn văn đọc hiểu (KaTeX Math Enabled)'}
                   </span>
                 </div>
 
-                <div className="font-serif text-slate-900 text-sm sm:text-base leading-relaxed">
+                <div className="font-serif text-slate-900 text-base sm:text-lg leading-relaxed">
                   <MathText content={activePassageText} />
                 </div>
 
@@ -346,52 +415,52 @@ export default function SplitTestRoom({
             )}
 
             {/* Question Heading & Prompt */}
-            <div className="space-y-4 pt-2">
+            <div className="space-y-5 pt-2">
               <div className="flex items-start gap-4">
-                <span className="bg-slate-900 text-white font-black px-3.5 py-1.5 rounded-xl text-base min-w-[3rem] text-center border border-slate-800 shadow-xs">
+                <span className="bg-[#d90429] text-white font-black px-4 py-2 rounded-2xl text-lg sm:text-xl min-w-[3.5rem] text-center border border-red-700 shadow-sm shrink-0">
                   {currentQuestion?.number || currentIndex + 1}
                 </span>
                 <div className="space-y-2 pt-1 flex-1">
                   <div className="flex items-center gap-2">
                     {qType === 'multiple_choice' && (
-                      <span className="bg-purple-100 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-purple-200">
-                        Chọn nhiều đáp án đúng
+                      <span className="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-lg border border-purple-200">
+                        Nhiều đáp án (Chọn Đúng/Sai từng ý)
                       </span>
                     )}
                     {qType === 'fill_blank' && (
-                      <span className="bg-amber-100 text-amber-900 text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-amber-200">
-                        Điền đáp án (Số / Phân số / Chuỗi)
+                      <span className="bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-lg border border-amber-200">
+                        Điền đáp án (Số / Phân số / Chuỗi ngắn)
                       </span>
                     )}
                     {qType === 'single_choice' && (
-                      <span className="bg-blue-50 text-blue-700 text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-blue-200">
-                        Chọn 1 đáp án đúng
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-lg border border-blue-200">
+                        Trắc nghiệm (Chọn 1 đáp án A/B/C/D)
                       </span>
                     )}
                   </div>
 
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug">
                     <MathText content={currentQuestion?.text} />
                   </h2>
                 </div>
               </div>
 
-              {/* Question Image */}
+              {/* 📷 QUESTION IMAGE PROMPT (ĐỀ BÀI LÀ ẢNH CÓ ĐÁP ÁN A/B/C/D) */}
               {currentQuestion?.imageUrl && !activePassageImage && (
-                <div className="pl-0 sm:pl-16 pt-2">
-                  <div className={`rounded-xl border border-slate-200 p-2 bg-slate-50 overflow-hidden ${getImageSizeClass(currentQuestion.imageSize)}`}>
+                <div className="pt-2">
+                  <div className="rounded-2xl border-2 border-slate-200 p-3 bg-slate-50 overflow-hidden shadow-xs">
                     <img
                       src={currentQuestion.imageUrl}
                       alt={`Minh họa câu ${currentQuestion.number}`}
-                      className="w-full h-auto rounded-lg object-contain"
+                      className="w-full h-auto rounded-xl object-contain max-h-[480px] mx-auto"
                     />
                   </div>
                 </div>
               )}
 
-              {/* Single Choice Options */}
+              {/* Single Choice Options (A/B/C/D) - ENLARGED BUTTONS FOR BETTER TESTING UX */}
               {qType === 'single_choice' && (
-                <div className="pl-0 sm:pl-16 space-y-3 pt-2">
+                <div className="space-y-3.5 pt-3">
                   {currentQuestion?.options.map((opt, idx) => {
                     const letter = String.fromCharCode(65 + idx);
                     const isSelected = userAnswers[currentQuestion.id] === opt.id;
@@ -400,22 +469,22 @@ export default function SplitTestRoom({
                       <button
                         key={opt.id}
                         onClick={() => handleSingleSelect(opt.id)}
-                        className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
+                        className={`w-full text-left p-5 sm:p-6 rounded-2xl border-2 transition-all flex items-center gap-4 ${
                           isSelected
-                            ? 'border-crimson bg-rose-50/50 shadow-xs'
-                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                            ? 'border-[#d90429] bg-rose-50/70 shadow-md scale-[1.01]'
+                            : 'border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50'
                         }`}
                       >
                         <span
-                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-base transition-colors shrink-0 ${
                             isSelected
-                              ? 'bg-crimson text-white shadow-xs'
-                              : 'bg-rose-50 text-crimson border border-rose-200'
+                              ? 'bg-[#d90429] text-white shadow-xs'
+                              : 'bg-rose-50 text-[#d90429] border border-rose-200'
                           }`}
                         >
                           {letter}
                         </span>
-                        <span className="text-sm sm:text-base font-medium text-slate-800 flex-1">
+                        <span className="text-base sm:text-lg font-bold text-slate-800 flex-1">
                           <MathText content={opt.text} />
                         </span>
                       </button>
@@ -424,9 +493,9 @@ export default function SplitTestRoom({
                 </div>
               )}
 
-              {/* Multiple Choice Options */}
+              {/* Multiple Choice Options (True/False) */}
               {qType === 'multiple_choice' && (
-                <div className="pl-0 sm:pl-16 space-y-3 pt-2">
+                <div className="space-y-3.5 pt-3">
                   {currentQuestion?.options.map((opt, idx) => {
                     const letter = String.fromCharCode(65 + idx);
                     const selectedList: string[] = Array.isArray(userAnswers[currentQuestion.id])
@@ -438,14 +507,14 @@ export default function SplitTestRoom({
                       <button
                         key={opt.id}
                         onClick={() => handleMultipleSelect(opt.id)}
-                        className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
+                        className={`w-full text-left p-5 sm:p-6 rounded-2xl border-2 transition-all flex items-center gap-4 ${
                           isSelected
-                            ? 'border-purple-600 bg-purple-50/50 shadow-xs'
-                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80'
+                            ? 'border-purple-600 bg-purple-50/70 shadow-md scale-[1.01]'
+                            : 'border-slate-200 bg-white hover:border-purple-300 hover:bg-slate-50'
                         }`}
                       >
                         <span
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm transition-colors ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-base transition-colors shrink-0 ${
                             isSelected
                               ? 'bg-purple-600 text-white shadow-xs'
                               : 'bg-purple-50 text-purple-700 border border-purple-200'
@@ -453,7 +522,7 @@ export default function SplitTestRoom({
                         >
                           {letter}
                         </span>
-                        <span className="text-sm sm:text-base font-medium text-slate-800 flex-1">
+                        <span className="text-base sm:text-lg font-bold text-slate-800 flex-1">
                           <MathText content={opt.text} />
                         </span>
                       </button>
@@ -464,17 +533,17 @@ export default function SplitTestRoom({
 
               {/* Fill in the Blank Input */}
               {qType === 'fill_blank' && (
-                <div className="pl-0 sm:pl-16 space-y-3 pt-2">
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 space-y-3">
-                    <label className="block text-xs font-bold text-amber-900 uppercase tracking-wide">
-                      Nhập kết quả của thí sinh:
+                <div className="space-y-3 pt-3">
+                  <div className="bg-amber-50 border border-amber-300 rounded-2xl p-6 space-y-3">
+                    <label className="block text-xs font-extrabold text-amber-900 uppercase tracking-wide">
+                      Nhập kết quả làm bài của thí sinh:
                     </label>
                     <input
                       type="text"
                       placeholder="Ví dụ: 80 hoặc 2.5 hoặc 5/2"
                       value={userAnswers[currentQuestion.id] || ''}
                       onChange={(e) => handleFillBlankChange(e.target.value)}
-                      className="w-full bg-white border border-amber-300 rounded-xl px-4 py-3 text-base font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                      className="w-full bg-white border border-amber-400 rounded-xl px-5 py-4 text-lg font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
                     />
                   </div>
                 </div>
@@ -482,10 +551,10 @@ export default function SplitTestRoom({
 
               {/* EXPLANATION SECTION (TEXT + IMAGE + AI GENERATOR) */}
               {(currentQuestion?.explanation || currentQuestion?.explanationImageUrl || isPreview) && (
-                <div className="pl-0 sm:pl-16 pt-4 border-t border-slate-100">
+                <div className="pt-4 border-t border-slate-200">
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-200 pb-2">
-                      <span className="font-extrabold text-xs uppercase tracking-wider text-crimson flex items-center gap-1.5">
+                      <span className="font-extrabold text-xs uppercase tracking-wider text-[#d90429] flex items-center gap-1.5">
                         <FileText className="w-4 h-4" /> Lời giải chi tiết & Đáp án
                       </span>
                     </div>
@@ -511,176 +580,179 @@ export default function SplitTestRoom({
             </div>
           </div>
 
-          {/* Left Panel Fixed Bottom Toolbar */}
+          {/* Left Panel Fixed Bottom Toolbar (ENLARGED CONTROLS) */}
           <div className="border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={handlePrevQuestion}
                 disabled={currentIndex === 0}
-                className="bg-slate-800 hover:bg-slate-900 disabled:opacity-40 text-white font-bold px-4 py-2.5 rounded-lg text-sm flex items-center gap-1 transition"
+                className="bg-slate-800 hover:bg-slate-900 disabled:opacity-40 text-white font-extrabold px-5 py-3 rounded-xl text-sm flex items-center gap-1 transition shadow-xs"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" /> Câu trước
               </button>
 
               <button
                 onClick={handleNextQuestion}
                 disabled={currentIndex === questions.length - 1}
-                className="bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-bold px-5 py-2.5 rounded-lg text-sm flex items-center gap-1 transition shadow-xs"
+                className="bg-slate-900 hover:bg-black disabled:opacity-40 text-white font-extrabold px-6 py-3 rounded-xl text-sm flex items-center gap-1 transition shadow-md"
               >
-                Câu tiếp <ChevronRight className="w-4 h-4" />
+                Câu tiếp <ChevronRight className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-600 font-semibold text-xs sm:text-sm">
-              <span>Thời gian làm câu hiện tại</span>
-              <span className="bg-white border border-slate-300 font-mono font-bold text-slate-800 px-3 py-1 rounded-md">
+            <div className="flex items-center gap-2 text-slate-700 font-bold text-xs sm:text-sm">
+              <span>Thời gian làm câu hiện tại:</span>
+              <span className="bg-white border border-slate-300 font-mono font-black text-slate-900 px-3.5 py-1.5 rounded-lg shadow-2xs">
                 {formatQuestionTime(questionSeconds)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* RIGHT PANEL: QUESTION STATE INDICATORS GRID */}
-        <div className="w-full md:w-80 lg:w-96 flex flex-col gap-5">
+        {/* RIGHT PANEL: QUESTION STATE GRID & SUBMIT */}
+        <div className="w-full md:w-80 lg:w-96 flex flex-col gap-5 shrink-0">
           
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide border-b border-slate-100 pb-2">
-              Thông tin thí sinh
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide border-b border-slate-100 pb-2">
+              Thông tin thí sinh & Thời gian
             </h3>
             
             <div className="space-y-2 text-xs sm:text-sm">
               <div className="flex justify-between items-center text-slate-600">
-                <span>Họ tên</span>
-                <span className="font-bold text-slate-900">{studentName}</span>
+                <span>Họ và tên:</span>
+                <span className="font-extrabold text-slate-900">{studentName}</span>
               </div>
               <div className="flex justify-between items-center text-slate-600">
-                <span>Mã dự thi</span>
+                <span>Mã dự thi:</span>
                 <span className="font-mono font-bold text-slate-800">{studentId}</span>
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-3">
+            <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-100">
               <div className="flex flex-col">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase">Thời gian còn lại</span>
-                <span className={`font-mono font-extrabold text-xl sm:text-2xl ${globalSeconds < 300 ? 'text-crimson animate-pulse' : 'text-slate-900'}`}>
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Thời gian còn lại</span>
+                <span className={`font-mono font-black text-2xl ${globalSeconds < 300 ? 'text-[#d90429] animate-pulse' : 'text-slate-900'}`}>
                   {formatTime(globalSeconds)}
                 </span>
               </div>
 
               <button
-                onClick={() => setShowSubmitModal(true)}
-                className="bg-crimson hover:bg-rose-700 text-white font-black px-6 py-2.5 rounded-lg text-sm transition shadow-md hover:shadow-lg transform active:scale-95"
+                onClick={() => handleSubmit(false)}
+                disabled={isSubmitting}
+                className="bg-[#d90429] hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl text-sm transition shadow-md hover:shadow-lg active:scale-95 flex items-center gap-1.5"
               >
-                Nộp bài
+                {isSubmitting ? 'Đang nộp...' : 'Nộp bài'}
               </button>
             </div>
           </div>
 
-          {/* REQUIREMENT 2: QUESTION STATE INDICATORS GRID */}
-          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex-1 flex flex-col justify-between space-y-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-500">
-                  DANH SÁCH CÂU HỎI ({questions.length} CÂU)
-                </h4>
-                <div className="flex gap-2 text-[10px] font-bold">
-                  <span className="flex items-center gap-1 text-slate-500">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-200"></span> Chưa làm
-                  </span>
-                  <span className="flex items-center gap-1 text-crimson">
-                    <span className="w-2.5 h-2.5 rounded-full bg-crimson"></span> Đã làm
-                  </span>
-                </div>
-              </div>
-
-              {/* Grid Buttons */}
-              <div className="grid grid-cols-5 gap-2 max-h-72 overflow-y-auto pr-1">
-                {questions.map((q, idx) => {
-                  const val = userAnswers[q.id];
-                  const isAttempted = Array.isArray(val) ? val.length > 0 : !!val && String(val).trim() !== '';
-                  const isActive = idx === currentIndex;
-
-                  // State styling:
-                  // Unattempted: White/Gray background
-                  // Attempted: Solid Crimson background
-                  // Active: Distinct visual ring/border scale
-                  let btnStyle = 'bg-white text-slate-700 hover:bg-slate-100 border-slate-300';
-                  if (isAttempted) {
-                    btnStyle = 'bg-crimson text-white font-bold border-rose-700 shadow-xs';
-                  }
-
-                  let activeRing = '';
-                  if (isActive) {
-                    activeRing = 'ring-4 ring-slate-900 border-slate-900 scale-105 font-extrabold z-10 shadow-md';
-                  }
-
-                  return (
-                    <button
-                      key={q.id}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`w-10 h-10 rounded-full text-xs transition-all flex items-center justify-center mx-auto border ${btnStyle} ${activeRing}`}
-                    >
-                      {q.number || idx + 1}
-                    </button>
-                  );
-                })}
-              </div>
+          {/* Question Grid Map */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3 flex-1 overflow-y-auto max-h-[420px]">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h4 className="font-extrabold text-xs text-slate-900 uppercase">Danh sách câu hỏi ({questions.length} câu)</h4>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                Đã làm: {answeredCount}/{questions.length}
+              </span>
             </div>
 
-            {/* Completion Progress Bar */}
-            <div className="border-t border-slate-100 pt-4 space-y-2">
-              <div className="flex justify-between items-center text-xs font-semibold text-slate-600">
-                <span>Đã hoàn thành</span>
-                <span className="font-bold text-slate-900">
-                  {answeredCount}/{questions.length} câu - {progressPercent}%
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
-                <div
-                  className="bg-crimson h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
-                ></div>
-              </div>
+            <div className="grid grid-cols-5 gap-2 pt-1">
+              {questions.map((q, idx) => {
+                const isAnswered = !!userAnswers[q.id];
+                const isCurrent = idx === currentIndex;
+
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`h-10 rounded-xl font-black text-xs transition flex items-center justify-center border-2 ${
+                      isCurrent
+                        ? 'border-[#d90429] bg-rose-50 text-[#d90429] shadow-xs'
+                        : isAnswered
+                          ? 'border-emerald-500 bg-emerald-500 text-white'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {q.number || idx + 1}
+                  </button>
+                );
+              })}
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* SUBMIT CONFIRMATION MODAL */}
-      {showSubmitModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl border border-slate-200">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-rose-100 text-crimson flex items-center justify-center mx-auto">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-extrabold text-slate-900">
-                {isPreview ? 'Nộp bài thử nghiệm (Draft Preview)' : 'Xác nhận nộp bài thi?'}
+      {/* 🚨 OUT-WEB ANTI-CHEAT WARNING POPUP MODAL */}
+      {showAntiCheatModal && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border-4 border-rose-600 max-w-md w-full p-6 text-center space-y-4 shadow-2xl animate-in zoom-in-95">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+              <ShieldAlert className="w-10 h-10" />
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-rose-700 uppercase tracking-tight">
+                CẢNH BÁO VI PHẠM NỘI QUY THI!
               </h3>
-              <p className="text-sm text-slate-600">
-                Bạn đã trả lời <strong className="text-slate-900">{answeredCount}/{questions.length}</strong> câu hỏi.
+              <p className="text-xs text-slate-600 font-bold">
+                Hệ thống giám sát phát hiện bạn vừa rời khỏi màn hình làm bài thi.
               </p>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowSubmitModal(false)}
-                disabled={isSubmitting}
-                className="flex-1 border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 rounded-xl text-sm transition"
-              >
-                Làm tiếp
-              </button>
-              <button
-                onClick={executeSubmission}
-                disabled={isSubmitting}
-                className="flex-1 bg-crimson hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? 'Đang nộp...' : 'Xác nhận nộp'}
-              </button>
+            <div className="p-4 bg-rose-50 rounded-2xl border border-rose-200 text-rose-900 font-extrabold text-sm space-y-1">
+              <div>Số lần vi phạm ghi nhận: <span className="text-xl font-black text-rose-700">{antiCheatViolations}/3</span></div>
+              <p className="text-[11px] font-normal text-rose-700">Nếu tiếp tục chuyển tab, bài thi sẽ bị tự động thu hồi và hủy kết quả.</p>
             </div>
+
+            <button
+              onClick={() => setShowAntiCheatModal(false)}
+              className="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3.5 rounded-xl text-sm transition shadow-md"
+            >
+              Tôi đã hiểu & Quay lại làm bài ngay
+            </button>
           </div>
         </div>
       )}
+
+      {/* 🌿 30-SECOND REST BREAK SCREEN BETWEEN SEQUENTIAL MODULES */}
+      {showRestBreakModal && (
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-8 text-center space-y-6 shadow-2xl animate-in zoom-in-95">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Coffee className="w-10 h-10" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-1 rounded-full uppercase tracking-wider">
+                NHẬN ĐIỂM SỐ & NGHỈ NGƠI TỰ ĐỘNG
+              </span>
+              <h3 className="text-2xl font-black text-slate-900">
+                Đã hoàn thành phần thi!
+              </h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Hệ thống đã tính điểm và ghi nhớ kết quả phần thi này của bạn vào CSDL. Hãy nghỉ ngơi 30 giây để chuẩn bị tốt nhất cho phần thi tiếp theo.
+              </p>
+            </div>
+
+            {/* 30s Countdown Timer Display */}
+            <div className="p-6 bg-slate-900 text-white rounded-2xl space-y-1 shadow-md">
+              <div className="text-xs text-slate-400 font-bold uppercase tracking-widest">Thời gian nghỉ thư giãn</div>
+              <div className="font-mono text-4xl font-black text-amber-400">
+                00:{restBreakSeconds.toString().padStart(2, '0')}
+              </div>
+            </div>
+
+            {/* Primary Action Button to Start Next Module */}
+            <button
+              onClick={handleStartNextModuleFromRestBreak}
+              className="w-full bg-[#d90429] hover:bg-red-700 text-white font-black py-4 rounded-2xl text-base transition shadow-xl hover:shadow-2xl flex items-center justify-center gap-2"
+            >
+              <span>🚀 BẮT ĐẦU: {restBreakNextTitle}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
