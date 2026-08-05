@@ -16,6 +16,7 @@ export interface User {
 export interface QuestionOption {
   id: string;
   text: string;
+  isCorrect?: boolean; // For 2-column True/False multiple choice option evaluation
 }
 
 export interface QuestionGroup {
@@ -40,10 +41,11 @@ export interface Question {
   imageSize?: 'small' | 'medium' | 'large' | 'full';
   options: QuestionOption[];
   correctOptionId?: string; // For single choice
-  correctOptionIds?: string[]; // For multiple choice (exact match required)
+  correctOptionIds?: string[]; // For multiple choice
   fillBlankAnswers?: string[]; // Acceptable correct values for fill in the blank
   explanation?: string; // Text / KaTeX explanation
   explanationImageUrl?: string; // Image upload URL for explanation / step-by-step solution
+  correctionNote?: string; // Errata note / Ghi chú đính chính cho đề thi (nếu có)
 }
 
 export interface ExamModule {

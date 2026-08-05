@@ -26,7 +26,24 @@ export async function POST(req: NextRequest) {
 
     const gradedAnswers = answers.map((ans: UserAnswer) => {
       const q = questions.find(question => question.id === ans.questionId);
-      const isCorrect = q ? q.correctOptionId === ans.selectedOptionId : false;
+      let isCorrect = false;
+
+      if (q) {
+        if (q.type === 'multiple_choice') {
+          // Compare student selected True option IDs against q.correctOptionIds
+          const correctIds = q.correctOptionIds || [];
+          const studentIds = ans.selectedOptionIds || [];
+          const isMatch = correctIds.length === studentIds.length && correctIds.every(id => studentIds.includes(id));
+          isCorrect = isMatch;
+        } else if (q.type === 'fill_blank') {
+          const accepted = q.fillBlankAnswers || [];
+          const val = (ans.fillBlankValue || '').trim().toLowerCase();
+          isCorrect = accepted.some(a => a.trim().toLowerCase() === val);
+        } else {
+          isCorrect = q.correctOptionId === ans.selectedOptionId;
+        }
+      }
+
       if (isCorrect) correctCount++;
       return {
         ...ans,

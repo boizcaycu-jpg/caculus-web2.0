@@ -410,6 +410,17 @@ export default function SplitTestRoom({
 
             {/* Question Heading & Prompt */}
             <div className="space-y-5 pt-2">
+              {/* 📌 ERRATA CORRECTION NOTE WARNING BANNER */}
+              {currentQuestion?.correctionNote && (
+                <div className="bg-amber-50 border-2 border-amber-400 p-4 rounded-2xl flex items-center gap-3 text-amber-900 shadow-2xs">
+                  <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 animate-pulse" />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-800">📌 GHI CHÚ ĐÍNH CHÍNH TỪ HỘI ĐỒNG KHẢO THÍ:</span>
+                    <p className="text-sm font-bold text-slate-900">{currentQuestion.correctionNote}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-start gap-4">
                 <span className="bg-[#d90429] text-white font-black px-4 py-2 rounded-2xl text-lg sm:text-xl min-w-[3.5rem] text-center border border-red-700 shadow-sm shrink-0">
                   {currentQuestion?.number || currentIndex + 1}
@@ -418,7 +429,7 @@ export default function SplitTestRoom({
                   <div className="flex items-center gap-2">
                     {qType === 'multiple_choice' && (
                       <span className="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-lg border border-purple-200">
-                        Nhiều đáp án (Chọn Đúng/Sai từng ý)
+                        Đánh giá 4 mệnh đề (Chọn Đúng/Sai 2 cột)
                       </span>
                     )}
                     {qType === 'fill_blank' && (
@@ -487,39 +498,71 @@ export default function SplitTestRoom({
                 </div>
               )}
 
-              {/* Multiple Choice Options (True/False) */}
+              {/* Multiple Choice Options (2-COLUMN TRUE/FALSE SELECTION TABLE) */}
               {qType === 'multiple_choice' && (
-                <div className="space-y-3.5 pt-3">
-                  {currentQuestion?.options.map((opt, idx) => {
-                    const letter = String.fromCharCode(65 + idx);
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4 pt-3">
+                  <div className="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center justify-between border-b border-slate-200 pb-3">
+                    <span>Đánh giá 4 ý mệnh đề (a, b, c, d)</span>
+                    <div className="flex gap-12 pr-6 font-black text-xs">
+                      <span className="text-emerald-700">ĐÚNG</span>
+                      <span className="text-rose-700">SAI</span>
+                    </div>
+                  </div>
+
+                  {['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((optId, idx) => {
+                    const letter = String.fromCharCode(97 + idx); // a, b, c, d
                     const selectedList: string[] = Array.isArray(userAnswers[currentQuestion.id])
                       ? userAnswers[currentQuestion.id]
                       : [];
-                    const isSelected = selectedList.includes(opt.id);
+                    
+                    const isSelectedTrue = selectedList.includes(optId);
+                    const optionObj = currentQuestion?.options?.find(o => o.id === optId) || { id: optId, text: `Ý ${letter}` };
 
                     return (
-                      <button
-                        key={opt.id}
-                        onClick={() => handleMultipleSelect(opt.id)}
-                        className={`w-full text-left p-5 sm:p-6 rounded-2xl border-2 transition-all flex items-center gap-4 ${
-                          isSelected
-                            ? 'border-purple-600 bg-purple-50/70 shadow-md scale-[1.01]'
-                            : 'border-slate-200 bg-white hover:border-purple-300 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-base transition-colors shrink-0 ${
-                            isSelected
-                              ? 'bg-purple-600 text-white shadow-xs'
-                              : 'bg-purple-50 text-purple-700 border border-purple-200'
-                          }`}
-                        >
-                          {letter}
-                        </span>
-                        <span className="text-base sm:text-lg font-bold text-slate-800 flex-1">
-                          <MathText content={opt.text} />
-                        </span>
-                      </button>
+                      <div key={optId} className="flex items-center justify-between gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                        <div className="flex items-center gap-3 flex-1">
+                          <span className="w-8 h-8 rounded-lg bg-purple-100 text-purple-900 font-black text-sm flex items-center justify-center shrink-0">
+                            {letter}
+                          </span>
+                          <span className="text-base sm:text-lg font-bold text-slate-900 flex-1">
+                            <MathText content={optionObj.text} />
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0">
+                          {/* Column 1: ĐÚNG */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextList = Array.from(new Set([...selectedList, optId]));
+                              setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: nextList }));
+                            }}
+                            className={`px-5 py-2.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 border-2 ${
+                              isSelectedTrue
+                                ? 'bg-emerald-600 border-emerald-700 text-white shadow-xs'
+                                : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-emerald-50'
+                            }`}
+                          >
+                            <Check className="w-4 h-4 stroke-[3]" /> ĐÚNG
+                          </button>
+
+                          {/* Column 2: SAI */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextList = selectedList.filter(id => id !== optId);
+                              setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: nextList }));
+                            }}
+                            className={`px-5 py-2.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 border-2 ${
+                              !isSelectedTrue
+                                ? 'bg-rose-600 border-rose-700 text-white shadow-xs'
+                                : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-rose-50'
+                            }`}
+                          >
+                            <X className="w-4 h-4 stroke-[3]" /> SAI
+                          </button>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
