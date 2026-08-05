@@ -549,8 +549,8 @@ export default function SplitTestRoom({
                 </div>
               )}
 
-              {/* EXPLANATION SECTION (TEXT + IMAGE + AI GENERATOR) */}
-              {(currentQuestion?.explanation || currentQuestion?.explanationImageUrl || isPreview) && (
+              {/* EXPLANATION SECTION (ONLY VISIBLE IN ADMIN PREVIEW MODE) */}
+              {(isPreview && (currentQuestion?.explanation || currentQuestion?.explanationImageUrl)) && (
                 <div className="pt-4 border-t border-slate-200">
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-200 pb-2">

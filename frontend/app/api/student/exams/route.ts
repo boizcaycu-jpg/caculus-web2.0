@@ -16,7 +16,25 @@ export async function GET(req: NextRequest) {
   const submissions = user ? getSubmissions(user.userId) : [];
 
   if (moduleId) {
-    const questions = getQuestionsByModule(moduleId);
+    const rawQuestions = getQuestionsByModule(moduleId);
+    const questions = rawQuestions.length > 0 ? rawQuestions : [
+      {
+        id: `q-test-${moduleId}`,
+        moduleId: moduleId,
+        number: 1,
+        type: 'single_choice' as const,
+        text: '[TEST]',
+        options: [
+          { id: 'opt-a', text: 'TEST A' },
+          { id: 'opt-b', text: 'TEST B' },
+          { id: 'opt-c', text: 'TEST C' },
+          { id: 'opt-d', text: 'TEST D' },
+        ],
+        correctOptionId: 'opt-a',
+        explanation: '',
+        explanationImageUrl: '',
+      }
+    ];
     const questionGroups = getQuestionGroupsByModule(moduleId);
 
     return NextResponse.json({

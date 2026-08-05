@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import MathText from '@/components/ui/MathText';
 import { Submission, Question } from '@/types';
-import { CheckCircle2, XCircle, Trophy, ArrowLeft, RefreshCw, ShieldAlert, Sparkles, BookOpen, Lightbulb, BarChart3, Calculator, Layers } from 'lucide-react';
+import { CheckCircle2, XCircle, Trophy, ArrowLeft, RefreshCw, ShieldAlert, BookOpen, BarChart3, Calculator, Layers, Eye, Image as ImageIcon } from 'lucide-react';
 
 export default function ResultsPage() {
   const params = useParams();
@@ -17,10 +17,8 @@ export default function ResultsPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // BUG 2: On-Demand AI Explanations state
-  const [generatingState, setGeneratingState] = useState<Record<string, boolean>>({});
-  const [explanations, setExplanations] = useState<Record<string, string>>({});
-  const [expandedState, setExpandedState] = useState<Record<string, boolean>>({});
+  // Toggle state for viewing uploaded solution images per question
+  const [expandedImages, setExpandedImages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetch('/api/student/exams')
@@ -44,58 +42,14 @@ export default function ResultsPage() {
       });
   }, [submissionId]);
 
-  // BUG 2: On-Demand AI Explanation Handler
-  const handleGenerateAiExplanation = async (qObj: Question) => {
-    const qId = qObj.id;
-
-    // Toggle if already fetched
-    if (explanations[qId]) {
-      setExpandedState(prev => ({ ...prev, [qId]: !prev[qId] }));
-      return;
-    }
-
-    setGeneratingState(prev => ({ ...prev, [qId]: true }));
-
-    try {
-      const res = await fetch('/api/admin/generate-explanation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questionText: qObj.text,
-          options: qObj.options,
-          passage: qObj.passage,
-          correctOptionId: qObj.correctOptionId,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success && data.explanation) {
-        setExplanations(prev => ({ ...prev, [qId]: data.explanation }));
-        setExpandedState(prev => ({ ...prev, [qId]: true }));
-      } else {
-        // Fallback explain call
-        const fallbackRes = await fetch(`/api/student/explain?questionId=${qId}&moduleId=${qObj.moduleId}`);
-        const fallbackData = await fallbackRes.json();
-        const expText = fallbackData.explanation || 'Lời giải chi tiết: Áp dụng công thức chuẩn hóa KaTeX để tìm đáp án chính xác.';
-        setExplanations(prev => ({ ...prev, [qId]: expText }));
-        setExpandedState(prev => ({ ...prev, [qId]: true }));
-      }
-    } catch (e) {
-      console.error(e);
-      setExplanations(prev => ({ 
-        ...prev, 
-        [qId]: 'Lời giải chi tiết: Sử dụng các nguyên lý toán học và bảo toàn để suy ra đáp án đúng.' 
-      }));
-      setExpandedState(prev => ({ ...prev, [qId]: true }));
-    } finally {
-      setGeneratingState(prev => ({ ...prev, [qId]: false }));
-    }
+  const toggleSolutionImage = (qId: string) => {
+    setExpandedImages(prev => ({ ...prev, [qId]: !prev[qId] }));
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-crimson"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#d90429]"></div>
       </div>
     );
   }
@@ -104,12 +58,11 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
         <h2 className="text-xl font-bold text-slate-800">Không tìm thấy kết quả nộp bài</h2>
-        <Link href="/dashboard" className="mt-4 text-crimson font-bold underline">Quay lại Dashboard</Link>
+        <Link href="/dashboard" className="mt-4 text-[#d90429] font-bold underline">Quay lại Dashboard</Link>
       </div>
     );
   }
 
-  // BUG 3: Calculate Raw Score
   const rawCorrect = submission.correctCount || Math.round((submission.score / 100) * (submission.totalQuestions || 40));
   const rawTotal = submission.totalQuestions || 40;
 
@@ -129,14 +82,14 @@ export default function ResultsPage() {
 
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 space-y-6">
         
-        {/* BUG 3: Prominent TSA Raw Score Result Banner */}
+        {/* Prominent TSA Raw Score Result Banner */}
         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-rose-100 text-crimson flex items-center justify-center mx-auto shadow-inner">
+          <div className="w-16 h-16 rounded-full bg-rose-100 text-[#d90429] flex items-center justify-center mx-auto shadow-inner">
             <Trophy className="w-8 h-8" />
           </div>
 
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">HỘI ĐỒNG KHẢO THÍ CACULUS TSA</span>
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">HỘI ĐỒNG KHẢO THÍ CACULUS TSA</span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Báo cáo Kết quả Khảo thí</h1>
             <p className="text-xs text-slate-500 font-medium">Thí sinh: <strong>{submission.userName}</strong> ({submission.studentId})</p>
           </div>
@@ -146,8 +99,8 @@ export default function ResultsPage() {
             <div className="text-xs font-black text-slate-500 uppercase tracking-widest">TỔNG ĐIỂM THÔ (RAW SCORE)</div>
             
             <div className="relative my-3 flex items-center justify-center">
-              <div className="w-32 h-32 rounded-full border-4 border-crimson/20 bg-white flex flex-col items-center justify-center shadow-inner">
-                <span className="text-4xl font-black text-crimson leading-none">{overallRaw}</span>
+              <div className="w-32 h-32 rounded-full border-4 border-[#d90429]/20 bg-white flex flex-col items-center justify-center shadow-inner">
+                <span className="text-4xl font-black text-[#d90429] leading-none">{overallRaw}</span>
                 <span className="text-xs font-bold text-slate-400 mt-1">/ {overallTotal} câu</span>
               </div>
             </div>
@@ -160,7 +113,7 @@ export default function ResultsPage() {
           {/* 3 Section Breakdown Cards */}
           <div className="space-y-3 pt-2 text-left">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <BarChart3 className="w-4 h-4 text-crimson" />
+              <BarChart3 className="w-4 h-4 text-[#d90429]" />
               Chi tiết Điểm thô 3 phần thi TSA
             </h3>
 
@@ -169,12 +122,12 @@ export default function ResultsPage() {
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-extrabold text-slate-900 flex items-center gap-1">
-                    <Calculator className="w-4 h-4 text-crimson" /> Toán học
+                    <Calculator className="w-4 h-4 text-[#d90429]" /> Toán học
                   </span>
-                  <span className="font-mono font-black text-crimson text-sm">{mathRaw}/{mathTotal} câu</span>
+                  <span className="font-mono font-black text-[#d90429] text-sm">{mathRaw}/{mathTotal} câu</span>
                 </div>
                 <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                  <div className="bg-crimson h-full rounded-full" style={{ width: `${(mathRaw / mathTotal) * 100}%` }}></div>
+                  <div className="bg-[#d90429] h-full rounded-full" style={{ width: `${(mathRaw / mathTotal) * 100}%` }}></div>
                 </div>
               </div>
 
@@ -219,42 +172,29 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* BUG 2: ON-DEMAND AI EXPLANATIONS REVIEW SECTION */}
-          <div className="border-t border-slate-100 pt-6 space-y-6 text-left">
+          {/* ITEM QUESTION LIST WITH UPLOADED SOLUTION IMAGE VIEW TOGGLE */}
+          <div className="border-t border-slate-100 pt-6 space-y-4 text-left">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-extrabold text-slate-900 text-base uppercase tracking-wide flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-crimson" />
-                  Danh sách câu hỏi bài làm & Lời giải On-Demand AI
+                  <BookOpen className="w-5 h-5 text-[#d90429]" />
+                  Danh sách câu hỏi & Đáp án bài thi
                 </h3>
-                <p className="text-xs text-slate-500">Tạo lời giải chi tiết KaTeX trực tiếp khi cần trợ giúp</p>
+                <p className="text-xs text-slate-500">Xem lại đáp án câu đúng/sai và ảnh đáp án chi tiết (nếu có)</p>
               </div>
             </div>
 
             {/* List of itemized question cards */}
-            <div className="space-y-4">
-              {Array.from({ length: rawTotal }).map((_, idx) => {
-                const qObj: Question = questions[idx] || {
-                  id: `q-gen-${idx + 1}`,
-                  moduleId: submission.moduleId,
-                  number: idx + 1,
-                  text: `[Câu hỏi ${idx + 1}] Cho hàm số $f(x) = \\lim_{x \\to 2} \\frac{x^2 - 4}{x - 2}$ và các dữ kiện khoa học.`,
-                  options: [
-                    { id: 'opt-a', text: 'Phương án A: $x = 4$' },
-                    { id: 'opt-b', text: 'Phương án B: $x = 2$' },
-                  ],
-                  correctOptionId: 'opt-a',
-                };
-
+            <div className="space-y-3">
+              {questions.map((qObj, idx) => {
                 const isCorrect = idx % 2 === 0;
-                const isGenerating = !!generatingState[qObj.id];
-                const isExpanded = !!expandedState[qObj.id];
-                const hasExplanation = !!explanations[qObj.id];
+                const hasSolutionImage = !!qObj.explanationImageUrl;
+                const isImageExpanded = !!expandedImages[qObj.id];
 
                 return (
                   <div
                     key={qObj.id || idx}
-                    className={`rounded-2xl border transition overflow-hidden bg-white shadow-xs ${
+                    className={`rounded-2xl border transition overflow-hidden bg-white shadow-2xs ${
                       isCorrect ? 'border-emerald-200' : 'border-rose-200'
                     }`}
                   >
@@ -262,13 +202,13 @@ export default function ResultsPage() {
                     <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50/60">
                       <div className="flex items-center gap-3">
                         <span className={`w-8 h-8 rounded-full font-black text-xs flex items-center justify-center text-white ${
-                          isCorrect ? 'bg-emerald-600' : 'bg-crimson'
+                          isCorrect ? 'bg-emerald-600' : 'bg-[#d90429]'
                         }`}>
-                          {idx + 1}
+                          {qObj.number || idx + 1}
                         </span>
                         <div className="space-y-0.5">
                           <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                            <span>Câu hỏi {idx + 1}</span>
+                            <span>Câu {qObj.number || idx + 1}</span>
                             {isCorrect ? (
                               <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-[10px] font-extrabold flex items-center gap-1">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Trả lời ĐÚNG
@@ -282,37 +222,50 @@ export default function ResultsPage() {
                         </div>
                       </div>
 
-                      {/* BUG 2: ON-DEMAND AI EXPLANATION BUTTON */}
-                      <button
-                        onClick={() => handleGenerateAiExplanation(qObj)}
-                        disabled={isGenerating}
-                        className="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-xs disabled:opacity-50"
-                      >
-                        <Sparkles className={`w-4 h-4 text-amber-200 ${isGenerating ? 'animate-spin' : ''}`} />
-                        {isGenerating
-                          ? '✨ Gemini 2.5 Flash đang tạo lời giải...'
-                          : hasExplanation
-                            ? isExpanded ? 'Ẩn lời giải' : 'Xem lại lời giải AI'
-                            : '✨ Tạo lời giải bằng AI'
-                        }
-                      </button>
+                      {/* SOLUTION IMAGE TOGGLE BUTTON (Nút xem ảnh đáp án nếu Admin đã up ảnh) */}
+                      {hasSolutionImage && (
+                        <button
+                          onClick={() => toggleSolutionImage(qObj.id)}
+                          className="text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-xs"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {isImageExpanded ? 'Ẩn ảnh đáp án' : '👁️ Xem ảnh đáp án chi tiết'}
+                        </button>
+                      )}
                     </div>
 
                     {/* Question Prompt Body */}
                     <div className="p-4 border-t border-slate-100 text-xs sm:text-sm font-medium text-slate-900">
                       <MathText content={qObj.text} />
+                      {qObj.imageUrl && (
+                        <div className="pt-2">
+                          <img src={qObj.imageUrl} alt="Ảnh đề bài" className="max-h-60 w-auto rounded-lg border border-slate-200" />
+                        </div>
+                      )}
                     </div>
 
-                    {/* BUG 2: ON-DEMAND KATEX EXPLANATION CARD (Rendered ONLY after button click) */}
-                    {isExpanded && hasExplanation && (
-                      <div className="p-4 bg-amber-50/70 border-t border-amber-200 space-y-2 animate-in fade-in duration-200">
-                        <div className="text-xs font-extrabold text-amber-900 uppercase tracking-wide flex items-center gap-1.5">
-                          <Lightbulb className="w-4 h-4 text-amber-600" />
-                          Lời giải KaTeX từ Gemini 2.5 Flash:
+                    {/* Text Explanation if exists */}
+                    {qObj.explanation && (
+                      <div className="p-4 bg-slate-50 border-t border-slate-200 text-xs text-slate-800 space-y-1">
+                        <span className="font-bold text-slate-900">Lời giải chi tiết:</span>
+                        <div><MathText content={qObj.explanation} /></div>
+                      </div>
+                    )}
+
+                    {/* UPLOADED SOLUTION IMAGE CONTAINER */}
+                    {isImageExpanded && qObj.explanationImageUrl && (
+                      <div className="p-4 bg-indigo-50/60 border-t border-indigo-200 space-y-2 animate-in fade-in duration-200">
+                        <div className="text-xs font-extrabold text-indigo-900 uppercase tracking-wide flex items-center gap-1.5">
+                          <ImageIcon className="w-4 h-4 text-indigo-700" />
+                          Ảnh đáp án & Lời giải chi tiết (Admin đã tải lên):
                         </div>
 
-                        <div className="p-4 bg-white rounded-xl border border-amber-200 text-xs sm:text-sm text-slate-800 leading-relaxed font-serif shadow-xs">
-                          <MathText content={explanations[qObj.id]} />
+                        <div className="p-2 bg-white rounded-xl border border-indigo-200 flex justify-center">
+                          <img
+                            src={qObj.explanationImageUrl}
+                            alt="Ảnh đáp án chi tiết"
+                            className="max-h-96 w-auto object-contain rounded-lg shadow-sm"
+                          />
                         </div>
                       </div>
                     )}
@@ -332,7 +285,7 @@ export default function ResultsPage() {
             </Link>
             <Link
               href="/exams"
-              className="bg-crimson hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2"
+              className="bg-[#d90429] hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2"
             >
               <RefreshCw className="w-4 h-4" /> Thử sức bài thi khác
             </Link>
