@@ -76,9 +76,24 @@ export function getUsers(): User[] {
   return db.users;
 }
 
-export function getUserByEmail(email: string): User | undefined {
+export function getUserByEmail(emailOrUsername: string): User | undefined {
   const db = ensureDbFile();
-  return db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const cleanStr = emailOrUsername.trim().toLowerCase();
+  
+  return db.users.find(u => {
+    const userEmail = u.email.toLowerCase();
+    const userStudentId = (u.studentId || '').toLowerCase();
+    const userId = u.id.toLowerCase();
+
+    return (
+      userEmail === cleanStr ||
+      userEmail === `${cleanStr}@caculus.edu.vn` ||
+      userStudentId === cleanStr ||
+      userId === cleanStr ||
+      userId === `user-${cleanStr}` ||
+      userId === `user-hs-${cleanStr}`
+    );
+  });
 }
 
 export function getUserById(id: string): User | undefined {

@@ -77,18 +77,18 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} autoComplete="new-password" className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Email *</label>
+              <label className="text-xs font-bold text-slate-700">Tài khoản / Email / Mã HSSV *</label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
                 <input
-                  type="email"
+                  type="text"
                   name="auth_user_email_secure"
                   id="auth_user_email_secure"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="new-password"
-                  placeholder="Nhập email tài khoản..."
+                  placeholder="Nhập email (hs001@caculus.edu.vn) hoặc tên (hs001)..."
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-crimson/20 focus:border-crimson transition"
                 />
               </div>
