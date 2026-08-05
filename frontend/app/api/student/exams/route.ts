@@ -15,6 +15,12 @@ export async function GET(req: NextRequest) {
   const exams = getExams();
   const submissions = user ? getSubmissions(user.userId) : [];
 
+  const headers = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  };
+
   if (moduleId) {
     const rawQuestions = getQuestionsByModule(moduleId);
     const questions = rawQuestions.length > 0 ? rawQuestions : [
@@ -42,11 +48,11 @@ export async function GET(req: NextRequest) {
       submissions,
       questions,
       questionGroups,
-    });
+    }, { headers });
   }
 
   return NextResponse.json({
     exams,
     submissions,
-  });
+  }, { headers });
 }

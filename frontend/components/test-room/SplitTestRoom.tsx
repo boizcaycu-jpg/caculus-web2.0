@@ -38,10 +38,8 @@ export default function SplitTestRoom({
   const [questionSeconds, setQuestionSeconds] = useState(0);
   const [globalSeconds, setGlobalSeconds] = useState(module.durationMinutes * 60);
 
-  // Anti-cheat violation & Out-Web Modal State
-  const [antiCheatViolations, setAntiCheatViolations] = useState(0);
+  // Out-Web Warning Popup Modal State (Counter Removed as requested)
   const [showAntiCheatModal, setShowAntiCheatModal] = useState(false);
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 30-Second Rest Break State between sequential modules
@@ -49,6 +47,16 @@ export default function SplitTestRoom({
   const [restBreakSeconds, setRestBreakSeconds] = useState(30);
   const [restBreakNextModuleId, setRestBreakNextModuleId] = useState<string>('');
   const [restBreakNextTitle, setRestBreakNextTitle] = useState<string>('');
+
+  // Synchronize state whenever module or initialQuestions props change
+  useEffect(() => {
+    setQuestions(initialQuestions);
+    setQuestionGroups(initialGroups);
+    setCurrentIndex(0);
+    setUserAnswers({});
+    setQuestionSeconds(0);
+    setGlobalSeconds(module.durationMinutes * 60);
+  }, [module.id, initialQuestions, initialGroups]);
 
   // Load preview draft state
   useEffect(() => {
@@ -130,27 +138,19 @@ export default function SplitTestRoom({
     return () => clearInterval(breakTimer);
   }, [showRestBreakModal]);
 
-  // Out-Web Anti-cheat detector (triggers modal popup when focus is lost)
+  // Out-Web Anti-cheat detector (shows modal warning popup when focus is lost)
   useEffect(() => {
     if (isPreview) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setAntiCheatViolations((prev) => {
-          const count = prev + 1;
-          logAntiCheatEvent('tab_switch', `Thí sinh rời khỏi màn hình/chuyển tab (Lần ${count})`);
-          return count;
-        });
+        logAntiCheatEvent('tab_switch', 'Thí sinh rời khỏi màn hình/chuyển tab');
         setShowAntiCheatModal(true);
       }
     };
 
     const handleWindowBlur = () => {
-      setAntiCheatViolations((prev) => {
-        const count = prev + 1;
-        logAntiCheatEvent('window_blur', `Thí sinh mất tập trung cửa sổ làm bài (Lần ${count})`);
-        return count;
-      });
+      logAntiCheatEvent('window_blur', 'Thí sinh mất tập trung cửa sổ làm bài');
       setShowAntiCheatModal(true);
     };
 
@@ -253,7 +253,7 @@ export default function SplitTestRoom({
           examId,
           moduleId: module.id,
           answers: answersList,
-          antiCheatViolationCount: antiCheatViolations,
+          antiCheatViolationCount: 0,
         }),
       });
 
@@ -266,7 +266,7 @@ export default function SplitTestRoom({
         });
 
         // Fetch Exam Modules to determine Sequential Rest Break Flow (Math -> Reading -> Science)
-        const examRes = await fetch('/api/student/exams').then(r => r.json());
+        const examRes = await fetch(`/api/student/exams?t=${Date.now()}`, { cache: 'no-store' }).then(r => r.json());
         const foundExam = (examRes.exams || []).find((e: any) => e.id === examId);
 
         if (foundExam && foundExam.modules) {
@@ -371,16 +371,10 @@ export default function SplitTestRoom({
           </div>
         </div>
         <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
-          <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+          <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-extrabold">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Máy chủ khảo thí trực tuyến
+            Máy chủ khảo thí trực tuyến CACULUS
           </span>
-          {antiCheatViolations > 0 && !isPreview && (
-            <span className="flex items-center gap-1 text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-300 font-extrabold">
-              <ShieldAlert className="w-4 h-4" />
-              Vi phạm: {antiCheatViolations}/3
-            </span>
-          )}
         </div>
       </header>
 
@@ -398,7 +392,7 @@ export default function SplitTestRoom({
                 <div className="font-extrabold text-xs uppercase tracking-wider text-purple-900 flex items-center justify-between border-b border-purple-200 pb-2">
                   <span className="flex items-center gap-1.5">
                     <FileText className="w-4 h-4 text-purple-700" />
-                    {currentGroup?.title || 'Bối cảnh / Đoạn văn đọc hiểu (KaTeX Math Enabled)'}
+                    {currentGroup?.title || 'Bối cảnh / Đoạn văn đọc hiểu'}
                   </span>
                 </div>
 
@@ -445,7 +439,7 @@ export default function SplitTestRoom({
                 </div>
               </div>
 
-              {/* 📷 QUESTION IMAGE PROMPT (ĐỀ BÀI LÀ ẢNH CÓ ĐÁP ÁN A/B/C/D) */}
+              {/* 📷 QUESTION IMAGE PROMPT */}
               {currentQuestion?.imageUrl && !activePassageImage && (
                 <div className="pt-2">
                   <div className="rounded-2xl border-2 border-slate-200 p-3 bg-slate-50 overflow-hidden shadow-xs">
@@ -458,7 +452,7 @@ export default function SplitTestRoom({
                 </div>
               )}
 
-              {/* Single Choice Options (A/B/C/D) - ENLARGED BUTTONS FOR BETTER TESTING UX */}
+              {/* Single Choice Options (A/B/C/D) */}
               {qType === 'single_choice' && (
                 <div className="space-y-3.5 pt-3">
                   {currentQuestion?.options.map((opt, idx) => {
@@ -555,7 +549,7 @@ export default function SplitTestRoom({
                   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-3">
                     <div className="flex justify-between items-center border-b border-slate-200 pb-2">
                       <span className="font-extrabold text-xs uppercase tracking-wider text-[#d90429] flex items-center gap-1.5">
-                        <FileText className="w-4 h-4" /> Lời giải chi tiết & Đáp án
+                        <FileText className="w-4 h-4" /> Lời giải chi tiết & Đáp án (ADMIN PREVIEW)
                       </span>
                     </div>
 
@@ -580,7 +574,7 @@ export default function SplitTestRoom({
             </div>
           </div>
 
-          {/* Left Panel Fixed Bottom Toolbar (ENLARGED CONTROLS) */}
+          {/* Left Panel Fixed Bottom Toolbar */}
           <div className="border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
@@ -682,31 +676,29 @@ export default function SplitTestRoom({
         </div>
       </div>
 
-      {/* 🚨 OUT-WEB ANTI-CHEAT WARNING POPUP MODAL */}
+      {/* 🚨 OUT-WEB WARNING POPUP MODAL (COUNTER REMOVED AS REQUESTED) */}
       {showAntiCheatModal && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border-4 border-rose-600 max-w-md w-full p-6 text-center space-y-4 shadow-2xl animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl border-4 border-rose-600 max-w-md w-full p-6 text-center space-y-5 shadow-2xl animate-in zoom-in-95">
             <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
               <ShieldAlert className="w-10 h-10" />
             </div>
             
-            <div className="space-y-1">
-              <h3 className="text-xl font-black text-rose-700 uppercase tracking-tight">
+            <div className="space-y-2">
+              <h3 className="text-xl sm:text-2xl font-black text-rose-700 uppercase tracking-tight">
                 CẢNH BÁO VI PHẠM NỘI QUY THI!
               </h3>
-              <p className="text-xs text-slate-600 font-bold">
+              <p className="text-sm text-slate-700 font-bold leading-relaxed">
                 Hệ thống giám sát phát hiện bạn vừa rời khỏi màn hình làm bài thi.
               </p>
-            </div>
-
-            <div className="p-4 bg-rose-50 rounded-2xl border border-rose-200 text-rose-900 font-extrabold text-sm space-y-1">
-              <div>Số lần vi phạm ghi nhận: <span className="text-xl font-black text-rose-700">{antiCheatViolations}/3</span></div>
-              <p className="text-[11px] font-normal text-rose-700">Nếu tiếp tục chuyển tab, bài thi sẽ bị tự động thu hồi và hủy kết quả.</p>
+              <p className="text-xs text-rose-600 font-medium">
+                Vui lòng không chuyển tab hoặc mở ứng dụng khác trong quá trình làm bài.
+              </p>
             </div>
 
             <button
               onClick={() => setShowAntiCheatModal(false)}
-              className="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3.5 rounded-xl text-sm transition shadow-md"
+              className="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-4 rounded-2xl text-base transition shadow-md"
             >
               Tôi đã hiểu & Quay lại làm bài ngay
             </button>

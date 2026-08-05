@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import SplitTestRoom from '@/components/test-room/SplitTestRoom';
 import { Exam, ExamModule, Question, QuestionGroup } from '@/types';
 import { TokenPayload } from '@/lib/auth';
+
 export default function RoomPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -22,7 +23,7 @@ export default function RoomPage() {
 
   useEffect(() => {
     // 1. Verify Session
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (!data.authenticated) {
@@ -32,8 +33,8 @@ export default function RoomPage() {
         }
       });
 
-    // 2. Load Exam & Module Details
-    fetch('/api/student/exams')
+    // 2. Load Exam & Module Details with timestamp cache-buster
+    fetch(`/api/student/exams?t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const foundExam = (data.exams || []).find((e: Exam) => e.id === examId);
@@ -43,45 +44,34 @@ export default function RoomPage() {
           setSelectedModule(targetModule);
 
           // 3. Fetch Real Saved Questions & Groups for this Module from Database
-          fetch(`/api/student/exams?moduleId=${targetModule.id}`)
+          fetch(`/api/student/exams?moduleId=${targetModule.id}&t=${Date.now()}`, { cache: 'no-store' })
             .then(res => res.json())
             .then(modData => {
               if (modData.questions && modData.questions.length > 0) {
                 setQuestions(modData.questions);
                 setQuestionGroups(modData.questionGroups || []);
               } else {
-                // Initial fallback if module hasn't been edited yet
+                // Lightweight single TEST placeholder question
                 const initialFallback: Question[] = [
                   {
-                    id: 'q-read-16',
+                    id: `q-test-${targetModule.id}`,
                     moduleId: targetModule.id,
-                    number: 16,
-                    text: 'Theo đoạn văn, phát biểu nào sau đây đúng về ứng dụng ban đầu của thủy canh?',
-                    passage: `[Đoạn văn Đọc hiểu] 
-Trong những năm 1930, William Frederick Gericke tại Đại học California ở Berkeley bắt đầu thúc đẩy việc trồng cây nông nghiệp trong dung dịch dinh dưỡng thay vì đất. Gericke đã thu hút sự chú ý của công chúng khi trồng được những cây cà chua khổng lồ.`,
+                    number: 1,
+                    type: 'single_choice',
+                    text: '[TEST]',
                     options: [
-                      { id: 'opt-a', text: 'Các loại cây trong bảng phương pháp thủy canh của Gericke' },
-                      { id: 'opt-b', text: 'Việc áp dụng thủy canh của Gericke' },
-                      { id: 'opt-c', text: 'Những cây cà chua của Gericke' },
-                      { id: 'opt-d', text: 'Các bể chứa nước lớn' }
+                      { id: 'opt-a', text: 'TEST A' },
+                      { id: 'opt-b', text: 'TEST B' },
+                      { id: 'opt-c', text: 'TEST C' },
+                      { id: 'opt-d', text: 'TEST D' }
                     ],
-                    correctOptionId: 'opt-c'
-                  },
-                  ...Array.from({ length: 19 }).map((_, i) => ({
-                    id: `q-gen-${i + 17}`,
-                    moduleId: targetModule.id,
-                    number: i + 17,
-                    text: `[Câu hỏi tư duy chuẩn hóa TSA ${i + 17}] Cho biểu thức $f(x) = \\lim_{x \\to 2} \\frac{x^2-4}{x-2}$. Giá trị của $f(2)$ là bao nhiêu?`,
-                    options: [
-                      { id: `opt-${i}-a`, text: '$x = 4$' },
-                      { id: `opt-${i}-b`, text: '$x = 2$' },
-                      { id: `opt-${i}-c`, text: '$x = 0$' },
-                      { id: `opt-${i}-d`, text: '$x = 8$' }
-                    ],
-                    correctOptionId: `opt-${i}-a`
-                  }))
+                    correctOptionId: 'opt-a',
+                    explanation: '',
+                    explanationImageUrl: ''
+                  }
                 ];
                 setQuestions(initialFallback);
+                setQuestionGroups([]);
               }
               setLoading(false);
             })
@@ -98,20 +88,22 @@ Trong những năm 1930, William Frederick Gericke tại Đại học California
   if (loading || !selectedModule) {
     return (
       <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-crimson"></div>
-        <p className="text-sm font-semibold tracking-wider">ĐANG TẢI DỮ LIỆU CÂU HỎI THỰC THỜI TỪ MÁY CHỦ CACULUS...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d90429]"></div>
+        <p className="text-sm font-semibold tracking-wider">ĐANG TẢI DỮ LIỆU CÂU HỎI CHUẨN HOÁ TỪ MÁY CHỦ CACULUS...</p>
       </div>
     );
   }
 
+  // Pass key={selectedModule.id} so React completely re-mounts fresh state on module transition
   return (
     <SplitTestRoom
+      key={selectedModule.id}
       examId={examId}
       module={selectedModule}
       questions={questions}
       questionGroups={questionGroups}
-      studentName={user?.name || 'Nguyễn Cường'}
-      studentId={user?.studentId || 'CACULUS_496692'}
+      studentName={user?.name || user?.realName || 'Nguyễn Cường'}
+      studentId={user?.studentId || 'CACULUS_VIP_001'}
     />
   );
 }
