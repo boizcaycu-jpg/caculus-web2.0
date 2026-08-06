@@ -8,7 +8,7 @@ import {
   Save, Eye, Upload, Plus, Trash2, ArrowUp, ArrowDown, Search, 
   FileText, CheckSquare, Layers, Image as ImageIcon,
   CheckCircle2, AlertCircle, Sparkles, BookOpen, FolderPlus,
-  ChevronLeft, ChevronRight, Maximize2, Minimize2, Check, X, ShieldAlert
+  ChevronLeft, ChevronRight, Maximize2, Minimize2, Check, X, ShieldAlert, Edit3
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -36,6 +36,7 @@ function ExamAuthoringEditorContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveStatusText, setSaveStatusText] = useState<string>('');
+  const [examTitle, setExamTitle] = useState<string>('');
 
   // File Upload Input Refs
   const questionImageInputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +68,13 @@ function ExamAuthoringEditorContent() {
   }, [queryId]);
 
   const currentExam = exams.find(e => e.id === selectedExamId) || exams[0];
+
+  // Sync Exam Title whenever currentExam changes
+  useEffect(() => {
+    if (currentExam) {
+      setExamTitle(currentExam.title);
+    }
+  }, [selectedExamId, exams]);
   
   const currentModule = currentExam?.modules?.find(m => m.category === activeCategory) || {
     id: `mod-${activeCategory}-${selectedExamId}`,
@@ -335,6 +343,7 @@ function ExamAuthoringEditorContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: selectedExamId,
+            title: examTitle,
             moduleId: modId,
             questions: modData.questions,
             questionGroups: modData.questionGroups,
@@ -368,90 +377,106 @@ function ExamAuthoringEditorContent() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans select-none">
-      <Navbar />
+      {/* 🌟 STREAMLINED DISTRACTION-FREE LOCAL STUDIO TOP BAR (REPLACED HEAVY SITE NAVBAR) */}
+      <header className="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4 shadow-md sticky top-0 z-40">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+          <div className="flex items-center gap-2">
+            <span className="bg-[#d90429] text-white font-black px-3 py-1 rounded-xl text-xs tracking-wider shadow-xs">
+              CACULUS TSA
+            </span>
+            <span className="font-extrabold text-xs sm:text-sm text-slate-300 uppercase tracking-wider hidden md:inline">
+              LOCAL STUDIO
+            </span>
+          </div>
+
+          <div className="h-5 w-px bg-slate-700 hidden sm:block" />
+
+          {/* EDITABLE EXAM TITLE INPUT BOX */}
+          <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-[#d90429] transition shadow-2xs">
+            <Edit3 className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="text-xs font-bold text-slate-400 uppercase shrink-0 hidden sm:inline">Tên đề thi:</span>
+            <input
+              type="text"
+              value={examTitle}
+              onChange={(e) => setExamTitle(e.target.value)}
+              placeholder="Nhập tên bài thi..."
+              className="bg-transparent text-sm sm:text-base font-black text-white focus:outline-none min-w-[220px] sm:min-w-[340px]"
+            />
+          </div>
+
+          {/* EXAM SELECTOR DROPDOWN */}
+          <select
+            value={selectedExamId}
+            onChange={(e) => setSelectedExamId(e.target.value)}
+            className="bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs sm:text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#d90429]"
+          >
+            {exams.map(e => (
+              <option key={e.id} value={e.id}>{e.title}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* 3 CATEGORY TABS & ACTION BUTTONS */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {saveStatusText && (
+            <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-700 px-3 py-1.5 rounded-xl hidden xl:inline">
+              {saveStatusText}
+            </span>
+          )}
+
+          <div className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 gap-1">
+            <button
+              onClick={() => handleSwitchCategory('math')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-black transition ${
+                activeCategory === 'math'
+                  ? 'bg-[#d90429] text-white shadow-xs'
+                  : 'text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              1. Toán
+            </button>
+            <button
+              onClick={() => handleSwitchCategory('reading')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-black transition ${
+                activeCategory === 'reading'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              2. Đọc hiểu
+            </button>
+            <button
+              onClick={() => handleSwitchCategory('science')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-black transition ${
+                activeCategory === 'science'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              3. Khoa học
+            </button>
+          </div>
+
+          <button
+            onClick={handleLivePreview}
+            className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5"
+          >
+            <Eye className="w-4 h-4 text-amber-400" /> Xem trước
+          </button>
+
+          <button
+            onClick={handleSaveChanges}
+            disabled={saving}
+            className="bg-[#d90429] hover:bg-red-700 text-white font-black text-xs sm:text-sm px-5 py-2 rounded-xl transition shadow-lg flex items-center gap-2 active:scale-95 disabled:opacity-50"
+          >
+            <Save className="w-4 h-4" />
+            {saving ? 'Đang lưu...' : '💾 LƯU BÀI THI & ĐẨY LÊN WEB ONLINE'}
+          </button>
+        </div>
+      </header>
 
       {/* Main Workspace Frame */}
       <main className="flex-1 flex flex-col max-w-[1700px] w-full mx-auto p-3 sm:p-5 space-y-4">
-        
-        {/* TOP BAR: EXAM PICKER & ACTIONS */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#d90429] bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">
-                KHÔNG GIAN SOẠN ĐỀ CHUẨN HOÁ TSA
-              </span>
-              <div className="flex items-center gap-3 mt-1">
-                <select
-                  value={selectedExamId}
-                  onChange={(e) => setSelectedExamId(e.target.value)}
-                  className="bg-slate-50 border border-slate-300 font-black text-slate-900 rounded-xl px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#d90429]"
-                >
-                  {exams.map(e => (
-                    <option key={e.id} value={e.id}>{e.title}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* 3 CATEGORY TABS (TOÁN - ĐỌC HIỂU - KHOA HỌC) */}
-            <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 gap-1">
-              <button
-                onClick={() => handleSwitchCategory('math')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 ${
-                  activeCategory === 'math'
-                    ? 'bg-[#d90429] text-white shadow-md'
-                    : 'text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                1. Tư duy Toán học
-              </button>
-              <button
-                onClick={() => handleSwitchCategory('reading')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 ${
-                  activeCategory === 'reading'
-                    ? 'bg-purple-700 text-white shadow-md'
-                    : 'text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                2. Tư duy Đọc hiểu
-              </button>
-              <button
-                onClick={() => handleSwitchCategory('science')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 ${
-                  activeCategory === 'science'
-                    ? 'bg-emerald-700 text-white shadow-md'
-                    : 'text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                3. Tư duy Khoa học & GQVĐ
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {saveStatusText && (
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-xl">
-                {saveStatusText}
-              </span>
-            )}
-
-            <button
-              onClick={handleLivePreview}
-              className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-xs"
-            >
-              <Eye className="w-4 h-4 text-amber-400" /> Xem trước bài thi
-            </button>
-
-            <button
-              onClick={handleSaveChanges}
-              disabled={saving}
-              className="bg-[#d90429] hover:bg-red-700 text-white font-black text-xs sm:text-base px-6 py-2.5 rounded-xl transition shadow-lg flex items-center gap-2 active:scale-95 disabled:opacity-50"
-            >
-              <Save className="w-5 h-5" />
-              {saving ? 'Đang lưu & đẩy CSDL...' : '💾 LƯU BÀI THI & ĐẨY LÊN WEB ONLINE'}
-            </button>
-          </div>
-        </div>
 
         {/* WORKSPACE CONTENT AREA (COLLAPSIBLE SIDEBAR + CANVAS) */}
         <div className="flex-1 flex flex-col md:flex-row gap-4 overflow-hidden">
