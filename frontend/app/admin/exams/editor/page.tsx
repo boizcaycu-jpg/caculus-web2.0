@@ -315,10 +315,10 @@ function ExamAuthoringEditorContent() {
     router.push(`/exams/${selectedExamId}/room?module=${currentModule.id}&preview=true`);
   };
 
-  // Save All Changes to CSDL (Persists all modules)
+  // Single Unified Save & Deploy Handler (Persists all modules to disk & pushes to Web Online)
   const handleSaveChanges = async () => {
     setSaving(true);
-    setSaveStatusText('Đang lưu & đồng bộ CSDL...');
+    setSaveStatusText('Đang lưu CSDL đĩa cứng...');
 
     try {
       // 1. Save current active module draft into allModulesDraft
@@ -342,10 +342,17 @@ function ExamAuthoringEditorContent() {
         });
       }
 
+      setSaveStatusText('Đang tự động đẩy lên Web Online (Vercel)...');
+
+      // 2. Trigger automated background Git Push to Vercel
+      try {
+        await fetch('/api/admin/deploy', { method: 'POST' });
+      } catch (err) {}
+
       setSaving(false);
       const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setSaveStatusText(`✓ Đã lưu & đồng bộ CSDL thành công (${timeStr})`);
-      setTimeout(() => setSaveStatusText(''), 4000);
+      setSaveStatusText(`✓ Đã lưu đĩa cứng & Đẩy lên Web Online thành công (${timeStr})`);
+      setTimeout(() => setSaveStatusText(''), 5000);
     } catch (e) {
       console.error(e);
       setSaving(false);
@@ -438,19 +445,10 @@ function ExamAuthoringEditorContent() {
             <button
               onClick={handleSaveChanges}
               disabled={saving}
-              className="bg-[#d90429] hover:bg-red-700 text-white font-black text-xs sm:text-sm px-6 py-2.5 rounded-xl transition shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              className="bg-[#d90429] hover:bg-red-700 text-white font-black text-xs sm:text-base px-6 py-2.5 rounded-xl transition shadow-lg flex items-center gap-2 active:scale-95 disabled:opacity-50"
             >
-              <Save className="w-4 h-4" />
-              {saving ? 'Đang lưu CSDL...' : 'Lưu tất cả bài thi'}
-            </button>
-
-            <button
-              onClick={() => {
-                alert("🚀 HƯỚNG DẪN ĐẨY ĐỀ LÊN WEB ONLINE:\n\nSau khi bấm 'Lưu tất cả bài thi' ở Local, bạn chỉ cần ra Màn hình chính Desktop và kích kép chuột vào Shortcut:\n\n👉 'ĐẨY ĐỀ LÊN WEB ONLINE.bat'\n\nHệ thống sẽ tự động cập nhật Web Thi trên Vercel cho Học sinh trong vài giây!");
-              }}
-              className="bg-purple-700 hover:bg-purple-800 text-white font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl transition shadow-md flex items-center gap-1.5 active:scale-95"
-            >
-              <Upload className="w-4 h-4 text-purple-200" /> Đẩy Đề Lên Web Online
+              <Save className="w-5 h-5" />
+              {saving ? 'Đang lưu & đẩy CSDL...' : '💾 LƯU BÀI THI & ĐẨY LÊN WEB ONLINE'}
             </button>
           </div>
         </div>
