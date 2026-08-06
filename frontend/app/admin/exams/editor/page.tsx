@@ -443,6 +443,15 @@ function ExamAuthoringEditorContent() {
               <Save className="w-4 h-4" />
               {saving ? 'Đang lưu CSDL...' : 'Lưu tất cả bài thi'}
             </button>
+
+            <button
+              onClick={() => {
+                alert("🚀 HƯỚNG DẪN ĐẨY ĐỀ LÊN WEB ONLINE:\n\nSau khi bấm 'Lưu tất cả bài thi' ở Local, bạn chỉ cần ra Màn hình chính Desktop và kích kép chuột vào Shortcut:\n\n👉 'ĐẨY ĐỀ LÊN WEB ONLINE.bat'\n\nHệ thống sẽ tự động cập nhật Web Thi trên Vercel cho Học sinh trong vài giây!");
+              }}
+              className="bg-purple-700 hover:bg-purple-800 text-white font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl transition shadow-md flex items-center gap-1.5 active:scale-95"
+            >
+              <Upload className="w-4 h-4 text-purple-200" /> Đẩy Đề Lên Web Online
+            </button>
           </div>
         </div>
 
