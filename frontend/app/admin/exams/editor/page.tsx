@@ -887,107 +887,186 @@ function ExamAuthoringEditorContent() {
                       Thiết lập Đáp án đúng & Lựa chọn
                     </h3>
                   </div>
+                  {/* Single Choice (A/B/C/D...) with dynamic add/remove */}
+                  {(!activeQuestion.type || activeQuestion.type === 'single_choice') && (() => {
+                    const singleOptions = (activeQuestion.options && activeQuestion.options.length > 0)
+                      ? activeQuestion.options
+                      : ['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((id, idx) => ({ id, text: `Đáp án ${String.fromCharCode(65 + idx)}` }));
 
-                  {/* Single Choice (A/B/C/D) */}
-                  {(!activeQuestion.type || activeQuestion.type === 'single_choice') && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((optId, idx) => {
-                        const label = String.fromCharCode(65 + idx);
-                        const isSelected = activeQuestion.correctOptionId === optId;
-
-                        return (
+                    return (
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-extrabold text-slate-700 uppercase">
+                            Chọn 1 đáp án đúng ({singleOptions.length} phương án)
+                          </span>
                           <button
-                            key={optId}
                             type="button"
-                            onClick={() => handleUpdateActiveQuestion('correctOptionId', optId)}
-                            className={`p-3.5 rounded-xl border-2 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-2xs ${
-                              isSelected
-                                ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm scale-102'
-                                : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                            }`}
+                            onClick={() => {
+                              const nextIdx = singleOptions.length;
+                              const nextLetter = String.fromCharCode(65 + nextIdx);
+                              const newOpt = { id: `opt-${Date.now()}-${nextLetter.toLowerCase()}`, text: `Đáp án ${nextLetter}` };
+                              handleUpdateActiveQuestion('options', [...singleOptions, newOpt]);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1 shadow-2xs"
                           >
-                            {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
-                            <span>Đáp án {label}</span>
+                            <Plus className="w-3.5 h-3.5" /> Thêm phương án ({String.fromCharCode(65 + singleOptions.length)})
                           </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                        </div>
 
-                  {/* 2-COLUMN TRUE / FALSE SELECTION GRID FOR MULTIPLE CHOICE (ĐÚNG - SAI 2 CỘT) */}
-                  {activeQuestion.type === 'multiple_choice' && (
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-                      <div className="text-xs font-extrabold text-slate-800 uppercase tracking-wide flex items-center justify-between border-b border-slate-200 pb-2">
-                        <span>Các ý mệnh đề (a, b, c, d)</span>
-                        <div className="flex gap-10 pr-6 font-black text-xs">
-                          <span className="text-emerald-700">CỘT 1: ĐÚNG</span>
-                          <span className="text-rose-700">CỘT 2: SAI</span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {singleOptions.map((opt, idx) => {
+                            const label = String.fromCharCode(65 + idx);
+                            const isSelected = activeQuestion.correctOptionId === opt.id;
+
+                            return (
+                              <div key={opt.id} className="relative group">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateActiveQuestion('correctOptionId', opt.id)}
+                                  className={`w-full p-3.5 rounded-xl border-2 font-extrabold text-sm transition flex items-center justify-center gap-2 shadow-2xs ${
+                                    isSelected
+                                      ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm scale-102'
+                                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-4 h-4 stroke-[3]" />}
+                                  <span>Đáp án {label}</span>
+                                </button>
+                                {singleOptions.length > 2 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const nextList = singleOptions.filter((_, i) => i !== idx);
+                                      handleUpdateActiveQuestion('options', nextList);
+                                      if (activeQuestion.correctOptionId === opt.id) {
+                                        handleUpdateActiveQuestion('correctOptionId', nextList[0]?.id || '');
+                                      }
+                                    }}
+                                    className="absolute -top-2 -right-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition shadow-xs"
+                                    title="Xóa phương án này"
+                                  >
+                                    <X className="w-3 h-3 stroke-[3]" />
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
+                    );
+                  })()}
 
-                      {['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((optId, idx) => {
-                        const letter = String.fromCharCode(97 + idx); // a, b, c, d
-                        const currentSelected = activeQuestion.correctOptionIds || [];
-                        const isTrue = currentSelected.includes(optId);
-                        const optionObj = activeQuestion.options?.find(o => o.id === optId) || { id: optId, text: `Ý ${letter}` };
+                  {/* 2-COLUMN TRUE / FALSE SELECTION GRID FOR MULTIPLE CHOICE (DYNAMIC 2, 3, 4+ PROPOSITIONS) */}
+                  {activeQuestion.type === 'multiple_choice' && (() => {
+                    const multiOptions = (activeQuestion.options && activeQuestion.options.length > 0)
+                      ? activeQuestion.options
+                      : ['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((id, idx) => ({ id, text: `Ý ${String.fromCharCode(97 + idx)}` }));
 
-                        return (
-                          <div key={optId} className="flex items-center justify-between gap-4 p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
-                            <div className="flex items-center gap-3 flex-1">
-                              <span className="w-7 h-7 rounded-lg bg-purple-100 text-purple-900 font-extrabold text-xs flex items-center justify-center shrink-0">
-                                {letter}
-                              </span>
-                              <input
-                                type="text"
-                                value={optionObj.text}
-                                onChange={(e) => {
-                                  const newText = e.target.value;
-                                  const newOptions = (activeQuestion.options || []).map(o => o.id === optId ? { ...o, text: newText } : o);
-                                  handleUpdateActiveQuestion('options', newOptions);
-                                }}
-                                placeholder={`Nội dung ý ${letter}...`}
-                                className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-medium"
-                              />
-                            </div>
-
-                            <div className="flex items-center gap-3 shrink-0">
-                              {/* Column 1: ĐÚNG */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const nextSelected = Array.from(new Set([...currentSelected, optId]));
-                                  handleUpdateActiveQuestion('correctOptionIds', nextSelected);
-                                }}
-                                className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 border ${
-                                  isTrue
-                                    ? 'bg-emerald-600 border-emerald-700 text-white shadow-xs'
-                                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-emerald-50'
-                                }`}
-                              >
-                                <Check className="w-3.5 h-3.5 stroke-[3]" /> ĐÚNG
-                              </button>
-
-                              {/* Column 2: SAI */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const nextSelected = currentSelected.filter(id => id !== optId);
-                                  handleUpdateActiveQuestion('correctOptionIds', nextSelected);
-                                }}
-                                className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 border ${
-                                  !isTrue
-                                    ? 'bg-rose-600 border-rose-700 text-white shadow-xs'
-                                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-rose-50'
-                                }`}
-                              >
-                                <X className="w-3.5 h-3.5 stroke-[3]" /> SAI
-                              </button>
-                            </div>
+                    return (
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                        <div className="text-xs font-extrabold text-slate-800 uppercase tracking-wide flex items-center justify-between border-b border-slate-200 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span>Các ý mệnh đề ({multiOptions.length} ý)</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const nextIdx = multiOptions.length;
+                                const nextLetter = String.fromCharCode(97 + nextIdx);
+                                const newOpt = { id: `opt-${Date.now()}-${nextLetter}`, text: `Ý ${nextLetter}` };
+                                handleUpdateActiveQuestion('options', [...multiOptions, newOpt]);
+                              }}
+                              className="bg-purple-700 hover:bg-purple-800 text-white font-extrabold text-[11px] px-3 py-1 rounded-lg transition flex items-center gap-1 shadow-2xs"
+                            >
+                              <Plus className="w-3.5 h-3.5 stroke-[3]" /> Thêm ý mệnh đề ({String.fromCharCode(97 + multiOptions.length)})
+                            </button>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                          <div className="flex gap-10 pr-6 font-black text-xs">
+                            <span className="text-emerald-700">CỘT 1: ĐÚNG</span>
+                            <span className="text-rose-700">CỘT 2: SAI</span>
+                          </div>
+                        </div>
+
+                        {multiOptions.map((optionObj, idx) => {
+                          const optId = optionObj.id;
+                          const letter = String.fromCharCode(97 + idx); // a, b, c, d, e...
+                          const currentSelected = activeQuestion.correctOptionIds || [];
+                          const isTrue = currentSelected.includes(optId);
+
+                          return (
+                            <div key={optId} className="flex items-center justify-between gap-4 p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                              <div className="flex items-center gap-3 flex-1">
+                                <span className="w-7 h-7 rounded-lg bg-purple-100 text-purple-900 font-extrabold text-xs flex items-center justify-center shrink-0">
+                                  {letter}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={optionObj.text}
+                                  onChange={(e) => {
+                                    const newText = e.target.value;
+                                    const newOptions = multiOptions.map((o, i) => i === idx ? { ...o, text: newText } : o);
+                                    handleUpdateActiveQuestion('options', newOptions);
+                                  }}
+                                  placeholder={`Nội dung ý ${letter} (hoặc để trống nếu đã có trong ảnh)...`}
+                                  className="flex-1 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-medium"
+                                />
+                              </div>
+
+                              <div className="flex items-center gap-2.5 shrink-0">
+                                {/* Column 1: ĐÚNG */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextSelected = Array.from(new Set([...currentSelected, optId]));
+                                    handleUpdateActiveQuestion('correctOptionIds', nextSelected);
+                                  }}
+                                  className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 border ${
+                                    isTrue
+                                      ? 'bg-emerald-600 border-emerald-700 text-white shadow-xs'
+                                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-emerald-50'
+                                  }`}
+                                >
+                                  <Check className="w-3.5 h-3.5 stroke-[3]" /> ĐÚNG
+                                </button>
+
+                                {/* Column 2: SAI */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextSelected = currentSelected.filter(id => id !== optId);
+                                    handleUpdateActiveQuestion('correctOptionIds', nextSelected);
+                                  }}
+                                  className={`px-4 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 border ${
+                                    !isTrue
+                                      ? 'bg-rose-600 border-rose-700 text-white shadow-xs'
+                                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-rose-50'
+                                  }`}
+                                >
+                                  <X className="w-3.5 h-3.5 stroke-[3]" /> SAI
+                                </button>
+
+                                {/* Delete Option Button */}
+                                {multiOptions.length > 2 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const nextOptions = multiOptions.filter((_, i) => i !== idx);
+                                      handleUpdateActiveQuestion('options', nextOptions);
+                                      const nextSelected = currentSelected.filter(id => id !== optId);
+                                      handleUpdateActiveQuestion('correctOptionIds', nextSelected);
+                                    }}
+                                    className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
+                                    title="Xóa ý mệnh đề này"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
 
                   {/* Fill in the blank (Multi-Answer Tag & List Editor) */}
                   {activeQuestion.type === 'fill_blank' && (

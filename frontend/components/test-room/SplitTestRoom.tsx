@@ -512,25 +512,30 @@ export default function SplitTestRoom({
                 </div>
               )}
 
-              {/* Multiple Choice Options (2-COLUMN TRUE/FALSE SELECTION TABLE) */}
+              {/* Multiple Choice Options (2-COLUMN TRUE/FALSE SELECTION TABLE - DYNAMIC 2, 3, 4+ OPTIONS) */}
               {qType === 'multiple_choice' && (
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4 pt-3">
                   <div className="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center justify-between border-b border-slate-200 pb-3">
-                    <span>Đánh giá 4 ý mệnh đề (a, b, c, d)</span>
+                    <span>
+                      Đánh giá các ý mệnh đề ({(currentQuestion?.options && currentQuestion.options.length > 0) ? currentQuestion.options.length : 4} ý)
+                    </span>
                     <div className="flex gap-12 pr-6 font-black text-xs">
                       <span className="text-emerald-700">ĐÚNG</span>
                       <span className="text-rose-700">SAI</span>
                     </div>
                   </div>
 
-                  {['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((optId, idx) => {
-                    const letter = String.fromCharCode(97 + idx); // a, b, c, d
+                  {(currentQuestion?.options && currentQuestion.options.length > 0
+                    ? currentQuestion.options
+                    : ['opt-a', 'opt-b', 'opt-c', 'opt-d'].map((id, idx) => ({ id, text: `Ý ${String.fromCharCode(97 + idx)}` }))
+                  ).map((optionObj, idx) => {
+                    const optId = optionObj.id;
+                    const letter = String.fromCharCode(97 + idx); // a, b, c, d, e...
                     const selectedList: string[] = Array.isArray(userAnswers[currentQuestion.id])
                       ? userAnswers[currentQuestion.id]
                       : [];
                     
                     const isSelectedTrue = selectedList.includes(optId);
-                    const optionObj = currentQuestion?.options?.find(o => o.id === optId) || { id: optId, text: `Ý ${letter}` };
 
                     return (
                       <div key={optId} className="flex items-center justify-between gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
