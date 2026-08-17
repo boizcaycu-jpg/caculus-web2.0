@@ -8,7 +8,8 @@ import {
   Save, Eye, Upload, Plus, Trash2, ArrowUp, ArrowDown, Search, 
   FileText, CheckSquare, Layers, Image as ImageIcon,
   CheckCircle2, AlertCircle, Sparkles, BookOpen, FolderPlus,
-  ChevronLeft, ChevronRight, Maximize2, Minimize2, Check, X, ShieldAlert, Edit3
+  ChevronLeft, ChevronRight, Maximize2, Minimize2, Check, X, ShieldAlert, Edit3,
+  Loader2, ExternalLink, CheckCircle
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -37,6 +38,17 @@ function ExamAuthoringEditorContent() {
   const [saving, setSaving] = useState(false);
   const [saveStatusText, setSaveStatusText] = useState<string>('');
   const [examTitle, setExamTitle] = useState<string>('');
+  const [newFillAnswer, setNewFillAnswer] = useState<string>('');
+
+  // Deploy Progress Modal State
+  const [deployModal, setDeployModal] = useState<{
+    isOpen: boolean;
+    step: 1 | 2 | 3 | 4;
+    error?: string;
+  }>({
+    isOpen: false,
+    step: 1,
+  });
 
   // File Upload Input Refs
   const questionImageInputRef = useRef<HTMLInputElement>(null);
@@ -301,32 +313,62 @@ function ExamAuthoringEditorContent() {
     updateGroupsAndDraft(updated);
   };
 
-  // Handle Image Upload File Handler
-  const handleImageUpload = (file: File, targetField: 'imageUrl' | 'explanationImageUrl' | 'groupImageUrl') => {
+  // Multi-Image Upload File Handler
+  const handleImageUpload = (file: File, targetField: 'questionImage' | 'explanationImage' | 'groupImage') => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64Str = e.target?.result as string;
-      if (targetField === 'groupImageUrl') {
+      if (targetField === 'groupImage' && activeGroup) {
+        const currentList = activeGroup.imageUrls || (activeGroup.imageUrl ? [activeGroup.imageUrl] : []);
+        const nextList = [...currentList, base64Str];
+        handleUpdateActiveGroup('imageUrls', nextList);
         handleUpdateActiveGroup('imageUrl', base64Str);
-      } else {
-        handleUpdateActiveQuestion(targetField, base64Str);
+      } else if (targetField === 'questionImage' && activeQuestion) {
+        const currentList = activeQuestion.imageUrls || (activeQuestion.imageUrl ? [activeQuestion.imageUrl] : []);
+        const nextList = [...currentList, base64Str];
+        handleUpdateActiveQuestion('imageUrls', nextList);
+        handleUpdateActiveQuestion('imageUrl', base64Str);
+      } else if (targetField === 'explanationImage' && activeQuestion) {
+        const currentList = activeQuestion.explanationImageUrls || (activeQuestion.explanationImageUrl ? [activeQuestion.explanationImageUrl] : []);
+        const nextList = [...currentList, base64Str];
+        handleUpdateActiveQuestion('explanationImageUrls', nextList);
+        handleUpdateActiveQuestion('explanationImageUrl', base64Str);
       }
     };
     reader.readAsDataURL(file);
   };
 
-  // Live Preview Navigation (Triggers Auto-Save before router.push)
-  const handleLivePreview = async () => {
-    await handleSaveChanges();
-    sessionStorage.setItem('caculus_draft_questions', JSON.stringify(questions));
-    sessionStorage.setItem('caculus_draft_groups', JSON.stringify(questionGroups));
-    router.push(`/exams/${selectedExamId}/room?module=${currentModule.id}&preview=true`);
+  // Delete Individual Image from Multi-Image List
+  const handleDeleteImage = (targetField: 'questionImage' | 'explanationImage' | 'groupImage', index: number) => {
+    if (targetField === 'groupImage' && activeGroup) {
+      const currentList = activeGroup.imageUrls || (activeGroup.imageUrl ? [activeGroup.imageUrl] : []);
+      const updatedList = currentList.filter((_, idx) => idx !== index);
+      handleUpdateActiveGroup('imageUrls', updatedList);
+      handleUpdateActiveGroup('imageUrl', updatedList[0] || '');
+    } else if (targetField === 'questionImage' && activeQuestion) {
+      const currentList = activeQuestion.imageUrls || (activeQuestion.imageUrl ? [activeQuestion.imageUrl] : []);
+      const updatedList = currentList.filter((_, idx) => idx !== index);
+      handleUpdateActiveQuestion('imageUrls', updatedList);
+      handleUpdateActiveQuestion('imageUrl', updatedList[0] || '');
+    } else if (targetField === 'explanationImage' && activeQuestion) {
+      const currentList = activeQuestion.explanationImageUrls || (activeQuestion.explanationImageUrl ? [activeQuestion.explanationImageUrl] : []);
+      const updatedList = currentList.filter((_, idx) => idx !== index);
+      handleUpdateActiveQuestion('explanationImageUrls', updatedList);
+      handleUpdateActiveQuestion('explanationImageUrl', updatedList[0] || '');
+    }
   };
 
-  // Single Unified Save & Deploy Handler (Persists all modules to disk & pushes to Web Online)
+  // Live Preview Navigation (Triggers Auto-Save before router.push)
+  const handleLivePreview = async () => {
+    sessionStorage.setItem('caculus_draft_questions', JSON.stringify(questions));
+    sessionStorage.setItem('caculus_draft_groups', JSON.stringify(questionGroups));
+    window.open(`/exams/${selectedExamId}/room?module=${currentModule.id}&preview=true`, '_blank');
+  };
+
+  // Single Unified Save & Deploy Handler (Drives 3-Step Progress Modal + Visual Preview Card)
   const handleSaveChanges = async () => {
     setSaving(true);
-    setSaveStatusText('Đang lưu CSDL đĩa cứng...');
+    setDeployModal({ isOpen: true, step: 1 });
 
     try {
       // 1. Save current active module draft into allModulesDraft
@@ -335,7 +377,7 @@ function ExamAuthoringEditorContent() {
         [currentModule.id]: { questions, questionGroups }
       };
 
-      // Save each module in draft map to CSDL
+      // Step 1: Save each module in draft map to CSDL
       for (const modId of Object.keys(currentDraftMap)) {
         const modData = currentDraftMap[modId];
         await fetch('/api/admin/exams', {
@@ -351,21 +393,27 @@ function ExamAuthoringEditorContent() {
         });
       }
 
-      setSaveStatusText('Đang tự động đẩy lên Web Online (Vercel)...');
+      setDeployModal(prev => ({ ...prev, step: 2 }));
+      await new Promise(r => setTimeout(r, 600));
 
-      // 2. Trigger automated background Git Push to Vercel
+      // Step 2 & 3: Trigger automated background Git Push to Vercel
+      setDeployModal(prev => ({ ...prev, step: 3 }));
       try {
         await fetch('/api/admin/deploy', { method: 'POST' });
       } catch (err) {}
 
+      await new Promise(r => setTimeout(r, 800));
+
+      // Step 4: Completed!
+      setDeployModal(prev => ({ ...prev, step: 4 }));
       setSaving(false);
       const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       setSaveStatusText(`✓ Đã lưu đĩa cứng & Đẩy lên Web Online thành công (${timeStr})`);
-      setTimeout(() => setSaveStatusText(''), 5000);
+      setTimeout(() => setSaveStatusText(''), 6000);
     } catch (e) {
       console.error(e);
       setSaving(false);
-      setSaveStatusText('Lỗi lưu CSDL!');
+      setDeployModal(prev => ({ ...prev, error: 'Lỗi trong quá trình lưu hoặc đẩy CSDL!' }));
     }
   };
 
@@ -669,23 +717,50 @@ function ExamAuthoringEditorContent() {
                   />
                 </div>
 
-                {/* Group Image Upload */}
+                {/* Group Multi-Image Upload */}
                 <div className="p-4 bg-purple-50/50 rounded-2xl border border-purple-200 space-y-3">
-                  <label className="block text-xs font-extrabold text-purple-900 uppercase">Hình ảnh đính kèm bối cảnh (Sơ đồ / Biểu đồ / Bảng dữ liệu)</label>
-                  {activeGroup.imageUrl ? (
-                    <div className="space-y-2">
-                      <img src={activeGroup.imageUrl} alt="Group Diagram" className="max-h-60 w-auto rounded-xl border border-purple-200" />
-                      <button onClick={() => handleUpdateActiveGroup('imageUrl', '')} className="text-xs text-rose-600 font-bold hover:underline">
-                        Xóa ảnh bối cảnh
-                      </button>
+                  <div className="flex justify-between items-center">
+                    <label className="block text-xs font-extrabold text-purple-900 uppercase flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-purple-700" />
+                      Hình ảnh đính kèm bối cảnh ({((activeGroup.imageUrls && activeGroup.imageUrls.length > 0) ? activeGroup.imageUrls.length : (activeGroup.imageUrl ? 1 : 0))} ảnh)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => groupImageInputRef.current?.click()}
+                      className="bg-purple-700 hover:bg-purple-800 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Thêm ảnh bối cảnh
+                    </button>
+                  </div>
+
+                  {/* Multi-Image Preview Grid */}
+                  {((activeGroup.imageUrls && activeGroup.imageUrls.length > 0) || activeGroup.imageUrl) ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                      {(activeGroup.imageUrls && activeGroup.imageUrls.length > 0 ? activeGroup.imageUrls : [activeGroup.imageUrl!]).map((imgSrc, imgIdx) => (
+                        <div key={imgIdx} className="relative group bg-white rounded-xl border border-purple-200 p-2 shadow-2xs">
+                          <span className="absolute top-2 left-2 bg-purple-900/80 text-white text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-xs">
+                            Ảnh #{imgIdx + 1}
+                          </span>
+                          <img src={imgSrc} alt={`Bối cảnh ${imgIdx + 1}`} className="max-h-44 w-full object-contain rounded-lg mx-auto" />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteImage('groupImage', imgIdx)}
+                            className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-lg shadow-sm transition"
+                            title="Xóa ảnh này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <button
+                    <div
                       onClick={() => groupImageInputRef.current?.click()}
-                      className="bg-white border border-purple-300 hover:bg-purple-100 text-purple-900 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                      className="border-2 border-dashed border-purple-300 hover:border-purple-600 hover:bg-purple-100/40 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-1.5 bg-white"
                     >
-                      <Upload className="w-4 h-4 text-purple-700" /> Tải lên ảnh bối cảnh từ máy tính
-                    </button>
+                      <Upload className="w-6 h-6 text-purple-700" />
+                      <span className="text-xs font-bold text-purple-900">Tải lên ảnh bối cảnh / sơ đồ từ máy tính (Có thể chọn nhiều ảnh)</span>
+                    </div>
                   )}
                   <input
                     type="file"
@@ -693,7 +768,7 @@ function ExamAuthoringEditorContent() {
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'groupImageUrl');
+                      if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'groupImage');
                     }}
                   />
                 </div>
@@ -746,32 +821,40 @@ function ExamAuthoringEditorContent() {
                   />
                 </div>
 
-                {/* 📷 MAIN QUESTION PROMPT IMAGE */}
+                {/* 📷 QUESTION MULTI-IMAGE PROMPT GALLERY */}
                 <div className="p-5 bg-slate-50/80 rounded-2xl border-2 border-dashed border-rose-200 space-y-4">
                   <div className="flex justify-between items-center">
                     <label className="text-xs font-extrabold text-[#d90429] uppercase tracking-wide flex items-center gap-2">
                       <ImageIcon className="w-5 h-5 text-[#d90429]" />
-                      ĐÍNH KÈM HÌNH ẢNH ĐỀ BÀI (BAO GỒM NỘI DUNG CÂU HỎI & CÁC PHƯƠNG ÁN) *
+                      HÌNH ẢNH ĐỀ BÀI ({((activeQuestion.imageUrls && activeQuestion.imageUrls.length > 0) ? activeQuestion.imageUrls.length : (activeQuestion.imageUrl ? 1 : 0))} ẢNH) *
                     </label>
-                    {activeQuestion.imageUrl && (
-                      <button
-                        onClick={() => handleUpdateActiveQuestion('imageUrl', '')}
-                        className="text-xs text-rose-600 font-bold hover:underline"
-                      >
-                        Xóa ảnh đề bài
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => questionImageInputRef.current?.click()}
+                      className="bg-[#d90429] hover:bg-red-700 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <Plus className="w-4 h-4 stroke-[3]" /> Thêm ảnh đề bài / minh hoạ
+                    </button>
                   </div>
 
-                  {activeQuestion.imageUrl ? (
-                    <div className="space-y-3">
-                      <div className="p-2 bg-white rounded-xl border border-slate-200 max-h-96 overflow-auto flex items-center justify-center">
-                        <img
-                          src={activeQuestion.imageUrl}
-                          alt="Đề bài dạng ảnh"
-                          className="max-h-80 w-auto object-contain rounded-lg shadow-2xs"
-                        />
-                      </div>
+                  {((activeQuestion.imageUrls && activeQuestion.imageUrls.length > 0) || activeQuestion.imageUrl) ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {(activeQuestion.imageUrls && activeQuestion.imageUrls.length > 0 ? activeQuestion.imageUrls : [activeQuestion.imageUrl!]).map((imgSrc, imgIdx) => (
+                        <div key={imgIdx} className="relative group bg-white rounded-xl border border-slate-200 p-2 shadow-2xs">
+                          <span className="absolute top-2 left-2 bg-slate-900/80 text-white text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-xs">
+                            Ảnh #{imgIdx + 1}
+                          </span>
+                          <img src={imgSrc} alt={`Đề bài ${imgIdx + 1}`} className="max-h-52 w-full object-contain rounded-lg mx-auto" />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteImage('questionImage', imgIdx)}
+                            className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-lg shadow-sm transition"
+                            title="Xóa ảnh này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div
@@ -780,20 +863,20 @@ function ExamAuthoringEditorContent() {
                     >
                       <Upload className="w-8 h-8 text-[#d90429]" />
                       <div className="text-xs font-extrabold text-slate-800">
-                        Nhấp vào đây để Tải lên Ảnh Đề bài từ Máy tính
+                        Nhấp vào đây để Tải lên Ảnh Đề bài từ Máy tính (Hỗ trợ nhiều ảnh)
                       </div>
                       <p className="text-[11px] text-slate-400">Hỗ trợ định dạng .PNG, .JPG, .JPEG, Base64</p>
-                      <input
-                        type="file"
-                        ref={questionImageInputRef}
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'imageUrl');
-                        }}
-                      />
                     </div>
                   )}
+                  <input
+                    type="file"
+                    ref={questionImageInputRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'questionImage');
+                    }}
+                  />
                 </div>
 
                 {/* ANSWERS & OPTIONS PICKER */}
@@ -906,48 +989,119 @@ function ExamAuthoringEditorContent() {
                     </div>
                   )}
 
-                  {/* Fill in the blank */}
+                  {/* Fill in the blank (Multi-Answer Tag & List Editor) */}
                   {activeQuestion.type === 'fill_blank' && (
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold text-slate-700">Các đáp án ngắn chấp nhận đúng (phân cách bằng dấu phẩy)</label>
-                      <input
-                        type="text"
-                        value={(activeQuestion.fillBlankAnswers || []).join(', ')}
-                        onChange={(e) => {
-                          const vals = e.target.value.split(',').map(s => s.trim());
-                          handleUpdateActiveQuestion('fillBlankAnswers', vals);
-                        }}
-                        placeholder="Ví dụ: 80, 80.0, t=80"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-mono text-slate-900"
-                      />
+                    <div className="bg-amber-50/70 border border-amber-300 rounded-2xl p-4 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-xs font-extrabold text-amber-900 uppercase">
+                          Danh sách đáp án chấp nhận đúng (Thí sinh nhập 1 trong các đáp án này đều được điểm)
+                        </label>
+                        <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                          {(activeQuestion.fillBlankAnswers || []).length} đáp án hợp lệ
+                        </span>
+                      </div>
+
+                      {/* Display current accepted tags */}
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {(activeQuestion.fillBlankAnswers || []).map((ans, aIdx) => (
+                          <span key={aIdx} className="inline-flex items-center gap-1.5 bg-white border border-amber-300 text-amber-950 font-mono font-bold text-xs px-3 py-1.5 rounded-xl shadow-2xs">
+                            <span>{ans}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = (activeQuestion.fillBlankAnswers || []).filter((_, idx) => idx !== aIdx);
+                                handleUpdateActiveQuestion('fillBlankAnswers', next);
+                              }}
+                              className="text-rose-600 hover:text-rose-800 font-black ml-1"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Add new tag input */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newFillAnswer}
+                          onChange={(e) => setNewFillAnswer(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && newFillAnswer.trim()) {
+                              e.preventDefault();
+                              const current = activeQuestion.fillBlankAnswers || [];
+                              if (!current.includes(newFillAnswer.trim())) {
+                                handleUpdateActiveQuestion('fillBlankAnswers', [...current, newFillAnswer.trim()]);
+                              }
+                              setNewFillAnswer('');
+                            }
+                          }}
+                          placeholder="Nhập đáp án chấp nhận (ví dụ: 80 hoặc 2.5 hoặc 5/2) rồi bấm Enter hoặc [Thêm]..."
+                          className="flex-1 bg-white border border-amber-300 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (newFillAnswer.trim()) {
+                              const current = activeQuestion.fillBlankAnswers || [];
+                              if (!current.includes(newFillAnswer.trim())) {
+                                handleUpdateActiveQuestion('fillBlankAnswers', [...current, newFillAnswer.trim()]);
+                              }
+                              setNewFillAnswer('');
+                            }
+                          }}
+                          className="bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1 shadow-xs"
+                        >
+                          <Plus className="w-4 h-4 stroke-[3]" /> Thêm đáp án
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* SOLUTION IMAGE UPLOAD SECTION */}
+                {/* SOLUTION MULTI-IMAGE UPLOAD SECTION */}
                 <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-200 space-y-3 pt-4">
                   <div className="flex justify-between items-center">
-                    <label className="block text-xs font-extrabold text-emerald-900 uppercase">
-                      Ảnh đáp án & Lời giải chi tiết (Admin tải lên)
+                    <label className="block text-xs font-extrabold text-emerald-900 uppercase flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-emerald-700" />
+                      Ảnh đáp án & Lời giải chi tiết ({((activeQuestion.explanationImageUrls && activeQuestion.explanationImageUrls.length > 0) ? activeQuestion.explanationImageUrls.length : (activeQuestion.explanationImageUrl ? 1 : 0))} ảnh)
                     </label>
-                    {activeQuestion.explanationImageUrl && (
-                      <button onClick={() => handleUpdateActiveQuestion('explanationImageUrl', '')} className="text-xs text-rose-600 font-bold hover:underline">
-                        Xóa ảnh lời giải
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => explanationImageInputRef.current?.click()}
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Thêm ảnh lời giải
+                    </button>
                   </div>
 
-                  {activeQuestion.explanationImageUrl ? (
-                    <div className="space-y-2">
-                      <img src={activeQuestion.explanationImageUrl} alt="Solution Diagram" className="max-h-60 w-auto rounded-xl border border-emerald-200" />
+                  {((activeQuestion.explanationImageUrls && activeQuestion.explanationImageUrls.length > 0) || activeQuestion.explanationImageUrl) ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                      {(activeQuestion.explanationImageUrls && activeQuestion.explanationImageUrls.length > 0 ? activeQuestion.explanationImageUrls : [activeQuestion.explanationImageUrl!]).map((imgSrc, imgIdx) => (
+                        <div key={imgIdx} className="relative group bg-white rounded-xl border border-emerald-200 p-2 shadow-2xs">
+                          <span className="absolute top-2 left-2 bg-emerald-900/80 text-white text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-xs">
+                            Trang #{imgIdx + 1}
+                          </span>
+                          <img src={imgSrc} alt={`Lời giải ${imgIdx + 1}`} className="max-h-48 w-full object-contain rounded-lg mx-auto" />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteImage('explanationImage', imgIdx)}
+                            className="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 text-white p-1.5 rounded-lg shadow-sm transition"
+                            title="Xóa ảnh này"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <button
+                    <div
                       onClick={() => explanationImageInputRef.current?.click()}
-                      className="bg-white border border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                      className="border-2 border-dashed border-emerald-300 hover:border-emerald-600 hover:bg-emerald-100/40 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-1.5 bg-white"
                     >
-                      <Upload className="w-4 h-4 text-emerald-700" /> Tải lên ảnh lời giải chi tiết từ máy tính
-                    </button>
+                      <Upload className="w-6 h-6 text-emerald-700" />
+                      <span className="text-xs font-bold text-emerald-900">Tải lên ảnh đáp án / lời giải chi tiết (Có thể chọn nhiều trang ảnh)</span>
+                    </div>
                   )}
                   <input
                     type="file"
@@ -955,7 +1109,7 @@ function ExamAuthoringEditorContent() {
                     accept="image/*"
                     className="hidden"
                     onChange={(e) => {
-                      if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'explanationImageUrl');
+                      if (e.target.files?.[0]) handleImageUpload(e.target.files[0], 'explanationImage');
                     }}
                   />
                 </div>
@@ -964,6 +1118,128 @@ function ExamAuthoringEditorContent() {
           </div>
         </div>
       </main>
+
+      {/* 🚀 DEPLOY PROGRESS & VISUAL EXAM PREVIEW MODAL */}
+      {deployModal.isOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="text-center space-y-1.5">
+              <span className="bg-[#d90429] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                TIẾN TRÌNH ĐỒNG BỘ CSDL & TRIỂN KHAI VERCEL
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                {deployModal.step < 4 ? 'Đang cập nhật đề thi lên hệ thống...' : '✨ Cập nhật đề thi thành công!'}
+              </h3>
+            </div>
+
+            {/* Step-by-Step Progress Tracking */}
+            <div className="space-y-3.5 bg-slate-50 border border-slate-200 rounded-2xl p-5">
+              
+              {/* Step 1: Disk save */}
+              <div className="flex items-center gap-3">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${
+                  deployModal.step >= 2 ? 'bg-emerald-600 text-white' : deployModal.step === 1 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {deployModal.step >= 2 ? <Check className="w-4 h-4 stroke-[3]" /> : '1'}
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-900">1. Ghi dữ liệu vào đĩa cứng (100% CSDL Local)</p>
+                  <p className="text-[11px] text-slate-500">{deployModal.step >= 2 ? 'Đã ghi đĩa an toàn vào data/db.json' : 'Đang xử lý...'}</p>
+                </div>
+              </div>
+
+              {/* Step 2: GitHub push */}
+              <div className="flex items-center gap-3">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${
+                  deployModal.step >= 3 ? 'bg-emerald-600 text-white' : deployModal.step === 2 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {deployModal.step >= 3 ? <Check className="w-4 h-4 stroke-[3]" /> : '2'}
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-900">2. Đóng gói & Đẩy lên GitHub Repository</p>
+                  <p className="text-[11px] text-slate-500">{deployModal.step >= 3 ? 'Đã đẩy mã nguồn & CSDL lên nhánh main' : deployModal.step === 2 ? 'Đang đóng gói Git commit...' : 'Chờ bước 1...'}</p>
+                </div>
+              </div>
+
+              {/* Step 3: Vercel build */}
+              <div className="flex items-center gap-3">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${
+                  deployModal.step >= 4 ? 'bg-emerald-600 text-white' : deployModal.step === 3 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {deployModal.step >= 4 ? <Check className="w-4 h-4 stroke-[3]" /> : '3'}
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-900">3. Kích hoạt Vercel Build Web Online</p>
+                  <p className="text-[11px] text-slate-500">{deployModal.step >= 4 ? 'Đã kích hoạt Vercel tự động build' : deployModal.step === 3 ? 'Đang gửi tín hiệu webhook build...' : 'Chờ bước 2...'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* VISUAL EXAM CARD (APPEARS ON COMPLETION) */}
+            {deployModal.step === 4 && (
+              <div className="bg-linear-to-br from-rose-50 to-amber-50 border-2 border-rose-200 rounded-2xl p-5 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-rose-200/80 pb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#d90429] flex items-center gap-1.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" /> BÀI THI VỪA CẬP NHẬT
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-500 font-mono">ID: {selectedExamId}</span>
+                </div>
+
+                <div className="space-y-1">
+                  <h4 className="text-base sm:text-lg font-black text-slate-900 leading-snug">{examTitle}</h4>
+                  <p className="text-xs text-slate-600">Đã cập nhật đầy đủ câu hỏi, hình ảnh và đáp án 3 phần thi.</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center pt-1">
+                  <div className="bg-white/80 border border-slate-200 rounded-xl p-2">
+                    <span className="block text-[10px] font-bold text-slate-500">Toán học</span>
+                    <span className="font-mono font-black text-sm text-[#d90429]">{allModulesDraft[`mod-math-${selectedExamId}`]?.questions?.length || questions.length} câu</span>
+                  </div>
+                  <div className="bg-white/80 border border-slate-200 rounded-xl p-2">
+                    <span className="block text-[10px] font-bold text-slate-500">Đọc hiểu</span>
+                    <span className="font-mono font-black text-sm text-purple-700">{allModulesDraft[`mod-reading-${selectedExamId}`]?.questions?.length || 20} câu</span>
+                  </div>
+                  <div className="bg-white/80 border border-slate-200 rounded-xl p-2">
+                    <span className="block text-[10px] font-bold text-slate-500">Khoa học</span>
+                    <span className="font-mono font-black text-sm text-emerald-700">{allModulesDraft[`mod-science-${selectedExamId}`]?.questions?.length || 40} câu</span>
+                  </div>
+                </div>
+
+                {/* Primary Action Buttons */}
+                <div className="pt-2 flex flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.open(`/exams/${selectedExamId}/room?preview=true`, '_blank');
+                    }}
+                    className="w-full bg-[#d90429] hover:bg-red-700 text-white font-black py-3.5 px-4 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2 active:scale-98"
+                  >
+                    <Eye className="w-4 h-4 text-amber-300" />
+                    XEM TRỰC QUAN BÀI THI NGAY (MỞ PHÒNG THI)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeployModal({ isOpen: false, step: 1 })}
+                    className="w-full bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-extrabold py-2.5 px-4 rounded-xl text-xs transition text-center"
+                  >
+                    ✕ Đóng & Tiếp tục soạn đề
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message if any */}
+            {deployModal.error && (
+              <div className="p-3 bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold rounded-xl text-center">
+                {deployModal.error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

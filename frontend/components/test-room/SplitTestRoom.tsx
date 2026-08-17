@@ -450,16 +450,30 @@ export default function SplitTestRoom({
                 </div>
               </div>
 
-              {/* 📷 QUESTION IMAGE PROMPT */}
-              {currentQuestion?.imageUrl && !activePassageImage && (
-                <div className="pt-2">
-                  <div className="rounded-2xl border-2 border-slate-200 p-3 bg-slate-50 overflow-hidden shadow-xs">
-                    <img
-                      src={currentQuestion.imageUrl}
-                      alt={`Minh họa câu ${currentQuestion.number}`}
-                      className="w-full h-auto rounded-xl object-contain max-h-[480px] mx-auto"
-                    />
-                  </div>
+              {/* 📷 QUESTION IMAGE PROMPT (MULTI-IMAGE & SINGLE IMAGE SUPPORT) */}
+              {((currentQuestion?.imageUrls && currentQuestion.imageUrls.length > 0) || currentQuestion?.imageUrl) && !activePassageImage && (
+                <div className="pt-2 space-y-3">
+                  {currentQuestion?.imageUrls && currentQuestion.imageUrls.length > 0 ? (
+                    <div className={`grid gap-3 ${currentQuestion.imageUrls.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                      {currentQuestion.imageUrls.map((imgSrc, imgIdx) => (
+                        <div key={imgIdx} className="rounded-2xl border-2 border-slate-200 p-2 bg-slate-50 overflow-hidden shadow-xs">
+                          <img
+                            src={imgSrc}
+                            alt={`Hình ảnh ${imgIdx + 1} - Câu ${currentQuestion.number}`}
+                            className="w-full h-auto rounded-xl object-contain max-h-[480px] mx-auto"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : currentQuestion?.imageUrl ? (
+                    <div className="rounded-2xl border-2 border-slate-200 p-3 bg-slate-50 overflow-hidden shadow-xs">
+                      <img
+                        src={currentQuestion.imageUrl}
+                        alt={`Minh họa câu ${currentQuestion.number}`}
+                        className="w-full h-auto rounded-xl object-contain max-h-[480px] mx-auto"
+                      />
+                    </div>
+                  ) : null}
                 </div>
               )}
 
@@ -602,13 +616,27 @@ export default function SplitTestRoom({
                       </div>
                     )}
 
-                    {currentQuestion?.explanationImageUrl && (
+                    {/* MULTI-IMAGE EXPLANATION SUPPORT */}
+                    {((currentQuestion?.explanationImageUrls && currentQuestion.explanationImageUrls.length > 0) || currentQuestion?.explanationImageUrl) && (
                       <div className="pt-2">
-                        <img
-                          src={currentQuestion.explanationImageUrl}
-                          alt="Ảnh lời giải chi tiết"
-                          className="max-h-80 w-auto object-contain rounded-xl border border-slate-200 shadow-2xs"
-                        />
+                        {currentQuestion?.explanationImageUrls && currentQuestion.explanationImageUrls.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {currentQuestion.explanationImageUrls.map((imgSrc, imgIdx) => (
+                              <img
+                                key={imgIdx}
+                                src={imgSrc}
+                                alt={`Ảnh giải chi tiết ${imgIdx + 1}`}
+                                className="max-h-80 w-full object-contain rounded-xl border border-slate-200 shadow-2xs bg-white p-1"
+                              />
+                            ))}
+                          </div>
+                        ) : currentQuestion?.explanationImageUrl ? (
+                          <img
+                            src={currentQuestion.explanationImageUrl}
+                            alt="Ảnh lời giải chi tiết"
+                            className="max-h-80 w-auto object-contain rounded-xl border border-slate-200 shadow-2xs"
+                          />
+                        ) : null}
                       </div>
                     )}
                   </div>

@@ -24,7 +24,8 @@ export interface QuestionGroup {
   moduleId: string;
   title?: string;
   passage?: string; // Reading text or scientific experiment description
-  imageUrl?: string; // Embedded diagram or Base64 / upload path
+  imageUrl?: string; // Embedded diagram or Base64 / upload path (single)
+  imageUrls?: string[]; // Multiple embedded diagrams or figures
   imageSize?: 'small' | 'medium' | 'large' | 'full';
   questionIds: string[]; // Child question IDs belonging to this group
 }
@@ -37,14 +38,16 @@ export interface Question {
   type?: 'single_choice' | 'multiple_choice' | 'fill_blank';
   text: string;
   passage?: string; // Optional standalone reading passage or scientific data context
-  imageUrl?: string; // Base64 data URL, upload path, or external URL for question prompt image
+  imageUrl?: string; // Base64 data URL, upload path, or external URL for question prompt image (single)
+  imageUrls?: string[]; // Multiple images for question prompt (charts, figures, sub-diagrams)
   imageSize?: 'small' | 'medium' | 'large' | 'full';
   options: QuestionOption[];
   correctOptionId?: string; // For single choice
   correctOptionIds?: string[]; // For multiple choice
   fillBlankAnswers?: string[]; // Acceptable correct values for fill in the blank
   explanation?: string; // Text / KaTeX explanation
-  explanationImageUrl?: string; // Image upload URL for explanation / step-by-step solution
+  explanationImageUrl?: string; // Single image upload URL for explanation
+  explanationImageUrls?: string[]; // Multiple image uploads for step-by-step solutions
   correctionNote?: string; // Errata note / Ghi chú đính chính cho đề thi (nếu có)
 }
 
